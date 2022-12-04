@@ -7,7 +7,6 @@
 
     public class SecretsTwitter
     {
-        public string Bearer { get; set; }
         public SecretsTwitterConsumer Consumer { get; set; }
         public SecretsTwitterPersonal Personal { get; set; }
     }
