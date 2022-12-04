@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toot2Toulouse", "Toot2Toulouse\Toot2Toulouse.csproj", "{68684392-D556-48C4-8705-48242EF2350D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68684392-D556-48C4-8705-48242EF2350D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68684392-D556-48C4-8705-48242EF2350D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68684392-D556-48C4-8705-48242EF2350D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68684392-D556-48C4-8705-48242EF2350D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AF137A80-2744-4464-B0B0-6322051CD0C7}
+	EndGlobalSection
+EndGlobal
