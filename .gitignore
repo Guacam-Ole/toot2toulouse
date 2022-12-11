@@ -404,3 +404,4 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio
 Toot2Toulouse/Properties/secrets.json
+Toot2Toulouse/Properties/config.json
