@@ -1,14 +1,76 @@
 ﻿// Copy this to secrets.json and replace the contents
 
 {
-  "Twitter": {
-    "Consumer": {
-      "ApiKey": "APIKEY",
-      "ApiKeySecret": "APIKEYSECRET"
+  "Secrets": {
+    "Twitter": {
+      "Consumer": {
+        "ApiKey": "",
+        "ApiKeySecret": ""
+      },
+      "Personal": {
+        "AccessToken": "",
+        "AccessTokenSecret": ""
+      }
     },
-    "Personal": {
-      "AccessToken": "ACCESSTOKEN",
-      "AccessTokenSecret": "ACCESSTOKENSECRET"
+    "Mastodon": {
+      "ClientId": "",
+      "ClientSecret": "",
+      "AccessToken": ""
+    }
+  },
+  "App": {
+    "Instance": "mastodon.social",
+    "ClientName": "my toot2toulouse",
+    "Url": "https://example.com",
+    "Suffix": {
+      "Content": " [🐘²🦜]",
+      "DisplayInstance": false,
+      "HideOnLongText": true
+    },
+    "Messages": {
+      "MastodonDown": "Cannot reach Mastodon. Will try again later",
+      "TwitterDown": "Cannot reach Twitter. Will try again later",
+      "MastodonAuthError": "Cannot authenticate with your Mastodon Account. If you removed your permission please add it again (or wait 7 days if this was on purpose. We will remove all your data after that time)",
+      "TwitterAuthError": "Cannot authenticate with your Twitter Account. If you removed your permission please add it again (or wait 7 days if this was on purpose. We will remove all your data after that time)",
+      "UpAndRunning": "Everything is fine again",
+      "BackAgain": "Everything is working again"
+    },
+    "Intervals": {
+      "Sending": "0:5:00",
+      "FollowerCheckApp": "1:0:0",
+      "FollowerCheckUser": "7.0:0:0",
+      "MinDelay": "0:1:0",
+      "MaxDelay": "1:0:0"
+    },
+    "Defaults": {
+      "Followers": {
+        "Search": [
+          "PersonalTranslation",
+          "TwitterContactName",
+          "TwitterContactDescription",
+          "GlobalTranslation",
+          "Text"
+        ],
+        "FollowerText": {
+          "Prefix": "🐘",
+          "HideInstance": true
+        }
+      },
+      "Visibility": {
+        "Public": "PublicAll",
+        "NotListed": "Circle",
+        "OnlyFollowers": "Circle",
+        "OnlyMentioned": null
+      },
+      "ContentWarning": "WithCW",
+      "Replies": "Thread",
+      "LongContent": "Thread",
+      "Replacements": {
+        "toot": "tweet",
+        "retoot": "retweet",
+        "boost": "reshare"
+      }
+
     }
   }
 }
