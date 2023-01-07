@@ -1,8 +1,16 @@
-﻿namespace Toot2Toulouse.Backend
+﻿namespace Toot2Toulouse.Backend.Configuration
 {
-    public class Secrets
+    public class TootConfigurationSecrets
     {
         public SecretsTwitter Twitter { get; set; }
+        public SecretsMastodon Mastodon { get; set; }   
+    }
+
+    public class SecretsMastodon
+    {
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
+        public string AccessToken { get; set; } 
     }
 
     public class SecretsTwitter

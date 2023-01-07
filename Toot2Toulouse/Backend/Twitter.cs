@@ -1,4 +1,5 @@
-﻿using Toot2Toulouse.Backend.Interfaces;
+﻿using Toot2Toulouse.Backend.Configuration;
+using Toot2Toulouse.Backend.Interfaces;
 
 using Tweetinvi;
 using Tweetinvi.Auth;
@@ -8,15 +9,15 @@ namespace Toot2Toulouse.Backend
 {
     public class Twitter : ITwitter
     {
-        private Secrets _secrets;
+        private TootConfiguration _config;
         private TwitterClient _appClient;
 
         private static readonly IAuthenticationRequestStore _twitterRequestStore = new LocalAuthenticationRequestStore();
 
-        public Twitter(ITootConfiguration tootConfiguration)
+        public Twitter(Interfaces.IConfig tootConfiguration)
         {
-            _secrets = tootConfiguration.GetSecrets();
-            _appClient = new TwitterClient(_secrets.Twitter.Consumer.ApiKey, _secrets.Twitter.Consumer.ApiKeySecret);
+            _config = tootConfiguration.GetConfig();
+            _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret);
         }
 
 
@@ -32,7 +33,7 @@ namespace Toot2Toulouse.Backend
 
         private void TestAuthenticate()
         {
-            _appClient = new TwitterClient(_secrets.Twitter.Consumer.ApiKey, _secrets.Twitter.Consumer.ApiKeySecret, _secrets.Twitter.Personal.AccessToken, _secrets.Twitter.Personal.AccessTokenSecret);
+            _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret, _config.Secrets.Twitter.Personal.AccessToken, _config.Secrets.Twitter.Personal.AccessTokenSecret);
         }
 
         //public async Task AuthTest()

@@ -6,8 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<ITootConfiguration, TootConfiguration>();
+builder.Services.AddScoped<Toot2Toulouse.Backend.Interfaces.IConfig, Toot2Toulouse.Backend.Config>();
 builder.Services.AddScoped<ITwitter, Twitter>();
+builder.Services.AddScoped<App>();
 
 var app = builder.Build();
 

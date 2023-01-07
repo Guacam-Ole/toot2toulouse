@@ -1,27 +1,27 @@
 ﻿using Newtonsoft.Json;
 
+using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Backend
 {
-    public class TootConfiguration : ITootConfiguration
+    public class Config : IConfig
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public TootConfiguration(IWebHostEnvironment webHostEnvironment)
+        public Config(IWebHostEnvironment webHostEnvironment)
         {
             _webHostEnvironment = webHostEnvironment;
 
         }
-        public Secrets GetSecrets()
+        public TootConfiguration GetConfig()
         {
-            return ReadJsonConfig<Secrets>("secrets.json");
+            return ReadJsonConfig<TootConfiguration>("config.json");
         }
 
         private T ReadJsonConfig<T>(string filename)
         {
             string fullpath = Path.Combine(_webHostEnvironment.ContentRootPath, "Properties", filename);
-            // PlatformServices.ApplicationEnvironment.
             using (StreamReader r = new StreamReader(fullpath))
             {
                 string json = r.ReadToEnd();

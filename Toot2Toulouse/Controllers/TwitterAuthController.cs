@@ -12,10 +12,10 @@ namespace Toot2Toulouse.Controllers
     public class TwitterAuthController : ControllerBase
     {
         private readonly ILogger<TwitterAuthController> _logger;
-        private readonly ITootConfiguration _configuration;
+        private readonly Backend.Interfaces.IConfig _configuration;
         private readonly ITwitter _tweet;
 
-        public TwitterAuthController(ILogger<TwitterAuthController> logger, ITootConfiguration configuration, ITwitter tweet)
+        public TwitterAuthController(ILogger<TwitterAuthController> logger, Backend.Interfaces.IConfig configuration, ITwitter tweet)
         {
             _logger = logger;
             _configuration = configuration;
