@@ -18,19 +18,13 @@
         public Dictionary<MessageCodes, string> Messages { get;set; }
         public int TwitterCharacterLimit { get; set; }
         public int MinSplitLength { get; set; }
-
+        public string ServiceAppSuffix { get; set; }
         
-        public TootConfigurationAppSuffix Suffix { get; set; }
+
         public TootConfigurationAppIntervals Intervals { get; set; }
     }
 
-    public class TootConfigurationAppSuffix
-    {
-        public string Content { get; set; }
-        public bool HideOnLongText { get; set; }
-        public bool OnlyLastInThread { get; set; }
-        public bool OnlyFirstInThread { get; set; }
-    }
+
 
     public class TootConfigurationAppIntervals
     {

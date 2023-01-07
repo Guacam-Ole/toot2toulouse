@@ -31,7 +31,7 @@ namespace Toot2Toulouse.Backend
             NoCw,
             NoCwSensitive,
             WithCw,
-            WithCwSensitive,    
+            WithCwSensitive,
         }
 
         public enum Replies
@@ -86,17 +86,17 @@ namespace Toot2Toulouse.Backend
             int maxLength = _config.App.TwitterCharacterLimit;
             bool addSuffix = true;
 
-            string suffix = _config.App.Suffix.Content ?? string.Empty;
+            string suffix = userConfiguration.AppSuffix.Content ?? string.Empty;
 
             bool needsSplit = originalToot.Length > maxLength;
-            if (!needsSplit && originalToot.Length + suffix.Length > maxLength && _config.App.Suffix.HideOnLongText) addSuffix = false;
+            if (!needsSplit && originalToot.Length + suffix.Length > maxLength && userConfiguration.AppSuffix.HideOnLongText) addSuffix = false;
             mainTweet = originalToot;
             if (addSuffix) mainTweet += suffix;
 
             if (!needsSplit) return null;
 
             var replylist = new List<string>();
-            mainTweet = GetChunk(mainTweet, maxLength, true, userConfiguration, out string replies);
+            mainTweet = GetChunk(mainTweet, maxLength, true, userConfiguration, out string? replies);
             while (replies != null)
             {
                 replylist.Add(GetChunk(replies, maxLength, false, userConfiguration, out replies));
@@ -115,7 +115,7 @@ namespace Toot2Toulouse.Backend
             texttopublish = texttopublish.Trim();
         }
 
-        private string GetChunk(string completeText, int maxLength, bool isFirst, UserConfiguration userConfiguration, out string remaining)
+        private string GetChunk(string completeText, int maxLength, bool isFirst, UserConfiguration userConfiguration, out string? remaining)
         {
             remaining = null;
             if (completeText.Length <= maxLength) return completeText;
@@ -123,6 +123,8 @@ namespace Toot2Toulouse.Backend
             bool isLast = completeText.Length <= maxLength;
 
             if (!isLast) maxLength -= userConfiguration.LongContentThreadOptions.Suffix.Length;
+
+
             int lastChar = maxLength;
             for (int lastSpace = maxLength; lastSpace >= _config.App.MinSplitLength; lastSpace--)
             {
@@ -152,7 +154,7 @@ namespace Toot2Toulouse.Backend
         //}
 
 
-        public async Task PublishFromToot(string content, TwitterClient userClient,  UserConfiguration userConfiguration)
+        public async Task PublishFromToot(string content, TwitterClient userClient, UserConfiguration userConfiguration)
         {
             var replies = GetReplies(content, userConfiguration, out string mainTweet);
             if (replies != null)
@@ -165,13 +167,14 @@ namespace Toot2Toulouse.Backend
                         await Tweet(userClient, mainTweet);
                         break;
                     case LongContent.Thread:
-                        var tweet=await Tweet(userClient, mainTweet);
-                        
-                        if (tweet.Id != 0) {
+                        var tweet = await Tweet(userClient, mainTweet);
+
+                        if (tweet.Id != 0)
+                        {
 
                             foreach (var reply in replies)
                             {
-                                tweet=await Tweet(userClient,reply, tweet.Id);
+                                tweet = await Tweet(userClient, reply, tweet.Id);
                             }
                         }
                         break;
@@ -179,15 +182,15 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public async Task<ITweet> Tweet(TwitterClient userClient, string content, long? replyTo=null)
+        public async Task<ITweet> Tweet(TwitterClient userClient, string content, long? replyTo = null)
         {
             try
             {
                 return await userClient.Tweets.PublishTweetAsync(new PublishTweetParameters
                 {
-                     Text= content,
-                     InReplyToTweetId=replyTo, 
-                      
+                    Text = content,
+                    InReplyToTweetId = replyTo,
+
                 });
             }
             catch (Exception ex)
@@ -206,7 +209,7 @@ namespace Toot2Toulouse.Backend
             var user = await userClient.Users.GetAuthenticatedUserAsync();
 
             string suffix = " [🐘²🐦]";
-        //    await Tweet(userClient, "Nur ein simpler Testtweet via API. Einfach ignorieren :)   " + suffix);
+            //    await Tweet(userClient, "Nur ein simpler Testtweet via API. Einfach ignorieren :)   " + suffix);
 
             string longText = "Das ist ein langer Thread. Bitte ignorieren..." +
                 @"Rope's end gangplank hang the jib squiffy warp doubloon bilge rat hulk reef scuttle. Haul wind belay Sea Legs tender maroon rigging skysail jack knave holystone. Ho lugger transom Yellow Jack gaff Jolly Roger fire in the hole topmast ballast Barbary Coast.

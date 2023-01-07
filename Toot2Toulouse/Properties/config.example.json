@@ -19,15 +19,10 @@
     }
   },
   "App": {
+    "ServiceAppSuffix": " -- 🐘²🦜",
     "Instance": "mastodon.social",
     "ClientName": "my toot2toulouse",
     "Url": "https://example.com",
-    "Suffix": {
-      "Content": " [🐘²🦜]",
-      "HideOnLongText": true,
-      "OnlyLastInThread": true,
-      "OnlyFirstInThread": false
-    },
     "Messages": {
       "MastodonDown": "Cannot reach Mastodon. Will try again later",
       "TwitterDown": "Cannot reach Twitter. Will try again later",
@@ -47,6 +42,12 @@
     "MinSplitLength": 260
   },
   "Defaults": {
+    "AppSuffix": {
+      "Content": " 🐘²🦜",
+      "HideIfBreaks": true,
+      "OnlyLastInThread": true,
+      "OnlyFirstInThread": false
+    },
     "Followers": {
       "Search": [
         "PersonalTranslation",

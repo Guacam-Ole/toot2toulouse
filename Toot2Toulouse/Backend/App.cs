@@ -29,7 +29,7 @@ namespace Toot2Toulouse.Backend
 
         private async Task SendStatusMessageTo(string recipient, MessageCodes messageCode)
         {
-           await ServiceToot($"{recipient}\n{_configuration.App.Messages[messageCode]}{_configuration.App.Suffix}", Visibility.Direct);
+           await ServiceToot($"{recipient}\n{_configuration.App.Messages[messageCode]}{_configuration.App.ServiceAppSuffix}", Visibility.Direct);
         }
 
         public async Task SendAllStatusMessagesTo(string recipient)

@@ -9,6 +9,7 @@
         public TootConfigurationAppThreadOptions LongContentThreadOptions { get; set; }
         public Dictionary<string, string> Replacements { get; set; }
         public UserConfigurationFollowers Followers { get; set; }
+        public UserConfigurationAppSuffix AppSuffix { get; set; }
     }
 
     public class UserConfigurationFollowers
@@ -28,5 +29,11 @@
     {
         public string Prefix { get; set; }
         public string Suffix { get; set; }
+    }
+
+    public class UserConfigurationAppSuffix
+    {
+        public string Content { get; set; }
+        public bool HideOnLongText { get; set; }
     }
 }
