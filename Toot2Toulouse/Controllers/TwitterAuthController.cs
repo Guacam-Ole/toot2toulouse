@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 
 using System.Linq.Expressions;
 
+using Toot2Toulouse.Backend;
+using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Controllers
@@ -12,13 +14,13 @@ namespace Toot2Toulouse.Controllers
     public class TwitterAuthController : ControllerBase
     {
         private readonly ILogger<TwitterAuthController> _logger;
-        private readonly Backend.Interfaces.IConfig _configuration;
+        private readonly TootConfiguration _configuration;
         private readonly ITwitter _tweet;
 
-        public TwitterAuthController(ILogger<TwitterAuthController> logger, Backend.Interfaces.IConfig configuration, ITwitter tweet)
+        public TwitterAuthController(ILogger<TwitterAuthController> logger, ConfigReader configReader, ITwitter tweet)
         {
             _logger = logger;
-            _configuration = configuration;
+            _configuration = configReader.Configuration;
             _tweet = tweet;
         }
 
