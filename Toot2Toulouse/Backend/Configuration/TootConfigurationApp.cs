@@ -15,14 +15,30 @@
         public string Instance { get; set; }
         public string ClientName { get; set; }
         public string Url { get; set; }
-        public string Suffix { get; set; }  
         public Dictionary<MessageCodes, string> Messages { get;set; }
+        public int TwitterCharacterLimit { get; set; }
+        public int MinSplitLength { get; set; }
 
-        public TimeSpan SendInterval { get; set; }
-        public TimeSpan FollowerCheckIntervalApp { get; set; }
-        public TimeSpan FollwerCheckIntervalUser { get; set; }
+        
+        public TootConfigurationAppSuffix Suffix { get; set; }
+        public TootConfigurationAppIntervals Intervals { get; set; }
+    }
+
+    public class TootConfigurationAppSuffix
+    {
+        public string Content { get; set; }
+        public bool HideOnLongText { get; set; }
+        public bool OnlyLastInThread { get; set; }
+        public bool OnlyFirstInThread { get; set; }
+    }
+
+    public class TootConfigurationAppIntervals
+    {
+        public TimeSpan Sending { get; set; }
+        public TimeSpan FollowerCheckApp { get; set; }
+        public TimeSpan FollwerCheckUser { get; set; }
         public TimeSpan MinDelay { get; set; }
         public TimeSpan MaxDelay { get; set; }
-        
     }
+    
 }

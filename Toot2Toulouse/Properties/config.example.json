@@ -24,8 +24,9 @@
     "Url": "https://example.com",
     "Suffix": {
       "Content": " [🐘²🦜]",
-      "DisplayInstance": false,
-      "HideOnLongText": true
+      "HideOnLongText": true,
+      "OnlyLastInThread": true,
+      "OnlyFirstInThread": false
     },
     "Messages": {
       "MastodonDown": "Cannot reach Mastodon. Will try again later",
@@ -42,35 +43,40 @@
       "MinDelay": "0:1:0",
       "MaxDelay": "1:0:0"
     },
-    "Defaults": {
-      "Followers": {
-        "Search": [
-          "PersonalTranslation",
-          "TwitterContactName",
-          "TwitterContactDescription",
-          "GlobalTranslation",
-          "Text"
-        ],
-        "FollowerText": {
-          "Prefix": "🐘",
-          "HideInstance": true
-        }
-      },
-      "Visibility": {
-        "Public": "PublicAll",
-        "NotListed": "Circle",
-        "OnlyFollowers": "Circle",
-        "OnlyMentioned": null
-      },
-      "ContentWarning": "WithCW",
-      "Replies": "Thread",
-      "LongContent": "Thread",
-      "Replacements": {
-        "toot": "tweet",
-        "retoot": "retweet",
-        "boost": "reshare"
+    "TwitterCharacterLimit": 280,
+    "MinSplitLength": 260
+  },
+  "Defaults": {
+    "Followers": {
+      "Search": [
+        "PersonalTranslation",
+        "TwitterContactName",
+        "TwitterContactDescription",
+        "GlobalTranslation",
+        "Text"
+      ],
+      "FollowerText": {
+        "Prefix": "🐘",
+        "HideInstance": true
       }
-
+    },
+    "Visibility": {
+      "Public": "PublicAll",
+      "NotListed": "Circle",
+      "OnlyFollowers": "Circle",
+      "OnlyMentioned": "DontPublish"
+    },
+    "ContentWarning": "WithCWSensitive",
+    "Replies": "Thread",
+    "LongContent": "Thread",
+    "LongContentThreadOptions": {
+      "Prefix": "...",
+      "Suffix": "..."
+    },
+    "Replacements": {
+      "Toot": "Tweet",
+      "Boost": "Retweet",
+      "Tröt": "Tweet"
     }
   }
 }

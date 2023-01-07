@@ -1,4 +1,7 @@
+using Newtonsoft.Json;
+
 using Toot2Toulouse.Backend;
+using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +14,8 @@ builder.Services.AddScoped<ITwitter, Twitter>();
 builder.Services.AddScoped<App>();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 

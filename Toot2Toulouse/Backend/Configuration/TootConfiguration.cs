@@ -4,6 +4,8 @@
     {
         public TootConfigurationSecrets Secrets { get; set; }
         public TootConfigurationApp App { get; set; }
+        public UserConfiguration Defaults { get; set; }
+
 
     }
 }

@@ -73,11 +73,11 @@ namespace Toot2Toulouse.Backend
             // Let's try to create a mew Application on instance:
             try
             {
-                //var authClient = new AuthenticationClient(appConfig.Instance);
+                var authClient = new AuthenticationClient(appConfig.Instance);
 
 
 
-                //var mastoddonApp = await authClient.CreateApp(appConfig.ClientName, Scope.Read | Scope.Write | Scope.Follow, appConfig.Url);
+                var mastoddonApp = await authClient.CreateApp(appConfig.ClientName, Scope.Read | Scope.Write | Scope.Follow, appConfig.Url);
 
 
                 //var client= new AuthenticationClient(mastoddonApp);

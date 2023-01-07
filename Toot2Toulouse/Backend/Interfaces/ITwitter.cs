@@ -1,4 +1,5 @@
 ﻿using Tweetinvi;
+using Tweetinvi.Models;
 
 namespace Toot2Toulouse.Backend.Interfaces
 {
@@ -7,7 +8,7 @@ namespace Toot2Toulouse.Backend.Interfaces
         //Task AuthTest();
 
 
-        Task<bool> Tweet(TwitterClient userClient, string content); // TODO: Media, Mentions
+        Task<ITweet> Tweet(TwitterClient userClient, string content, long? replyTo=null); // TODO: Media, Mentions
 
         Task<string> GetAuthenticationUrl(string baseUrl);
 
