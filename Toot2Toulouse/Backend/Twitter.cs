@@ -125,16 +125,18 @@ namespace Toot2Toulouse.Backend
             if (!isLast) maxLength -= userConfiguration.LongContentThreadOptions.Suffix.Length;
 
 
-            int lastChar = maxLength;
-            for (int lastSpace = maxLength; lastSpace >= _config.App.MinSplitLength; lastSpace--)
+            int lastSpace;
+            for ( lastSpace = maxLength; lastSpace >= _config.App.MinSplitLength; lastSpace--)
             {
-                if (completeText[lastChar] == ' ') break;
+                if (completeText[lastSpace] == ' ') 
+                    
+                    break;
             }
 
-            string chunk = completeText.Substring(0, lastChar).TrimEnd();
+            string chunk = completeText.Substring(0, lastSpace).TrimEnd();
             if (!isFirst) chunk = userConfiguration.LongContentThreadOptions.Prefix + chunk;
             if (!isLast) chunk = chunk + userConfiguration.LongContentThreadOptions.Suffix;
-            remaining = completeText.Substring(lastChar).TrimStart();
+            remaining = completeText.Substring(lastSpace).TrimStart();
             return chunk;
         }
 
