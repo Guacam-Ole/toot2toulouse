@@ -11,8 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddScoped<ConfigReader>();
 builder.Services.AddScoped<ITwitter, Twitter>();
-builder.Services.AddScoped<Mastodon>();
-builder.Services.AddScoped<App>();
+builder.Services.AddScoped<IMastodon, Mastodon>();
+builder.Services.AddScoped<IToulouse, Toulouse>();
+builder.Services.AddScoped<INotification, Notification>();
 
 var app = builder.Build();
 

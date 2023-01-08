@@ -10,6 +10,8 @@ using Tweetinvi.Auth;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
+//using static Toot2Toulouse.Backend.Interfaces.ITwitter;
+
 namespace Toot2Toulouse.Backend
 {
     public class Twitter : ITwitter
@@ -20,54 +22,14 @@ namespace Toot2Toulouse.Backend
         private UserConfiguration _userConfiguration;
 
         private static readonly IAuthenticationRequestStore _twitterRequestStore = new LocalAuthenticationRequestStore();
+        private readonly ILogger<Twitter> _logger;
 
-        public enum Visibilities
-        {
-            PublicAll,
-            PublicFollowers,
-            PublicMentionedHide,
-            PublicMentionedShow,
-            Circle,
-            DontPublish
-        }
-
-        public enum ContentWarnings
-        {
-            DontPublish,
-            NoCw,
-            NoCwSensitive,
-            WithCw,
-            WithCwSensitive,
-        }
-
-        public enum Replies
-        {
-            Publish,
-            DontPublish,
-            Thread
-        }
-
-        public enum LongContent
-        {
-            Cut,
-            DontPublish,
-            Thread
-        }
-
-        public enum Followersearch
-        {
-            TwitterContactName,
-            TwitterContactDescription,
-            PersonalTranslation,
-            GlobalTranslation,
-            Text,
-            Backlink
-        }
-
-        public Twitter(ConfigReader configReader)
+        
+        public Twitter(ILogger<Twitter> logger, ConfigReader configReader)
         {
             _config = configReader.Configuration;
             _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret);
+            _logger = logger;
         }
 
         public void InitUser(TwitterClient client, UserConfiguration userConfiguration)
@@ -76,7 +38,7 @@ namespace Toot2Toulouse.Backend
             _userConfiguration = userConfiguration;
         }
 
-        public async Task<string> GetAuthenticationUrl(string baseUrl)
+        public async Task<string> GetAuthenticationUrlAsync(string baseUrl)
         {
             var guid = Guid.NewGuid();
             var targetUrl = baseUrl + "/TwitterAuth";
@@ -126,6 +88,8 @@ namespace Toot2Toulouse.Backend
             texttopublish = texttopublish.Trim();
         }
 
+
+
         private string GetChunk(string completeText, int maxLength, bool isFirst, out string? remaining)
         {
             remaining = null;
@@ -173,7 +137,7 @@ namespace Toot2Toulouse.Backend
             return true;
         }
 
-        public async Task Publish(Mastonet.Entities.Status toot)
+        public async Task PublishAsync(Mastonet.Entities.Status toot)
         {
             if (!ShouldITweetThis(toot)) return;
             string tootContent = StripHtml(toot.Content);
@@ -187,7 +151,7 @@ namespace Toot2Toulouse.Backend
                  //   tootContent += attachment.Url + "\n";
                 }
             }
-           await Tweet(tootContent);
+          // await Tweet(tootContent);
 
         }
 
@@ -198,21 +162,21 @@ namespace Toot2Toulouse.Backend
             {
                 switch (_userConfiguration.LongContent)
                 {
-                    case LongContent.DontPublish:
+                    case ITwitter.LongContent.DontPublish:
                         break;
 
-                    case LongContent.Cut:
-                        await Tweet( mainTweet);
+                    case ITwitter.LongContent.Cut:
+                        await TweetAsync( mainTweet);
                         break;
 
-                    case LongContent.Thread:
-                        var tweet = await Tweet( mainTweet);
+                    case ITwitter.LongContent.Thread:
+                        var tweet = await TweetAsync( mainTweet);
 
                         if (tweet.Id != 0)
                         {
                             foreach (var reply in replies)
                             {
-                                tweet = await Tweet( reply, tweet.Id);
+                                tweet = await TweetAsync( reply, tweet.Id);
                             }
                         }
                         break;
@@ -220,19 +184,18 @@ namespace Toot2Toulouse.Backend
             }
             else
             {
-                await Tweet(mainTweet);
+                await TweetAsync(mainTweet);
             }
         }
 
-        public async Task<ITweet> Tweet(string content, long? replyTo = null)
+        public async Task<ITweet> TweetAsync(string content, long? replyTo = null)
         {
             try
             {
                 return await _userClient.Tweets.PublishTweetAsync(new PublishTweetParameters
                 {
                     Text = content,
-                    InReplyToTweetId = replyTo,
-                });
+                    InReplyToTweetId = replyTo                });
             }
             catch (Exception ex)
             {
@@ -241,7 +204,7 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public async Task<bool> FinishAuthentication(string query)
+        public async Task<bool> FinishAuthenticationAsync(string query)
         {
             var requestParameters = await RequestCredentialsParameters.FromCallbackUrlAsync(query, _twitterRequestStore);
             var userCredentials = await _appClient.Auth.RequestCredentialsAsync(requestParameters);

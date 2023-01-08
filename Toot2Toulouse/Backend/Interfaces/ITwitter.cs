@@ -7,16 +7,57 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface ITwitter
     {
-        //Task AuthTest();
+        public enum Visibilities
+        {
+            PublicAll,
+            PublicFollowers,
+            PublicMentionedHide,
+            PublicMentionedShow,
+            Circle,
+            DontPublish
+        }
 
+        public enum ContentWarnings
+        {
+            DontPublish,
+            NoCw,
+            NoCwSensitive,
+            WithCw,
+            WithCwSensitive,
+        }
 
-        Task<ITweet> Tweet(string content, long? replyTo=null); // TODO: Media, Mentions
+        public enum Replies
+        {
+            Publish,
+            DontPublish,
+            Thread
+        }
 
-        Task<string> GetAuthenticationUrl(string baseUrl);
+        public enum LongContent
+        {
+            Cut,
+            DontPublish,
+            Thread
+        }
 
-        Task<bool> FinishAuthentication(string query);
+        public enum Followersearch
+        {
+            TwitterContactName,
+            TwitterContactDescription,
+            PersonalTranslation,
+            GlobalTranslation,
+            Text,
+            Backlink
+        }
+
+        Task<ITweet> TweetAsync(string content, long? replyTo = null); // TODO: Media, Mentions
+
+        Task<string> GetAuthenticationUrlAsync(string baseUrl);
+
+        Task<bool> FinishAuthenticationAsync(string query);
 
         void InitUser(TwitterClient userClient, UserConfiguration userConfiguration);
-        Task Publish(Mastonet.Entities.Status toot);
+
+        Task PublishAsync(Mastonet.Entities.Status toot);
     }
 }

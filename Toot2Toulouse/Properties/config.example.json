@@ -19,6 +19,11 @@
     }
   },
   "App": {
+    "Modes": {
+      "Active": "Open",
+      "AutoInvite": 100,
+      "AutoClose": 1000
+    },
     "ServiceAppSuffix": " -- 🐘²🦜",
     "Instance": "mastodon.social",
     "ClientName": "my toot2toulouse",

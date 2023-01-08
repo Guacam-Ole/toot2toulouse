@@ -8,15 +8,9 @@ using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
 
 namespace Toot2Toulouse.Backend
 {
-    public class Mastodon
+    public class Mastodon:IMastodon
     {
-        public enum Visibilites
-        {
-            Public,
-            NotListed,
-            OnlyFollowers,
-            OnlyMentioned
-        }
+ 
 
         private readonly ILogger<Mastodon> _logger;
         private readonly TootConfiguration _configuration;
@@ -32,11 +26,11 @@ namespace Toot2Toulouse.Backend
             await ServiceToot($"{recipient}\n{_configuration.App.Messages[messageCode]}{_configuration.App.ServiceAppSuffix}", Visibility.Direct);
         }
 
-        public async Task SendAllStatusMessagesTo(string recipient)
+        public async Task SendAllStatusMessagesToAsync(string recipient)
         {
             foreach (var messageCode in Enum.GetValues<MessageCodes>())
             {
-                await SendStatusMessageTo("@stammtischphilosoph@chaos.social", messageCode);
+                await SendStatusMessageTo(recipient, messageCode);
             }
         }
 
@@ -51,23 +45,17 @@ namespace Toot2Toulouse.Backend
             await mastodonClient.PublishStatus(content, visibility);
         }
 
-        public async Task<Status?> GetPostContaining(string searchString, int limit=100)
+        public async Task<IEnumerable<Status>> GetPostsContainingAsync(string searchString, int limit=100)
         {
             var mastodonClient = GetServiceClient();
             var serviceUser = await mastodonClient.GetCurrentUser();
             var userName = serviceUser.UserName;
             var timeline=await mastodonClient.GetHomeTimeline(new ArrayOptions { Limit=limit});
-            var match = timeline.FirstOrDefault(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
-            if (match != null) return match;
-            return null;
+             return timeline.Where(q=>q.Content.Contains(searchString,StringComparison.InvariantCultureIgnoreCase));
         }
 
         
 
-        public async Task GetSinglePost()
-        {
-
-        }
 
         //public async Task ServiceToot(TootConfigurationApp appConfig, SecretsMastodon mastodonSecrets)
         //{
@@ -80,7 +68,7 @@ namespace Toot2Toulouse.Backend
         //    await client.PublishStatus("Nur ein Test an @stammtischphilosoph@chaos.social ");
         //}
 
-        public async Task<SecretsMastodon> CreateNewApp(TootConfigurationApp appConfig, SecretsMastodon mastodonSecrets)
+        public async Task<SecretsMastodon> CreateNewAppAsync(TootConfigurationApp appConfig, SecretsMastodon mastodonSecrets)
         {
             if (!string.IsNullOrEmpty(mastodonSecrets.ClientId) || !string.IsNullOrEmpty(mastodonSecrets.ClientSecret))
             {

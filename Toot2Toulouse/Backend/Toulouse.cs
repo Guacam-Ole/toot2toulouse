@@ -1,22 +1,19 @@
-﻿using Newtonsoft.Json;
-
-using Toot2Toulouse.Backend.Configuration;
+﻿using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
-using Toot2Toulouse.Controllers;
 
 using Tweetinvi;
 using Tweetinvi.Models;
 
 namespace Toot2Toulouse.Backend
 {
-    public class App
+    public class Toulouse : IToulouse
     {
         private readonly ITwitter _twitter;
-        private readonly Mastodon _mastodon;
+        private readonly IMastodon _mastodon;
         private readonly TootConfiguration _config;
-        private readonly ILogger<App> _logger;
+        private readonly ILogger<Toulouse> _logger;
 
-        public App(ITwitter twitter, Mastodon mastodon, ConfigReader configReader, ILogger<App> logger)
+        public Toulouse(ILogger<Toulouse> logger, ConfigReader configReader, ITwitter twitter, IMastodon mastodon  )
         {
             _twitter = twitter;
             _mastodon = mastodon;
@@ -29,15 +26,10 @@ namespace Toot2Toulouse.Backend
             _twitter.InitUser(userClient, _config.Defaults);
         }
 
-
-        public async Task TweetServicePosts()
+        public async Task TweetServicePostsAsync()
         {
-
-
-            await TweetServicePostsContaining("[ONLYMENTIONED]");
+            await TweetServicePostsContaining("[ONLYMENTIONED]", "[EMOJI]", "[MULTI]");
         }
-
-
 
         public async Task TweetServicePostsContaining(params string[] content)
         {
@@ -49,10 +41,10 @@ namespace Toot2Toulouse.Backend
 
         public async Task TweetServicePostContaining(string content)
         {
-            var toot = await _mastodon.GetPostContaining(content);
-            if (toot != null)
+            var toots = await _mastodon.GetPostsContainingAsync(content);
+            if (toots != null)
             {
-                await _twitter.Publish(toot);
+                foreach (var toot in toots) await _twitter.PublishAsync(toot);
             }
         }
     }

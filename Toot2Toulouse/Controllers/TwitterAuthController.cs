@@ -33,14 +33,14 @@ namespace Toot2Toulouse.Controllers
         public async Task<ActionResult> InitRequest()
         {
        //     var secrets = _configuration.GetSecrets();
-            return new RedirectResult(await _tweet.GetAuthenticationUrl(GetRequestHost()));
+            return new RedirectResult(await _tweet.GetAuthenticationUrlAsync(GetRequestHost()));
         }
 
         [HttpGet]
         public async Task Get()
         {
             if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return;
-            await _tweet.FinishAuthentication(Request.QueryString.Value);
+            await _tweet.FinishAuthenticationAsync(Request.QueryString.Value);
 
                     
         }
