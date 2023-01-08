@@ -10,7 +10,6 @@ using Tweetinvi.Auth;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
-//using static Toot2Toulouse.Backend.Interfaces.ITwitter;
 
 namespace Toot2Toulouse.Backend
 {
@@ -23,29 +22,39 @@ namespace Toot2Toulouse.Backend
 
         private static readonly IAuthenticationRequestStore _twitterRequestStore = new LocalAuthenticationRequestStore();
         private readonly ILogger<Twitter> _logger;
+        private readonly IToot _toot;
 
-        
-        public Twitter(ILogger<Twitter> logger, ConfigReader configReader)
+        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, IToot toot)
         {
             _config = configReader.Configuration;
             _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret);
             _logger = logger;
+            _toot = toot;
         }
 
         public void InitUser(TwitterClient client, UserConfiguration userConfiguration)
         {
             _userClient = client;
             _userConfiguration = userConfiguration;
+            _toot.InitUser(userConfiguration);
         }
 
         public async Task<string> GetAuthenticationUrlAsync(string baseUrl)
         {
-            var guid = Guid.NewGuid();
-            var targetUrl = baseUrl + "/TwitterAuth";
-            var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, guid.ToString());
-            var authTokenRequest = await _appClient.Auth.RequestAuthenticationUrlAsync(redirectUrl);
-            await _twitterRequestStore.AddAuthenticationTokenAsync(guid.ToString(), authTokenRequest);
-            return authTokenRequest.AuthorizationURL;
+            try
+            {
+                var guid = Guid.NewGuid();
+                var targetUrl = baseUrl + "/TwitterAuth";
+                var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, guid.ToString());
+                var authTokenRequest = await _appClient.Auth.RequestAuthenticationUrlAsync(redirectUrl);
+                await _twitterRequestStore.AddAuthenticationTokenAsync(guid.ToString(), authTokenRequest);
+                return authTokenRequest.AuthorizationURL;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed retrieving AuthenticationUrl", ex);
+                throw;
+            }
         }
 
         private void TestAuthenticate()
@@ -53,66 +62,12 @@ namespace Toot2Toulouse.Backend
             _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret, _config.Secrets.Twitter.Personal.AccessToken, _config.Secrets.Twitter.Personal.AccessTokenSecret);
         }
 
-        private List<string>? GetReplies(string originalToot, out string mainTweet)
-        {
-            DoReplacements(ref originalToot);
-            int maxLength = _config.App.TwitterCharacterLimit;
-            bool addSuffix = true;
+       
 
-            string suffix = _userConfiguration.AppSuffix.Content ?? string.Empty;
-
-            bool needsSplit = originalToot.Length > maxLength;
-            if (!needsSplit && originalToot.Length + suffix.Length > maxLength && _userConfiguration.AppSuffix.HideOnLongText) addSuffix = false;
-            mainTweet = originalToot;
-            if (addSuffix) mainTweet += suffix;
-
-            if (!needsSplit) return null;
-
-            var replylist = new List<string>();
-            mainTweet = GetChunk(mainTweet, maxLength, true, out string? replies);
-            while (replies != null)
-            {
-                replylist.Add(GetChunk(replies, maxLength, false,  out replies));
-            }
-
-            return replylist;
-        }
-
-        private void DoReplacements(ref string texttopublish)
-        {
-            texttopublish = $" {texttopublish} ";
-            foreach (var translation in _userConfiguration.Replacements)
-            {
-                texttopublish = texttopublish.Replace($" {translation.Key} ", $" {translation.Value} ", StringComparison.CurrentCultureIgnoreCase);
-            }
-            texttopublish = texttopublish.Trim();
-        }
+  
 
 
 
-        private string GetChunk(string completeText, int maxLength, bool isFirst, out string? remaining)
-        {
-            remaining = null;
-            if (completeText.Length <= maxLength) return completeText;
-            if (!isFirst) maxLength -= _userConfiguration.LongContentThreadOptions.Prefix.Length;
-            bool isLast = completeText.Length <= maxLength;
-
-            if (!isLast) maxLength -= _userConfiguration.LongContentThreadOptions.Suffix.Length;
-
-            int lastSpace;
-            for (lastSpace = maxLength; lastSpace >= _config.App.MinSplitLength; lastSpace--)
-            {
-                if (completeText[lastSpace] == ' ')
-
-                    break;
-            }
-
-            string chunk = completeText[..lastSpace].TrimEnd();
-            if (!isFirst) chunk = _userConfiguration.LongContentThreadOptions.Prefix + chunk;
-            if (!isLast) chunk += _userConfiguration.LongContentThreadOptions.Suffix;
-            remaining = completeText[lastSpace..].TrimStart();
-            return chunk;
-        }
 
         //public async Task AuthTest()
         //{
@@ -157,7 +112,7 @@ namespace Toot2Toulouse.Backend
 
         public async Task PublishFromToot(string content)
         {
-            var replies = GetReplies(content, out string mainTweet);
+            var replies = _toot.GetReplies(content, out string mainTweet);
             if (replies != null)
             {
                 switch (_userConfiguration.LongContent)

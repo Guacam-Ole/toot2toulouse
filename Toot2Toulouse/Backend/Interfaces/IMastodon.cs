@@ -17,7 +17,7 @@ namespace Toot2Toulouse.Backend.Interfaces
         }
 
         Task SendAllStatusMessagesToAsync(string recipient);
-        Task<SecretsMastodon> CreateNewAppAsync(TootConfigurationApp appConfig, SecretsMastodon mastodonSecrets);
-        Task<IEnumerable<Status>> GetPostsContainingAsync(string searchString, int limit = 100);
+        //Task<SecretsMastodon> CreateNewAppAsync(TootConfigurationApp appConfig, SecretsMastodon mastodonSecrets);
+        Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100);
     }
 }

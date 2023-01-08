@@ -12,10 +12,14 @@ namespace Toot2Toulouse.Backend
         public ConfigReader(IWebHostEnvironment webHostEnvironment)
         {
             _webHostEnvironment = webHostEnvironment;
-            Configuration = GetConfig();
+            Configuration = RetApplicationConfig();
+            if (SecretsAreMissing())
+            {
+                throw new Exception("Not all Secrets are configured");
+            }
         }
 
-        private TootConfiguration GetConfig()
+        private TootConfiguration RetApplicationConfig()
         {
             return ReadJsonFile<TootConfiguration>("config.json");
         }
@@ -28,6 +32,18 @@ namespace Toot2Toulouse.Backend
                 string json = r.ReadToEnd();
                 return JsonConvert.DeserializeObject<T>(json);
             }
+        }
+
+        private static bool SecretsAreMissing(params string[] properties)
+        {
+            return properties.Any(p => string.IsNullOrEmpty(p));
+        }
+
+        public bool SecretsAreMissing()
+        {
+            bool twitterSecretsMissing = SecretsAreMissing(Configuration.Secrets.Twitter.Consumer.ApiKey, Configuration.Secrets.Twitter.Consumer.ApiKeySecret, Configuration.Secrets.Twitter.Personal.AccessToken, Configuration.Secrets.Twitter.Personal.AccessTokenSecret);
+            bool mastodonSecretsMissing = SecretsAreMissing(Configuration.Secrets.Mastodon.AccessToken, Configuration.Secrets.Mastodon.ClientId, Configuration.Secrets.Mastodon.ClientSecret);
+            return twitterSecretsMissing|| mastodonSecretsMissing;
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Toot2Toulouse.Backend
 
         public async Task TweetServicePostContaining(string content)
         {
-            var toots = await _mastodon.GetPostsContainingAsync(content);
+            var toots = await _mastodon.GetServicePostsContainingAsync(content);
             if (toots != null)
             {
                 foreach (var toot in toots) await _twitter.PublishAsync(toot);

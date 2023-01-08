@@ -30,12 +30,12 @@ namespace Toot2Toulouse.Controllers
             return null; // new JsonResult();
         }
 
-        [HttpGet,Route("create")]
-        public async Task<ActionResult> Create()
-        {
-            var newConfig=await _mastodon.CreateNewAppAsync(_config.App, _config.Secrets.Mastodon);
-            return new JsonResult(newConfig);
-        }
+        //[HttpGet,Route("create")]
+        //public async Task<ActionResult> Create()
+        //{
+        //    var newConfig=await _mastodon.CreateNewAppAsync(_config.App, _config.Secrets.Mastodon);
+        //    return new JsonResult(newConfig);
+        //}
 
         [Route("latest")]
         public async Task<ActionResult> GetLatestTootFromApp()
