@@ -6,5 +6,6 @@ namespace Toot2Toulouse.Backend.Interfaces
     {
         List<string>? GetReplies(string originalToot, out string mainTweet);
         void InitUser(UserConfiguration userConfiguration);
+        string StripHtml(string content);
     }
 }

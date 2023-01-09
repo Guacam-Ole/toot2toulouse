@@ -23,12 +23,13 @@ namespace Toot2Toulouse.Backend
             // Quick and dirty until storage methods implemented:
             var userCredentials = configReader.ReadJsonFile<TwitterCredentials>("developmentUserCredentials.json");
             var userClient = new TwitterClient(userCredentials);
-            _twitter.InitUser(userClient, _config.Defaults);
+            _twitter.InitUserAsync(userClient, _config.Defaults);
         }
 
         public async Task TweetServicePostsAsync()
         {
-            await TweetServicePostsContaining("[ONLYMENTIONED]", "[EMOJI]", "[MULTI]");
+            //await TweetServicePostsContaining("[ONLYMENTIONED]", "[EMOJI]", "[MULTI]"); 
+            await TweetServicePostsContaining("[YT]");
         }
 
         public async Task TweetServicePostsContaining(params string[] content)

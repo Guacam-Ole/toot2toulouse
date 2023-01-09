@@ -36,6 +36,7 @@ namespace Toot2Toulouse.Backend.Interfaces
         public enum LongContent
         {
             Cut,
+            CutLink,
             DontPublish,
             Thread
         }
@@ -56,7 +57,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task<bool> FinishAuthenticationAsync(string query);
 
-        void InitUser(TwitterClient userClient, UserConfiguration userConfiguration);
+        Task InitUserAsync(TwitterClient userClient, UserConfiguration userConfiguration);
 
         Task PublishAsync(Mastonet.Entities.Status toot);
     }

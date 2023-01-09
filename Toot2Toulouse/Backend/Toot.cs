@@ -1,4 +1,6 @@
-﻿using Toot2Toulouse.Backend.Configuration;
+﻿using System.Text.RegularExpressions;
+
+using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 
 using Tweetinvi.Models;
@@ -21,6 +23,14 @@ namespace Toot2Toulouse.Backend
         {
             _userConfiguration = userConfiguration;
 
+
+        }
+
+        public string StripHtml(string content)
+        {
+            content = content.Replace("</p>", "\n\n");
+            content = content.Replace("<br />", "\n");
+            return Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
         }
 
         public List<string>? GetReplies(string originalToot, out string mainTweet)

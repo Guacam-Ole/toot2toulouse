@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Mastonet.Entities;
 
-using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
@@ -10,7 +10,6 @@ using Tweetinvi.Auth;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
-
 namespace Toot2Toulouse.Backend
 {
     public class Twitter : ITwitter
@@ -18,25 +17,37 @@ namespace Toot2Toulouse.Backend
         private TootConfiguration _config;
         private TwitterClient _appClient;
         private TwitterClient _userClient;
+        private IAuthenticatedUser _twitterUser;
         private UserConfiguration _userConfiguration;
-
+        private Account _mastonUser;
         private static readonly IAuthenticationRequestStore _twitterRequestStore = new LocalAuthenticationRequestStore();
         private readonly ILogger<Twitter> _logger;
         private readonly IToot _toot;
+        private readonly INotification _notification;
 
-        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, IToot toot)
+        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, IToot toot, INotification notification)
         {
             _config = configReader.Configuration;
             _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret);
             _logger = logger;
             _toot = toot;
+            _notification = notification;
         }
 
-        public void InitUser(TwitterClient client, UserConfiguration userConfiguration)
+        public async Task InitUserAsync(TwitterClient client, UserConfiguration userConfiguration)
         {
-            _userClient = client;
-            _userConfiguration = userConfiguration;
-            _toot.InitUser(userConfiguration);
+            try
+            {
+                _userClient = client;
+                _twitterUser = await _userClient.Users.GetAuthenticatedUserAsync();
+                _userConfiguration = userConfiguration;
+                _toot.InitUser(userConfiguration);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error initializing user", ex);
+                throw;
+            }
         }
 
         public async Task<string> GetAuthenticationUrlAsync(string baseUrl)
@@ -62,13 +73,6 @@ namespace Toot2Toulouse.Backend
             _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret, _config.Secrets.Twitter.Personal.AccessToken, _config.Secrets.Twitter.Personal.AccessTokenSecret);
         }
 
-       
-
-  
-
-
-
-
         //public async Task AuthTest()
         //{
         //    TestAuthenticate();
@@ -79,13 +83,6 @@ namespace Toot2Toulouse.Backend
         //    await Tweet("Nur ein simpler Testtweet via API. Einfach ignorieren.  " + suffix);
         //}
 
-        private string StripHtml(string content)
-        {
-            content= content.Replace("</p>", "\n\n");
-            content = content.Replace("<br />", "\n");
-            return Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
-        }
-
         private bool ShouldITweetThis(Mastonet.Entities.Status toot)
         {
             // TODO: CHeck visibilitysettings
@@ -94,52 +91,69 @@ namespace Toot2Toulouse.Backend
 
         public async Task PublishAsync(Mastonet.Entities.Status toot)
         {
+            _mastonUser = toot.Account;
             if (!ShouldITweetThis(toot)) return;
-            string tootContent = StripHtml(toot.Content);
-            string contentWarning = StripHtml(toot.SpoilerText);
-            bool hasContentWarning = !string.IsNullOrWhiteSpace(contentWarning);
-            if (toot.MediaAttachments!=null && toot.MediaAttachments.Count()>0)
-            {
-                tootContent += "\n";
-                foreach (var attachment in toot.MediaAttachments)
-                {
-                 //   tootContent += attachment.Url + "\n";
-                }
-            }
-          // await Tweet(tootContent);
 
+            string contentWarning = _toot.StripHtml(toot.SpoilerText);
+            bool hasContentWarning = !string.IsNullOrWhiteSpace(contentWarning);
+            //if (toot.MediaAttachments != null && toot.MediaAttachments.Count() > 0)
+            //{
+            //    tootContent += "\n";
+            //    foreach (var attachment in toot.MediaAttachments)
+            //    {
+            //        //   tootContent += attachment.Url + "\n";
+            //    }
+            //}
+            await PublishFromToot(toot);
         }
 
-        public async Task PublishFromToot(string content)
+        public async Task PublishFromToot(Status toot)
         {
-            var replies = _toot.GetReplies(content, out string mainTweet);
-            if (replies != null)
+            try
             {
-                switch (_userConfiguration.LongContent)
+                string content = _toot.StripHtml(toot.Content);
+                var replies = _toot.GetReplies(content, out string mainTweet);
+                if (replies != null)
                 {
-                    case ITwitter.LongContent.DontPublish:
-                        break;
+                    switch (_userConfiguration.LongContent)
+                    {
+                        case ITwitter.LongContent.DontPublish:
+                            _logger.LogDebug($"didnt tweet for {_twitterUser} because {content.Length} was more than the allowed twitter limit");
+                            break;
 
-                    case ITwitter.LongContent.Cut:
-                        await TweetAsync( mainTweet);
-                        break;
+                        case ITwitter.LongContent.Cut:
+                            await TweetAsync(mainTweet);
+                            _logger.LogDebug($"tweeted for {_twitterUser} containing {content.Length} chars cutting after {mainTweet.Length} chars");
+                            break;
 
-                    case ITwitter.LongContent.Thread:
-                        var tweet = await TweetAsync( mainTweet);
+                        case ITwitter.LongContent.Thread:
+                            var tweet = await TweetAsync(mainTweet);
 
-                        if (tweet.Id != 0)
-                        {
-                            foreach (var reply in replies)
+                            if (tweet.Id != 0)
                             {
-                                tweet = await TweetAsync( reply, tweet.Id);
+                                foreach (var reply in replies)
+                                {
+                                    tweet = await TweetAsync(reply, tweet.Id);
+                                }
                             }
-                        }
-                        break;
+                            _logger.LogDebug($"tweeted for {_twitterUser} containing {content.Length} chars resulting in thread with {replies.Count} replies");
+                            break;
+
+                        default:
+                            throw new NotImplementedException();
+                    }
+                }
+                else
+                {
+                    await TweetAsync(mainTweet);
+                    _logger.LogDebug($"tweeted for {_twitterUser} containing {content.Length} chars ");
                 }
             }
-            else
+            catch (Exception)
             {
-                await TweetAsync(mainTweet);
+                _notification.Error(_mastonUser.Id, TootConfigurationApp.MessageCodes.TwitterDown, "Sorry. Could not send your tweet. Will NOT try again");
+                // TODO: Retry
+                throw;
             }
         }
 
@@ -150,17 +164,19 @@ namespace Toot2Toulouse.Backend
                 return await _userClient.Tweets.PublishTweetAsync(new PublishTweetParameters
                 {
                     Text = content,
-                    InReplyToTweetId = replyTo                });
+                    InReplyToTweetId = replyTo
+                });
             }
             catch (Exception ex)
             {
-                // TODO: LOG
-                return null;
+                _logger.LogError($"Error tweeting for {_twitterUser}", ex);
+                throw;
             }
         }
 
         public async Task<bool> FinishAuthenticationAsync(string query)
         {
+            // TODO: Save credentials; Success page
             var requestParameters = await RequestCredentialsParameters.FromCallbackUrlAsync(query, _twitterRequestStore);
             var userCredentials = await _appClient.Auth.RequestCredentialsAsync(requestParameters);
 
@@ -178,8 +194,8 @@ Jack Tar killick fathom Admiral of the Black quarter hearties hempen halter ahoy
 
 Yawl lateen sail carouser smartly fire ship pirate Nelsons folly league code of conduct Sea Legs. Scuppers driver loaded to the gunwalls Arr gangplank Sink me poop deck pillage lugger snow. Hempen halter bounty crimp come about grog blossom pink barque galleon wherry cable. ";
 
-            InitUser(userClient, _config.Defaults);
-            await PublishFromToot(longText);
+            InitUserAsync(userClient, _config.Defaults);
+            await PublishFromToot(new Status { Content = longText });
             return true;
         }
     }
