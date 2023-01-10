@@ -66,14 +66,6 @@
         "HideInstance": true
       }
     },
-    "Visibility": {
-      "Public": "PublicAll",
-      "NotListed": "Circle",
-      "OnlyFollowers": "Circle",
-      "OnlyMentioned": "DontPublish"
-    },
-    "ContentWarning": "WithCWSensitive",
-    "Replies": "Thread",
     "LongContent": "Thread",
     "LongContentThreadOptions": {
       "Prefix": "...",

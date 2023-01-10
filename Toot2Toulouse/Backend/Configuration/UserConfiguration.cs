@@ -4,9 +4,7 @@ namespace Toot2Toulouse.Backend.Configuration
 {
     public class UserConfiguration
     {
-        public Dictionary<IMastodon.Visibilites, ITwitter.Visibilities> Visibility { get; set; }  // VisibilityRules what to post how on twitter
-        public ITwitter.ContentWarnings ContentWarning { get; set; } // CW-Settings
-        public ITwitter.Replies Replies { get; set; } // what to do with replies (comments)
+
         public ITwitter.LongContent LongContent { get; set; } // What to do if toot is longer than allowed tweet
         public TootConfigurationAppThreadOptions LongContentThreadOptions { get; set; } // prefix and suffix when splitting toot into thread
         public Dictionary<string, string> Replacements { get; set; } // Autoreplacements for words (e.g. toot->tweet)
