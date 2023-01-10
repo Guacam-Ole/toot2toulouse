@@ -4,7 +4,6 @@ namespace Toot2Toulouse.Backend.Configuration
 {
     public class UserConfiguration
     {
-
         public ITwitter.LongContent LongContent { get; set; } // What to do if toot is longer than allowed tweet
         public TootConfigurationAppThreadOptions LongContentThreadOptions { get; set; } // prefix and suffix when splitting toot into thread
         public Dictionary<string, string> Replacements { get; set; } // Autoreplacements for words (e.g. toot->tweet)

@@ -3,27 +3,23 @@
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 
-using Tweetinvi.Models;
-
 namespace Toot2Toulouse.Backend
 {
     public class Toot : IToot
     {
-        private  UserConfiguration _userConfiguration;
+        private UserConfiguration _userConfiguration;
         private readonly ILogger<Toot> _logger;
         private readonly TootConfiguration _config;
 
         public Toot(ILogger<Toot> logger, ConfigReader configReader)
         {
             _logger = logger;
-            _config=configReader.Configuration;
+            _config = configReader.Configuration;
         }
 
-        public void InitUser (UserConfiguration userConfiguration)
+        public void InitUser(UserConfiguration userConfiguration)
         {
             _userConfiguration = userConfiguration;
-
-
         }
 
         public string StripHtml(string content)
@@ -67,7 +63,6 @@ namespace Toot2Toulouse.Backend
             }
             texttopublish = texttopublish.Trim();
         }
-
 
         private string GetChunk(string completeText, int maxLength, bool isFirst, out string? remaining)
         {

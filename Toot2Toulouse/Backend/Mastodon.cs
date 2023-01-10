@@ -65,8 +65,8 @@ namespace Toot2Toulouse.Backend
             var mastodonClient = GetServiceClient();
             var serviceUser = await mastodonClient.GetCurrentUser();
             var userName = serviceUser.UserName;
-            var timeline = await mastodonClient.GetHomeTimeline(new ArrayOptions { Limit = limit });
-            var matches = timeline.Where(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
+            var statuses=await mastodonClient.GetAccountStatuses(serviceUser.Id, new ArrayOptions {  Limit=limit});
+            var matches = statuses.Where(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
             _logger.LogDebug($"Found {matches.Count()} matches when searching for '{searchString}' in service User");
             return matches;
         }

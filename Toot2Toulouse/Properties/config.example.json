@@ -43,6 +43,9 @@
       "MinDelay": "0:1:0",
       "MaxDelay": "1:0:0"
     },
+    "MaxImageSize": 5,
+    "MaxGifSize": 15,
+    "MaxVideoSize": 512,
     "TwitterCharacterLimit": 280,
     "MinSplitLength": 260
   },

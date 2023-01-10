@@ -16,6 +16,12 @@
         public string ClientName { get; set; }
         public string Url { get; set; }
         public Dictionary<MessageCodes, string> Messages { get;set; }
+
+
+        public int MaxImageSize { get; set; }
+        public int MaxGifSize { get; set; }
+        public int MaxVideoSize { get; set; }
+
         public int TwitterCharacterLimit { get; set; }
         public int MinSplitLength { get; set; } // when trying to split long toots by space this is number of characters the algorithm gives up and splits inside a word
         public string ServiceAppSuffix { get; set; }  // Suffix that is used when sending System messages

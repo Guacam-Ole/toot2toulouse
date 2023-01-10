@@ -51,7 +51,7 @@ namespace Toot2Toulouse.Backend.Interfaces
             Backlink
         }
 
-        Task<ITweet> TweetAsync(string content, long? replyTo = null); // TODO: Media, Mentions
+        Task<ITweet> TweetAsync(string content, bool isSensitive, long replyTo);
 
         Task<string> GetAuthenticationUrlAsync(string baseUrl);
 

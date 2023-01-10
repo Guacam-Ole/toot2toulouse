@@ -28,8 +28,8 @@ namespace Toot2Toulouse.Backend
 
         public async Task TweetServicePostsAsync()
         {
-            //await TweetServicePostsContaining("[ONLYMENTIONED]", "[EMOJI]", "[MULTI]"); 
-            await TweetServicePostsContaining("[YT]");
+            await TweetServicePostsContaining("[VIDEO]", "[YT]"); 
+            //await TweetServicePostsContaining( "[MULTI]");
         }
 
         public async Task TweetServicePostsContaining(params string[] content)
@@ -43,7 +43,7 @@ namespace Toot2Toulouse.Backend
         public async Task TweetServicePostContaining(string content)
         {
             var toots = await _mastodon.GetServicePostsContainingAsync(content);
-            if (toots != null)
+            if (toots != null && toots.Count()>0)
             {
                 foreach (var toot in toots) await _twitter.PublishAsync(toot);
             }
