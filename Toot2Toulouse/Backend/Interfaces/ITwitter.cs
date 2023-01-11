@@ -1,4 +1,6 @@
-﻿using Toot2Toulouse.Backend.Configuration;
+﻿using System.ComponentModel.DataAnnotations;
+
+using Toot2Toulouse.Backend.Configuration;
 
 using Tweetinvi;
 using Tweetinvi.Models;
@@ -7,37 +9,18 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface ITwitter
     {
-        public enum Visibilities
-        {
-            PublicAll,
-            PublicFollowers,
-            PublicMentionedHide,
-            PublicMentionedShow,
-            Circle,
-            DontPublish
-        }
-
-        public enum ContentWarnings
-        {
-            DontPublish,
-            NoCw,
-            NoCwSensitive,
-            WithCw,
-            WithCwSensitive,
-        }
-
-        public enum Replies
-        {
-            Publish,
-            DontPublish,
-            Thread
-        }
-
         public enum LongContent
         {
+            [Display(Name = "Cut the tweet")]
             Cut,
+
+            [Display(Name = "Cut the tweet and add link to toot")]
             CutLink,
+
+            [Display(Name = "Don't publish at all")]
             DontPublish,
+
+            [Display(Name = "Create a thread")]
             Thread
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace Toot2Toulouse.Backend.Configuration
 {
@@ -49,7 +50,7 @@ namespace Toot2Toulouse.Backend.Configuration
         {
             Open,
             Closed,
-            [DisplayName("Invite required")]
+            [Display(Name="Invite required")]
             Invite
         }
 
