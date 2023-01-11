@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="Properties\messages.en.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Mastonet" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />

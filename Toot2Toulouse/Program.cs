@@ -1,3 +1,5 @@
+using Microsoft.Extensions.FileProviders;
+
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Interfaces;
 
@@ -13,6 +15,8 @@ builder.Services.AddScoped<IToulouse, Toulouse>();
 builder.Services.AddScoped<INotification, Notification>();
 builder.Services.AddScoped<IToot, Toot>();
 
+
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -21,4 +25,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+           Path.Combine(builder.Environment.ContentRootPath, "Frontend")),
+    RequestPath = "/Frontend"
+});
+
 app.Run();
+
+
+
+// https://localhost:7198/Frontend/index.en.html

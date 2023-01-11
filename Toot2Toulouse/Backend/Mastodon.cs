@@ -12,16 +12,18 @@ namespace Toot2Toulouse.Backend
     {
         private readonly ILogger<Mastodon> _logger;
         private readonly TootConfiguration _configuration;
+        private readonly Dictionary<MessageCodes, string> _messages;
 
         public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration)
         {
             _logger = logger;
             _configuration = configuration.Configuration;
+            _messages = configuration.GetMessagesForLanguage(_configuration.App.DefaultLanguage);   // TODO: Allow per-user Language setting
         }
 
         private async Task SendStatusMessageTo(string recipient, MessageCodes messageCode)
         {
-            await ServiceToot($"{recipient}\n{_configuration.App.Messages[messageCode]}{_configuration.App.ServiceAppSuffix}", Visibility.Direct);
+            await ServiceToot($"{recipient}\n{_messages[messageCode]}{_configuration.App.ServiceAppSuffix}", Visibility.Direct);
         }
 
         public async Task SendAllStatusMessagesToAsync(string recipient)
@@ -42,7 +44,7 @@ namespace Toot2Toulouse.Backend
             }
             catch (Exception ex)
             {
-                _logger.LogCritical($"Cannot retrieve serviceclient for {_configuration.App.Instance} using accesstoken", ex);
+                _logger.LogCritical(ex, "Cannot retrieve serviceclient for {Instance} using accesstoken", _configuration.App.Instance);
                 throw;
             }
         }
@@ -56,7 +58,7 @@ namespace Toot2Toulouse.Backend
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed sending Status Message: '{content}'", ex);
+                _logger.LogError( ex, "Failed sending Status Message: '{content}'",content);
             }
         }
 

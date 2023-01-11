@@ -41,8 +41,6 @@ namespace Toot2Toulouse.Controllers
         {
             if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return;
             await _tweet.FinishAuthenticationAsync(Request.QueryString.Value);
-
-                    
         }
     }
 }

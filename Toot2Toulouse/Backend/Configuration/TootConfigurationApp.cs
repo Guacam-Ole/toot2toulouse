@@ -15,7 +15,7 @@
         public string Instance { get; set; }
         public string ClientName { get; set; }
         public string Url { get; set; }
-        public Dictionary<MessageCodes, string> Messages { get;set; }
+        //public Dictionary<MessageCodes, string> Messages { get;set; }
 
 
         public int MaxImageSize { get; set; }
@@ -28,6 +28,8 @@
         
 
         public TootConfigurationAppIntervals Intervals { get; set; }
+        public string DefaultLanguage { get; set; }
+        public string[] AvailableLanguages { get; set; }
     }
 
 

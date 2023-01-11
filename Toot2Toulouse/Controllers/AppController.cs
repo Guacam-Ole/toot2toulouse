@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Mvc;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
@@ -45,6 +46,10 @@ namespace Toot2Toulouse.Controllers
             return null; // new JsonResult();
         }
 
-
+        [Route("")]
+        public ActionResult Index()
+        {
+            return new RedirectResult($"./Frontend/index.{_config.App.DefaultLanguage}.html");
+        }
     }
 }
