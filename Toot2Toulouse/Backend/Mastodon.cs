@@ -11,12 +11,14 @@ namespace Toot2Toulouse.Backend
     public class Mastodon : IMastodon
     {
         private readonly ILogger<Mastodon> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly TootConfiguration _configuration;
         private readonly Dictionary<MessageCodes, string> _messages;
 
-        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration)
+        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration, IWebHostEnvironment webHostEnvironment)
         {
             _logger = logger;
+            _webHostEnvironment = webHostEnvironment;
             _configuration = configuration.Configuration;
             _messages = configuration.GetMessagesForLanguage(_configuration.App.DefaultLanguage);   // TODO: Allow per-user Language setting
         }
@@ -24,6 +26,20 @@ namespace Toot2Toulouse.Backend
         private async Task SendStatusMessageTo(string recipient, MessageCodes messageCode)
         {
             await ServiceToot($"{recipient}\n{_messages[messageCode]}{_configuration.App.ServiceAppSuffix}", Visibility.Direct);
+        }
+
+        public async Task<string> GetAuthenticationUrl(string requestHost, string userInstance)
+        {
+            var serviceClient = await GetAuthenticationClient(userInstance);
+            var url = serviceClient.OAuthUrl();
+            return url;
+        }
+
+        public async Task<AuthenticationClient> GetAuthenticationClient(string userInstance)
+        {
+            var authClient = new AuthenticationClient(userInstance);
+            var appRegistration = await authClient.CreateApp(_configuration.App.ClientName, Scope.Read);
+            return authClient;
         }
 
         public async Task SendAllStatusMessagesToAsync(string recipient)
@@ -38,8 +54,8 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var serviceClient=new MastodonClient(_configuration.App.Instance, _configuration.Secrets.Mastodon.AccessToken);
-                _logger.LogDebug($"Successfully retrieved Serviceclient for {_configuration.App.Instance} using accesstoken");
+                var serviceClient = new MastodonClient(_configuration.App.Instance, _configuration.Secrets.Mastodon.AccessToken);
+                _logger.LogDebug("Successfully retrieved Serviceclient for {Instance} using accesstoken", _configuration.App.Instance);
                 return serviceClient;
             }
             catch (Exception ex)
@@ -58,7 +74,7 @@ namespace Toot2Toulouse.Backend
             }
             catch (Exception ex)
             {
-                _logger.LogError( ex, "Failed sending Status Message: '{content}'",content);
+                _logger.LogError(ex, "Failed sending Status Message: '{content}'", content);
             }
         }
 
@@ -67,7 +83,7 @@ namespace Toot2Toulouse.Backend
             var mastodonClient = GetServiceClient();
             var serviceUser = await mastodonClient.GetCurrentUser();
             var userName = serviceUser.UserName;
-            var statuses=await mastodonClient.GetAccountStatuses(serviceUser.Id, new ArrayOptions {  Limit=limit});
+            var statuses = await mastodonClient.GetAccountStatuses(serviceUser.Id, new ArrayOptions { Limit = limit });
             var matches = statuses.Where(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
             _logger.LogDebug($"Found {matches.Count()} matches when searching for '{searchString}' in service User");
             return matches;

@@ -13,7 +13,7 @@ builder.Services.AddScoped<ITwitter, Twitter>();
 builder.Services.AddScoped<IMastodon, Mastodon>();
 builder.Services.AddScoped<IToulouse, Toulouse>();
 builder.Services.AddScoped<INotification, Notification>();
-builder.Services.AddScoped<IToot, Toot>();
+builder.Services.AddScoped<IMessage, Message>();
 
 
 

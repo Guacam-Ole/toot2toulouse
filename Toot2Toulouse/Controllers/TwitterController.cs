@@ -11,13 +11,13 @@ namespace Toot2Toulouse.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class TwitterAuthController : ControllerBase
+    public class TwitterController : ControllerBase
     {
-        private readonly ILogger<TwitterAuthController> _logger;
+        private readonly ILogger<TwitterController> _logger;
         private readonly TootConfiguration _configuration;
         private readonly ITwitter _tweet;
 
-        public TwitterAuthController(ILogger<TwitterAuthController> logger, ConfigReader configReader, ITwitter tweet)
+        public TwitterController(ILogger<TwitterController> logger, ConfigReader configReader, ITwitter tweet)
         {
             _logger = logger;
             _configuration = configReader.Configuration;
@@ -29,15 +29,15 @@ namespace Toot2Toulouse.Controllers
             return string.Format($"{Request.Scheme}://{Request.Host.Value}");
         }
 
-        [Route("init")]
-        public async Task<ActionResult> InitRequest()
+        [Route("auth")]
+        public async Task<ActionResult> AuthStart()
         {
-       //     var secrets = _configuration.GetSecrets();
             return new RedirectResult(await _tweet.GetAuthenticationUrlAsync(GetRequestHost()));
         }
 
+        [Route("code")]
         [HttpGet]
-        public async Task Get()
+        public async Task AuthFinish()
         {
             if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return;
             await _tweet.FinishAuthenticationAsync(Request.QueryString.Value);

@@ -5,13 +5,13 @@ using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Backend
 {
-    public class Toot : IToot
+    public class Message : IMessage
     {
         private UserConfiguration _userConfiguration;
-        private readonly ILogger<Toot> _logger;
+        private readonly ILogger<Message> _logger;
         private readonly TootConfiguration _config;
 
-        public Toot(ILogger<Toot> logger, ConfigReader configReader)
+        public Message(ILogger<Message> logger, ConfigReader configReader)
         {
             _logger = logger;
             _config = configReader.Configuration;

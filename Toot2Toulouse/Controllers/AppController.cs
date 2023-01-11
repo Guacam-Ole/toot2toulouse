@@ -15,7 +15,7 @@ namespace Toot2Toulouse.Controllers
         private readonly IMastodon _mastodon;
         private TootConfiguration _config;
 
-        public AppController(ILogger<TwitterAuthController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon)
+        public AppController(ILogger<TwitterController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon)
         {
             _config = configReader.Configuration;
             _app = app;

@@ -30,11 +30,8 @@
     },
     "ServiceAppSuffix": " -- 🐘²🦜",
     "Instance": "mastodon.social",
-    "ClientName": "my toot2toulouse",
+    "ClientName": "toot2toulouse on [mydomain]",
     "Url": "https://example.com",
-    "Messages": {
-     
-    },
     "Intervals": {
       "Sending": "0:5:00",
       "FollowerCheckApp": "1:0:0",

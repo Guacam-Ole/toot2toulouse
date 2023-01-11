@@ -27,10 +27,10 @@ namespace Toot2Toulouse.Backend
         private Account _mastonUser;
         private static readonly IAuthenticationRequestStore _twitterRequestStore = new LocalAuthenticationRequestStore();
         private readonly ILogger<Twitter> _logger;
-        private readonly IToot _toot;
+        private readonly Interfaces.IMessage _toot;
         private readonly INotification _notification;
 
-        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, IToot toot, INotification notification)
+        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot, INotification notification)
         {
             _config = configReader.Configuration;
             _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret);
@@ -60,7 +60,7 @@ namespace Toot2Toulouse.Backend
             try
             {
                 var guid = Guid.NewGuid();
-                var targetUrl = baseUrl + "/TwitterAuth";
+                var targetUrl = baseUrl + "/twitter/code";
                 var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, guid.ToString());
                 var authTokenRequest = await _appClient.Auth.RequestAuthenticationUrlAsync(redirectUrl);
                 await _twitterRequestStore.AddAuthenticationTokenAsync(guid.ToString(), authTokenRequest);
