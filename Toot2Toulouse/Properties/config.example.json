@@ -26,7 +26,9 @@
       "AutoInvite": 100,
       "AutoClose": 1000,
       "AllowedInstances": null,
-      "BlockedInstances": null
+      "BlockedInstances": null,
+      "AllowBots": false,
+      "MaxTootsPerDay": 960
     },
     "ServiceAppSuffix": " -- 🐘²🦜",
     "Instance": "mastodon.social",
