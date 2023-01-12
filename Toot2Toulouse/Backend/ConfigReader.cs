@@ -30,11 +30,9 @@ namespace Toot2Toulouse.Backend
         public T ReadJsonFile<T>(string filename)
         {
             string fullpath = Path.Combine(_webHostEnvironment.ContentRootPath, "Properties", filename);
-            using (var r = new StreamReader(fullpath))
-            {
-                string json = r.ReadToEnd();
-                return JsonConvert.DeserializeObject<T>(json);
-            }
+            using var r = new StreamReader(fullpath);
+            string json = r.ReadToEnd();
+            return JsonConvert.DeserializeObject<T>(json);
         }
 
         private static bool SecretsAreMissing(params string[] properties)

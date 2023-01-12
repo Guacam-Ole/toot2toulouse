@@ -1,15 +1,12 @@
-﻿using Newtonsoft.Json.Converters;
-
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
-using System.Xml.Linq;
+﻿using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
+using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
-using Tweetinvi.Core.Events;
 using Tweetinvi.Models;
 
 namespace Toot2Toulouse.Backend
@@ -18,13 +15,15 @@ namespace Toot2Toulouse.Backend
     {
         private readonly ITwitter _twitter;
         private readonly IMastodon _mastodon;
+        private readonly IDatabase _database;
         private readonly TootConfiguration _config;
         private readonly ILogger<Toulouse> _logger;
 
-        public Toulouse(ILogger<Toulouse> logger, ConfigReader configReader, ITwitter twitter, IMastodon mastodon  )
+        public Toulouse(ILogger<Toulouse> logger, ConfigReader configReader, ITwitter twitter, IMastodon mastodon, IDatabase database)
         {
             _twitter = twitter;
             _mastodon = mastodon;
+            _database = database;
             _config = configReader.Configuration;
             _logger = logger;
 
@@ -36,7 +35,7 @@ namespace Toot2Toulouse.Backend
 
         public async Task TweetServicePostsAsync()
         {
-            await TweetServicePostsContaining("[VIDEO]", "[YT]"); 
+            await TweetServicePostsContaining("[VIDEO]", "[YT]");
             //await TweetServicePostsContaining( "[MULTI]");
         }
 
@@ -51,7 +50,7 @@ namespace Toot2Toulouse.Backend
         public async Task TweetServicePostContaining(string content)
         {
             var toots = await _mastodon.GetServicePostsContainingAsync(content);
-            if (toots != null && toots.Count()>0)
+            if (toots != null && toots.Count() > 0)
             {
                 foreach (var toot in toots) await _twitter.PublishAsync(toot);
             }
@@ -69,30 +68,32 @@ namespace Toot2Toulouse.Backend
               || type.Equals(typeof(decimal));
         }
 
-        private void GetSettingsForDisplayRecursive<T>(T element, string path,  List<DisplaySettingsItem> displaySettings)
+        private void GetSettingsForDisplayRecursive<T>(T element, string path, List<DisplaySettingsItem> displaySettings)
         {
-            var properties=element.GetType().GetProperties();   
-            foreach (var property in properties) { 
-            if (property.CanRead && property.CanWrite)
+            var properties = element.GetType().GetProperties();
+            foreach (var property in properties)
+            {
+                if (property.CanRead && property.CanWrite)
                 {
                     var value = property.GetValue(element, null);
-                    if (!property.PropertyType.IsEnum && property.PropertyType.Namespace!=null && property.PropertyType.Namespace.StartsWith("Toot2Toulouse"))
+                    if (!property.PropertyType.IsEnum && property.PropertyType.Namespace != null && property.PropertyType.Namespace.StartsWith("Toot2Toulouse"))
                     {
-                        GetSettingsForDisplayRecursive(value, path+"/"+property.Name, displaySettings);
-                    } else
+                        GetSettingsForDisplayRecursive(value, path + "/" + property.Name, displaySettings);
+                    }
+                    else
                     {
                         var displayAttribute = property.GetCustomAttribute<OverviewCategory>();
                         if (displayAttribute == null) continue;
 
                         if (value == null && displayAttribute.NullText != null) value = displayAttribute.NullText;
 
-                            if (property.PropertyType.IsEnum)
+                        if (property.PropertyType.IsEnum)
                         {
                             displaySettings.Add(new DisplaySettingsItem { Category = displayAttribute.Category, DisplayName = displayAttribute.DisplayName ?? property.Name, Path = path + "/" + property.Name, Value = Enum.GetName(property.PropertyType, value), DisplayAsButton = true });
                         }
                         else
                         {
-                            displaySettings.Add(new DisplaySettingsItem { Category = displayAttribute.Category, DisplayName = displayAttribute.DisplayName ?? property.Name, Path = path + "/" + property.Name, Value = $"{value}{displayAttribute.Suffix}", DisplayAsButton = property.PropertyType==typeof(bool)});
+                            displaySettings.Add(new DisplaySettingsItem { Category = displayAttribute.Category, DisplayName = displayAttribute.DisplayName ?? property.Name, Path = path + "/" + property.Name, Value = $"{value}{displayAttribute.Suffix}", DisplayAsButton = property.PropertyType == typeof(bool) });
                         }
                     }
                 }
@@ -101,9 +102,39 @@ namespace Toot2Toulouse.Backend
 
         public List<DisplaySettingsItem> GetServerSettingsForDisplay()
         {
-            var displaySettings=new List<DisplaySettingsItem>();
+            var displaySettings = new List<DisplaySettingsItem>();
             GetSettingsForDisplayRecursive(_config.App, string.Empty, displaySettings);
-            return displaySettings.OrderBy(q=>q.Category).ThenBy(q=>q.DisplayName).ToList();
+            return displaySettings.OrderBy(q => q.Category).ThenBy(q => q.DisplayName).ToList();
+        }
+
+        public string GetHashString(string inputString)
+        {
+            using HashAlgorithm algorithm = SHA256.Create();
+            var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
+
+            var sb = new StringBuilder();
+            foreach (byte b in hash)
+            {
+                sb.Append(b.ToString("X2"));
+            }
+
+            return sb.ToString();
+        }
+
+        public void AddHashToUser(User user)
+        {
+            user.Hash = CalculateHashForUser(user);
+        }
+
+        public User? GetUserByHash(Guid userId, string hash)
+        {
+            return _database.GetUserByIdAndHash(userId, hash);
+        }
+
+        private string CalculateHashForUser(User user)
+        {
+            string valueToHash = $"{user.Id}{user.Mastodon.Id}{user.Twitter.Id}{_config.Secrets.Salt}";
+            return GetHashString(valueToHash);
         }
     }
 }

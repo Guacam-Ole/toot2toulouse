@@ -3,7 +3,8 @@
     public class TootConfigurationSecrets
     {
         public SecretsTwitter Twitter { get; set; }
-        public SecretsMastodon Mastodon { get; set; }   
+        public SecretsMastodon Mastodon { get; set; }  
+        public string Salt { get; set; }
     }
 
     public class SecretsMastodon

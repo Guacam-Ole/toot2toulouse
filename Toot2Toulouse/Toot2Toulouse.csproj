@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Backend\Data\**" />
+    <Content Remove="Backend\Data\**" />
+    <EmbeddedResource Remove="Backend\Data\**" />
+    <None Remove="Backend\Data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <_ContentIncludedByDefault Remove="Properties\messages.en.json" />
   </ItemGroup>
 
@@ -16,10 +23,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
     <PackageReference Include="UrlCombine" Version="2.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Backend\Data\" />
   </ItemGroup>
 
 </Project>

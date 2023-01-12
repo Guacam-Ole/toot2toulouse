@@ -2,6 +2,7 @@
 
 {
   "Secrets": {
+    "Salt": "Use your own Salt here. Can be any combination of characters",
     "Twitter": {
       "Consumer": {
         "ApiKey": "",

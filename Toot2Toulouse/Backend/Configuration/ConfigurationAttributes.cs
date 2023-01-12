@@ -14,4 +14,9 @@
             DisplayName = displayName;
         }
     }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class HideOnExport: Attribute
+    {
+    }
 }
