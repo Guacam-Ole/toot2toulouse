@@ -21,15 +21,18 @@ namespace Toot2Toulouse.Backend.Configuration
         [OverviewCategory("General Information", "App Name")]
         public string ClientName { get; set; }
 
+        [OverviewCategory("General Information", "Mastodon Account name")]
+        public string AccountName { get; set; }
+
         public string Url { get; set; }
 
-        [OverviewCategory("Twitter Attachments (Size in MB)", "Maximum Filesize for static images")]
+        [OverviewCategory("Twitter Attachments", "Maximum Filesize for static images", Suffix = " MB")]
         public int MaxImageSize { get; set; }
 
-        [OverviewCategory("Twitter Attachments (Size in MB)", "Maximum Filesize for GIFs")]
+        [OverviewCategory("Twitter Attachments", "Maximum Filesize for GIFs", Suffix = " MB")]
         public int MaxGifSize { get; set; }
 
-        [OverviewCategory("Twitter Attachments (Size in MB)", "Maximum Filesize for embedded Videos")]
+        [OverviewCategory("Twitter Attachments", "Maximum Filesize for embedded Videos", Suffix =" MB")]
         public int MaxVideoSize { get; set; }
 
         public int TwitterCharacterLimit { get; set; }
@@ -75,16 +78,16 @@ namespace Toot2Toulouse.Backend.Configuration
 
     public class TootConfigurationAppIntervals
     {
-        [OverviewCategory("Intervals (hours:minutes:seconds)", "Look for new Toots")]
+        [OverviewCategory("Intervals", "Look for new Toots", Suffix  = " (hh:mm:ss)")]
         public TimeSpan Sending { get; set; }   // How often should t2t check for message and send?
 
         public TimeSpan FollowerCheckApp { get; set; }  // How often should t2t scan for follower informations?
         public TimeSpan FollwerCheckUser { get; set; }  // How often should t2t scan for follower informations (per user)?
 
-        [OverviewCategory("Intervals (hours:minutes:seconds)", "Minimum Delay")]
+        [OverviewCategory("Intervals", "Minimum Delay", Suffix = " (hh:mm:ss)")]
         public TimeSpan MinDelay { get; set; } // Minimum delay before tweeting a toot
 
-        [OverviewCategory("Intervals (hours:minutes:seconds)", "Maximum Delay")]
+        [OverviewCategory("Intervals", "Maximum Delay", Suffix = " (hh:mm:ss)")]
         public TimeSpan MaxDelay { get; set; } // Maximum delay before tweeting a toot
     }
 }

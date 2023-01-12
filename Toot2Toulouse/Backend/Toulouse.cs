@@ -92,7 +92,7 @@ namespace Toot2Toulouse.Backend
                         }
                         else
                         {
-                            displaySettings.Add(new DisplaySettingsItem { Category = displayAttribute.Category, DisplayName = displayAttribute.DisplayName ?? property.Name, Path = path + "/" + property.Name, Value = value, DisplayAsButton = property.PropertyType==typeof(bool)});
+                            displaySettings.Add(new DisplaySettingsItem { Category = displayAttribute.Category, DisplayName = displayAttribute.DisplayName ?? property.Name, Path = path + "/" + property.Name, Value = $"{value}{displayAttribute.Suffix}", DisplayAsButton = property.PropertyType==typeof(bool)});
                         }
                     }
                 }

@@ -33,6 +33,7 @@
     "ServiceAppSuffix": " -- 🐘²🦜",
     "Instance": "mastodon.social",
     "ClientName": "toot2toulouse on [mydomain]",
+    "Accountname": "handle@instance", // Account which sends status update to user
     "Url": "https://example.com",
     "Intervals": {
       "Sending": "0:5:00",

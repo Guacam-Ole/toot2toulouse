@@ -19,7 +19,7 @@
         //    table += "</td></tr>";
         //});
 
-        var table = "<table><thead><th>Setting</th><th class=''>Value</th></thead><tbody>";
+        var table = "<table><tbody>";
         $.each(data, function (key, val) {
             
             if (lastCategory != val.category) {
