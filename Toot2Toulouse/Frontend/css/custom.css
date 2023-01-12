@@ -1,3 +1,11 @@
 .fake {
 cursor:  not-allowed;
 }
+
+#serverlimitstable table {
+    width:100%;
+}
+
+th.right, td.right {
+    text-align: right;
+}

@@ -23,13 +23,13 @@ namespace Toot2Toulouse.Backend.Configuration
 
         public string Url { get; set; }
 
-        [OverviewCategory("Attachments", "Maximum Filesize for static images (MB)")]
+        [OverviewCategory("Twitter Attachments (Size in MB)", "Maximum Filesize for static images")]
         public int MaxImageSize { get; set; }
 
-        [OverviewCategory("Attachments", "Maximum Filesize for GIFs (MB)")]
+        [OverviewCategory("Twitter Attachments (Size in MB)", "Maximum Filesize for GIFs")]
         public int MaxGifSize { get; set; }
 
-        [OverviewCategory("Attachments", "Maximum Filesize for embedded Videos (MB)")]
+        [OverviewCategory("Twitter Attachments (Size in MB)", "Maximum Filesize for embedded Videos")]
         public int MaxVideoSize { get; set; }
 
         public int TwitterCharacterLimit { get; set; }
@@ -60,10 +60,10 @@ namespace Toot2Toulouse.Backend.Configuration
         public int AutoInvite { get; set; } // Active Users per Hour before automatically switching  to Invite (<=0=disable)
         public int AutoClosed { get; set; }// Active Users per Hour before automatically switching to Closed (<=0=disable)
 
-        [OverviewCategory("Registration Limits", "Allowed Instances")]
+        [OverviewCategory("Registration Limits", "Allowed Instances", NullText ="Any")]
         public string AllowedInstances { get; set; }
 
-        [OverviewCategory("Registration Limits", "Blocked Instances")]
+        [OverviewCategory("Registration Limits", "Blocked Instances", NullText = "None")]
         public string BlockedInstances { get; set; }
 
         [OverviewCategory("Registration Limits", "Allow Bots")]
@@ -75,16 +75,16 @@ namespace Toot2Toulouse.Backend.Configuration
 
     public class TootConfigurationAppIntervals
     {
-        [OverviewCategory("Intervals", "Look for new Toots")]
+        [OverviewCategory("Intervals (hours:minutes:seconds)", "Look for new Toots")]
         public TimeSpan Sending { get; set; }   // How often should t2t check for message and send?
 
         public TimeSpan FollowerCheckApp { get; set; }  // How often should t2t scan for follower informations?
         public TimeSpan FollwerCheckUser { get; set; }  // How often should t2t scan for follower informations (per user)?
 
-        [OverviewCategory("Intervals", "Minimum Delay")]
+        [OverviewCategory("Intervals (hours:minutes:seconds)", "Minimum Delay")]
         public TimeSpan MinDelay { get; set; } // Minimum delay before tweeting a toot
 
-        [OverviewCategory("Intervals", "Maximum Delay")]
+        [OverviewCategory("Intervals (hours:minutes:seconds)", "Maximum Delay")]
         public TimeSpan MaxDelay { get; set; } // Maximum delay before tweeting a toot
     }
 }

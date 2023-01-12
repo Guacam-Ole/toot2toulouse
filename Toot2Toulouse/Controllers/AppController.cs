@@ -51,5 +51,11 @@ namespace Toot2Toulouse.Controllers
         {
             return new RedirectResult($"./Frontend/index.{_config.App.DefaultLanguage}.html");
         }
+
+        [Route("server")]
+        public ActionResult GetServerSettings()
+        {
+            return new JsonResult(_app.GetServerSettingsForDisplay());
+        }
     }
 }
