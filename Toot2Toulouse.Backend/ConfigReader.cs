@@ -9,17 +9,21 @@ namespace Toot2Toulouse.Backend
 {
     public class ConfigReader
     {
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly string _path;
+
+        // private readonly IWebHostEnvironment _webHostEnvironment;
         public TootConfiguration Configuration { get; set; }
 
-        public ConfigReader(IWebHostEnvironment webHostEnvironment)
+        public ConfigReader(string path)
         {
-            _webHostEnvironment = webHostEnvironment;
+            _path = path;
+            //   _webHostEnvironment = webHostEnvironment;
             Configuration = RetApplicationConfig();
             if (SecretsAreMissing())
             {
                 throw new Exception("Not all Secrets are configured");
             }
+            
         }
 
         private TootConfiguration RetApplicationConfig()
@@ -29,7 +33,8 @@ namespace Toot2Toulouse.Backend
 
         public T ReadJsonFile<T>(string filename)
         {
-            string fullpath = Path.Combine(_webHostEnvironment.ContentRootPath, "Properties", filename);
+            string fullpath = Path.Combine(_path, filename);
+                //_webHostEnvironment.ContentRootPath, "Properties", filename);
             using var r = new StreamReader(fullpath);
             string json = r.ReadToEnd();
             return JsonConvert.DeserializeObject<T>(json);

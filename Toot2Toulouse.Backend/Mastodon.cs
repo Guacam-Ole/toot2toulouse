@@ -1,6 +1,8 @@
 ﻿using Mastonet;
 using Mastonet.Entities;
 
+using Microsoft.Extensions.Logging;
+
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
@@ -12,16 +14,16 @@ namespace Toot2Toulouse.Backend
     public class Mastodon : IMastodon
     {
         private readonly ILogger<Mastodon> _logger;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        //private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IDatabase _database;
         private readonly ICookies _cookies;
         private readonly TootConfiguration _configuration;
         private readonly Dictionary<MessageCodes, string> _messages;
 
-        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration, IWebHostEnvironment webHostEnvironment, IDatabase database, ICookies cookies)
+        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration,  IDatabase database, ICookies cookies)
         {
             _logger = logger;
-            _webHostEnvironment = webHostEnvironment;
+            //_webHostEnvironment = webHostEnvironment;
             _database = database;
             _cookies = cookies;
             _configuration = configuration.Configuration;

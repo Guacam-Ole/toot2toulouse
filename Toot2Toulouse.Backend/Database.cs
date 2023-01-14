@@ -1,5 +1,7 @@
 ﻿using LiteDB;
 
+using Microsoft.Extensions.Logging;
+
 using System.Security.Cryptography;
 using System.Text;
 
@@ -12,19 +14,26 @@ namespace Toot2Toulouse.Backend
     public class Database : IDatabase
     {
         private readonly ILogger<Database> _logger;
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly TootConfiguration _config;
+        private string _path;
 
-        public Database(ILogger<Database> logger, IWebHostEnvironment webHostEnvironment, ConfigReader configReader)
+        public Database(ILogger<Database> logger, ConfigReader configReader, string path)
         {
             _logger = logger;
-            _webHostEnvironment = webHostEnvironment;
+            //_webHostEnvironment = webHostEnvironment;
             _config = configReader.Configuration;
+            _path = path;
+        }
+
+        public void SetDatabasePath(string path)
+        {
+            _path= path;
         }
 
         private string GetDatabaseFile()
         {
-            return Path.Combine(_webHostEnvironment.ContentRootPath, "Data", "t2t.db");
+            return Path.Combine(_path, "t2t.db");
+            //return Path.Combine(_webHostEnvironment.ContentRootPath, "Data", "t2t.db");
         }
 
         public UserData? GetUserById(Guid id)

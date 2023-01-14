@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
 
 using System.Diagnostics.SymbolStore;
 using System.IO.Pipes;

@@ -1,5 +1,7 @@
 ﻿using Mastonet.Entities;
 
+using Microsoft.Extensions.Logging;
+
 using Newtonsoft.Json;
 
 using System;
