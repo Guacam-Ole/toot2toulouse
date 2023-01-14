@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 using Toot2Toulouse.Backend.Interfaces;
+using Toot2Toulouse.Interfaces;
 
 namespace Toot2Toulouse.Controllers
 {
@@ -8,9 +9,9 @@ namespace Toot2Toulouse.Controllers
     [Route("[controller]")]
     public class MastodonController : ControllerBase
     {
-        private readonly IMastodon _mastodon;
+        private readonly IMastodonClientAuthentication _mastodon;
 
-        public MastodonController(IMastodon mastodon)
+        public MastodonController(IMastodonClientAuthentication mastodon)
         {
             _mastodon = mastodon;
         }

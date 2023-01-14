@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Models;
 
-using Tweetinvi;
 using Tweetinvi.Models;
 
 namespace Toot2Toulouse.Backend.Interfaces
@@ -35,14 +33,14 @@ namespace Toot2Toulouse.Backend.Interfaces
             Backlink
         }
 
-        Task<ITweet> TweetAsync(string content, bool isSensitive, long replyTo);
+        Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long replyTo);
 
-        Task<string> GetAuthenticationUrlAsync(string baseUrl);
+        //Task<string> GetAuthenticationUrlAsync(string baseUrl);
 
-        Task<bool> FinishAuthenticationAsync(string query);
+        //Task<bool> FinishAuthenticationAsync(string query);
 
-        Task InitUserAsync(UserData userData);
+        //Task InitUserAsync(UserData userData);
 
-        Task PublishAsync(Mastonet.Entities.Status toot);
+        Task PublishAsync(UserData userData, Mastonet.Entities.Status toot);
     }
 }

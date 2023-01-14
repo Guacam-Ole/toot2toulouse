@@ -25,10 +25,7 @@ namespace Toot2Toulouse.Backend
             _path = path;
         }
 
-        public void SetDatabasePath(string path)
-        {
-            _path= path;
-        }
+     
 
         private string GetDatabaseFile()
         {

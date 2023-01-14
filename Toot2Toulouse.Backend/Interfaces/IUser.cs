@@ -4,9 +4,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IUser
     {
-        UserData GetUserData();
-
-        void DeleteUser();
-        Task<bool> Login(Guid id, string hash);
+        UserData? GetUser(Guid id, string hash);
+        UserData? ExportUserData(UserData userData);
     }
 }

@@ -21,53 +21,38 @@ namespace Toot2Toulouse.Backend
         private readonly TootConfiguration _config;
         private readonly ILogger<Toulouse> _logger;
 
-        public Toulouse(ILogger<Toulouse> logger, ConfigReader configReader, ITwitter twitter, IMastodon mastodon, IDatabase database, ICookies cookies)
+        public Toulouse(ILogger<Toulouse> logger, ConfigReader configReader, ITwitter twitter, IMastodon mastodon, IDatabase database)
         {
             _twitter = twitter;
             _mastodon = mastodon;
             _database = database;
             _config = configReader.Configuration;
             _logger = logger;
-
-            // Quick and dirty until storage methods implemented:
-            //var userCredentials = configReader.ReadJsonFile<TwitterCredentials>("developmentUserCredentials.json");
-            //var userClient = new TwitterClient(userCredentials);
-
-            //var id = cookies.UserIdGetCookie();
-            //var hash=cookies.UserHashGetCookie();
-
-            //var usr=_database.GetUserByIdAndHash(id, hash);
-
-            //_twitter.InitUserAsync(usr);
         }
 
 
-        public async Task InitUserAsync(UserData userdata)
-        {
-            await _twitter.InitUserAsync(userdata);
-        }
-        public async Task TweetServicePostsAsync()
-        {
-            await TweetServicePostsContaining("[VIDEO]", "[YT]");
-            //await TweetServicePostsContaining( "[MULTI]");
-        }
+    
+        //public async Task TweetServicePostsAsync()
+        //{
+        //    await TweetServicePostsContaining("[VIDEO]", "[YT]");
+        //}
 
-        public async Task TweetServicePostsContaining(params string[] content)
-        {
-            foreach (var item in content)
-            {
-                await TweetServicePostContaining(item);
-            }
-        }
+        //public async Task TweetServicePostsContaining(params string[] content)
+        //{
+        //    foreach (var item in content)
+        //    {
+        //        await TweetServicePostContaining(item);
+        //    }
+        //}
 
-        public async Task TweetServicePostContaining(string content)
-        {
-            var toots = await _mastodon.GetServicePostsContainingAsync(content);
-            if (toots != null && toots.Count() > 0)
-            {
-                foreach (var toot in toots) await _twitter.PublishAsync(toot);
-            }
-        }
+        //public async Task TweetServicePostContaining(string content)
+        //{
+        //    var toots = await _mastodon.GetServicePostsContainingAsync(content);
+        //    if (toots != null && toots.Count() > 0)
+        //    {
+        //        foreach (var toot in toots) await _twitter.PublishAsync(toot);
+        //    }
+        //}
 
         private bool IsSimpleType(Type type)
         {

@@ -4,8 +4,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IToulouse
     {
-        Task TweetServicePostsAsync();   // TODO: Remove when finished
-        Task InitUserAsync(UserData userData);
+        //Task TweetServicePostsAsync();   // TODO: Remove when finished
 
         List<DisplaySettingsItem> GetServerSettingsForDisplay();
 

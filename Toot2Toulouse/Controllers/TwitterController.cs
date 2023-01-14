@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
+using Toot2Toulouse.Interfaces;
 
 namespace Toot2Toulouse.Controllers
 {
@@ -14,14 +15,15 @@ namespace Toot2Toulouse.Controllers
     public class TwitterController : ControllerBase
     {
         private readonly ILogger<TwitterController> _logger;
+        private readonly ITwitterClientAuthentication _twitterClientAuthentication;
         private readonly TootConfiguration _config;
         private readonly ITwitter _tweet;
 
-        public TwitterController(ILogger<TwitterController> logger, ConfigReader configReader, ITwitter tweet)
+        public TwitterController(ILogger<TwitterController> logger, ConfigReader configReader, ITwitterClientAuthentication twitterClientAuthentication)
         {
             _logger = logger;
+            _twitterClientAuthentication = twitterClientAuthentication;
             _config = configReader.Configuration;
-            _tweet = tweet;
         }
 
         private string GetRequestHost()
@@ -32,7 +34,7 @@ namespace Toot2Toulouse.Controllers
         [Route("auth")]
         public async Task<ActionResult> AuthStart()
         {
-            return new RedirectResult(await _tweet.GetAuthenticationUrlAsync(GetRequestHost()));
+            return new RedirectResult(await _twitterClientAuthentication.GetAuthenticationUrlAsync(GetRequestHost()));
         }
 
         [Route("code")]
@@ -40,7 +42,7 @@ namespace Toot2Toulouse.Controllers
         public async Task<ActionResult> AuthFinish()
         {
             if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return Content("query missing");
-            var success=await _tweet.FinishAuthenticationAsync(Request.QueryString.Value);
+            var success=await _twitterClientAuthentication.FinishAuthenticationAsync(Request.QueryString.Value);
             if (!success) return Content("twitter auth failed");
             return new RedirectResult($"../Frontend/regfinished.{_config.App.DefaultLanguage}.html");
         }

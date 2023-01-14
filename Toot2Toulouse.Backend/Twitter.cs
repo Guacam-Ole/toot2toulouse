@@ -2,20 +2,11 @@
 
 using Microsoft.Extensions.Logging;
 
-using Newtonsoft.Json;
-
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using System.Net.Http;
-using System.Net.NetworkInformation;
-
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
-using Tweetinvi.Auth;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
@@ -24,71 +15,30 @@ namespace Toot2Toulouse.Backend
     public class Twitter : ITwitter
     {
         private TootConfiguration _config;
-        private TwitterClient _appClient;
-        private TwitterClient _userClient;
-        private IAuthenticatedUser _twitterUser;
-        private UserConfiguration _userConfiguration;
-        private static readonly IAuthenticationRequestStore _twitterRequestStore = new LocalAuthenticationRequestStore();
+
         private readonly ILogger<Twitter> _logger;
         private readonly Interfaces.IMessage _toot;
         private readonly INotification _notification;
-        private readonly ICookies _cookies;
         private readonly IDatabase _database;
 
-        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot, INotification notification, ICookies cookies, IDatabase database)
+        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot, INotification notification, IDatabase database)
         {
             _config = configReader.Configuration;
-            _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret);
             _logger = logger;
             _toot = toot;
             _notification = notification;
-            _cookies = cookies;
             _database = database;
         }
 
-     
-
-        public async Task InitUserAsync(UserData userdata)
+        private TwitterClient GetUserClient(UserData userData)
         {
-            
-            try
-            {
-                _userClient = new TwitterClient(userdata.Twitter.ConsumerKey, userdata.Twitter.ConsumerSecret, userdata.Twitter.AccessToken, userdata.Twitter.AccessSecret);
-                _twitterUser = await _userClient.Users.GetAuthenticatedUserAsync();
-                _userConfiguration = userdata.Config;
-                _toot.InitUser(_userConfiguration);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error initializing user", ex);
-                throw;
-            }
+            return new TwitterClient(userData.Twitter.ConsumerKey, userData.Twitter.ConsumerSecret, userData.Twitter.AccessToken, userData.Twitter.AccessSecret);
         }
 
-        public async Task<string> GetAuthenticationUrlAsync(string baseUrl)
+        private async Task<IAuthenticatedUser> GetTwitterUser(UserData userData)
         {
-            try
-            {
-                var guid = Guid.NewGuid();
-                var targetUrl = baseUrl + "/twitter/code";
-                var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, guid.ToString());
-                var authTokenRequest = await _appClient.Auth.RequestAuthenticationUrlAsync(redirectUrl);
-                await _twitterRequestStore.AddAuthenticationTokenAsync(guid.ToString(), authTokenRequest);
-                return authTokenRequest.AuthorizationURL;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed retrieving AuthenticationUrl", ex);
-                throw;
-            }
+            return await GetUserClient(userData).Users.GetAuthenticatedUserAsync();
         }
-
-        //private void TestAuthenticate()
-        //{
-        //    _appClient = new TwitterClient(_config.Secrets.Twitter.Consumer.ApiKey, _config.Secrets.Twitter.Consumer.ApiKeySecret, _config.Secrets.Twitter.Personal.AccessToken, _config.Secrets.Twitter.Personal.AccessTokenSecret);
-        //}
-
-       
 
         private bool ShouldITweetThis(Status toot)
         {
@@ -96,17 +46,13 @@ namespace Toot2Toulouse.Backend
             return !string.IsNullOrWhiteSpace(toot.Content);
         }
 
-        public async Task PublishAsync(Status toot)
+        public async Task PublishAsync(UserData userData, Status toot)
         {
             if (!ShouldITweetThis(toot)) return;
-
-            //string contentWarning = _toot.StripHtml(toot.SpoilerText);
-            //bool hasContentWarning = !string.IsNullOrWhiteSpace(contentWarning);
-          
-            await PublishFromToot(toot);
+            await PublishFromToot(userData, toot);
         }
 
-        public async Task PublishFromToot(Status toot)
+        private async Task PublishFromToot(UserData userData, Status toot)
         {
             try
             {
@@ -118,32 +64,33 @@ namespace Toot2Toulouse.Backend
                 }
 
                 string content = _toot.StripHtml(toot.Content);
+                var twitterUser = GetTwitterUser(userData);
 
-                var replies = _toot.GetReplies(content, out string mainTweet);
+                var replies = _toot.GetReplies(userData.Config, content, out string mainTweet);
                 if (replies != null)
                 {
-                    switch (_userConfiguration.LongContent)
+                    switch (userData.Config.LongContent)
                     {
                         case ITwitter.LongContent.DontPublish:
-                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", _twitterUser, content.Length);
+                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser, content.Length);
                             break;
 
                         case ITwitter.LongContent.Cut:
-                            await TweetAsync(mainTweet, isSensitive, toot.MediaAttachments);
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", _twitterUser, content.Length, mainTweet.Length);
+                            await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser, content.Length, mainTweet.Length);
                             break;
 
                         case ITwitter.LongContent.Thread:
-                            var tweet = await TweetAsync(mainTweet, isSensitive, toot.MediaAttachments);
+                            var tweet = await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
 
                             if (tweet.Id != 0)
                             {
                                 foreach (var reply in replies)
                                 {
-                                    tweet = await TweetAsync(reply, isSensitive, tweet.Id);
+                                    tweet = await TweetAsync(userData, reply, isSensitive, tweet.Id);
                                 }
                             }
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", _twitterUser, content.Length, replies.Count);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser, content.Length, replies.Count);
                             break;
 
                         default:
@@ -152,46 +99,48 @@ namespace Toot2Toulouse.Backend
                 }
                 else
                 {
-                    await TweetAsync(mainTweet, isSensitive, toot.MediaAttachments);
-                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", _twitterUser, content.Length);
+                    await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser, content.Length);
                 }
             }
             catch (Exception)
             {
-                
                 //_notification.Error(_mastonUser.Id, TootConfigurationApp.MessageCodes.TwitterDown, "Sorry. Could not send your tweet. Will NOT try again");
                 // TODO: Retry
                 throw;
             }
         }
 
-        private async Task<IMedia> ValidateAndDownloadAttachmentAsync(Attachment attachment)
+        private async Task<IMedia> ValidateAndDownloadAttachmentAsync(UserData userData, Attachment attachment)
         {
             try
             {
+                var userClient = GetUserClient(userData);
                 var fileInfo = new FileInfo(attachment.Url);
                 byte[] fileContents;
                 IMedia mediafile;
 
                 switch (fileInfo.Extension)
                 {
-
                     case ".png":
                     case ".jpg":
                     case ".jpeg":
                     case ".webp":
                         fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
-                        mediafile = await _userClient.Upload.UploadTweetImageAsync( fileContents);
+                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
                         mediafile.Name = "Das ist ein tolles bild";
                         return mediafile;
+
                     case ".gif":
                         fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
-                        return await _userClient.Upload.UploadTweetImageAsync(fileContents);
+                        return await userClient.Upload.UploadTweetImageAsync(fileContents);
+
                     case ".mp4":
                         fileContents = await DownloadFile(attachment.Url, null, _config.App.MaxVideoSize);
-                        mediafile = await _userClient.Upload.UploadTweetVideoAsync(fileContents);
+                        mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
                         mediafile.Name = "Das ist ein tolles video";
                         return mediafile;
+
                     default:
                         throw new NotImplementedException(); // TODO: Own exceptiontype
                 }
@@ -203,17 +152,16 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        private async Task<ITweet> TweetAsync(string content, bool isSensitive, IEnumerable<Attachment> attachments)
+        private async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, IEnumerable<Attachment> attachments)
         {
             var mediaFiles = new List<IMedia>();
             foreach (var attachment in attachments)
             {
-                var mediafile = await ValidateAndDownloadAttachmentAsync(attachment);
+                var mediafile = await ValidateAndDownloadAttachmentAsync(userData, attachment);
                 if (mediafile != null) mediaFiles.Add(mediafile);
-
             }
 
-            return await TweetAsync(new PublishTweetParameters
+            return await TweetAsync(userData, new PublishTweetParameters
             {
                 Text = content,
                 PossiblySensitive = isSensitive,
@@ -250,9 +198,9 @@ namespace Toot2Toulouse.Backend
             return memoryStream.ToArray();
         }
 
-        public async Task<ITweet> TweetAsync(string content, bool isSensitive, long replyTo)
+        public async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long replyTo)
         {
-            return await TweetAsync(new PublishTweetParameters
+            return await TweetAsync(userData, new PublishTweetParameters
             {
                 Text = content,
                 InReplyToTweetId = replyTo,
@@ -260,56 +208,17 @@ namespace Toot2Toulouse.Backend
             });
         }
 
-        public async Task<ITweet> TweetAsync(PublishTweetParameters tweetParameters)
+        public async Task<ITweet> TweetAsync(UserData userData, PublishTweetParameters tweetParameters)
         {
             try
             {
-                return await _userClient.Tweets.PublishTweetAsync(tweetParameters);
+                return await GetUserClient(userData).Tweets.PublishTweetAsync(tweetParameters);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error tweeting for {_twitterUser}", ex);
+                _logger.LogError($"Error tweeting for {userData.Twitter.DisplayName}", ex);
                 throw;
             }
-
-        }
-
-        public async Task<bool> FinishAuthenticationAsync(string query)
-        {
-            var hash = _cookies.UserHashGetCookie();
-            var id=_cookies.UserIdGetCookie();
-
-            if (id == Guid.Empty || hash == null) throw new Exception("No cookie. You shouldn't even be here");
-
-            var t2tUser=_database.GetUserByIdAndHash(id, hash);
-            if (t2tUser == null) throw new Exception("invalid cookie data");
-
-
-            var requestParameters = await RequestCredentialsParameters.FromCallbackUrlAsync(query, _twitterRequestStore);
-            var userCredentials = await _appClient.Auth.RequestCredentialsAsync(requestParameters);
-
-
-            var credsStr = JsonConvert.SerializeObject(userCredentials);
-            var userClient = new TwitterClient(userCredentials);
-            var user = await userClient.Users.GetAuthenticatedUserAsync();
-            t2tUser.Twitter = new Models.Twitter
-            {
-                ConsumerKey = userCredentials.ConsumerKey,
-                ConsumerSecret = userCredentials.ConsumerSecret,
-                AccessToken= userCredentials.AccessToken,
-                AccessSecret= userCredentials.AccessTokenSecret,
-                Bearer=userCredentials.BearerToken, 
-                Id = user.Id.ToString(),
-                DisplayName = user.Name,
-                Handle=user.ScreenName
-            };
-            _database.UpsertUser(t2tUser);  
-
-            _notification.Info(t2tUser.Id, TootConfigurationApp.MessageCodes.RegistrationFinished);
-
-            InitUserAsync(t2tUser);
-            //await PublishFromToot(new Status { Content = longText });
-            return true;
         }
     }
 }

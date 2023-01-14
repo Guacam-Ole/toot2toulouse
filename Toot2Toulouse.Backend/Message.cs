@@ -9,7 +9,7 @@ namespace Toot2Toulouse.Backend
 {
     public class Message : IMessage
     {
-        private UserConfiguration _userConfiguration;
+    //    private UserConfiguration _userConfiguration;
         private readonly ILogger<Message> _logger;
         private readonly TootConfiguration _config;
 
@@ -19,10 +19,6 @@ namespace Toot2Toulouse.Backend
             _config = configReader.Configuration;
         }
 
-        public void InitUser(UserConfiguration userConfiguration)
-        {
-            _userConfiguration = userConfiguration;
-        }
 
         public string StripHtml(string content)
         {
@@ -31,49 +27,49 @@ namespace Toot2Toulouse.Backend
             return Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
         }
 
-        public List<string>? GetReplies(string originalToot, out string mainTweet)
+        public List<string>? GetReplies(UserConfiguration userConfiguration, string originalToot, out string mainTweet)
         {
-            DoReplacements(ref originalToot);
+            DoReplacements(userConfiguration, ref originalToot);
             int maxLength = _config.App.TwitterCharacterLimit;
             bool addSuffix = true;
 
-            string suffix = _userConfiguration.AppSuffix.Content ?? string.Empty;
+            string suffix = userConfiguration.AppSuffix.Content ?? string.Empty;
 
             bool needsSplit = originalToot.Length > maxLength;
-            if (!needsSplit && originalToot.Length + suffix.Length > maxLength && _userConfiguration.AppSuffix.HideOnLongText) addSuffix = false;
+            if (!needsSplit && originalToot.Length + suffix.Length > maxLength && userConfiguration.AppSuffix.HideOnLongText) addSuffix = false;
             mainTweet = originalToot;
             if (addSuffix) mainTweet += suffix;
 
             if (!needsSplit) return null;
 
             var replylist = new List<string>();
-            mainTweet = GetChunk(mainTweet, maxLength, true, out string? replies);
+            mainTweet = GetChunk(userConfiguration, mainTweet, maxLength, true, out string? replies);
             while (replies != null)
             {
-                replylist.Add(GetChunk(replies, maxLength, false, out replies));
+                replylist.Add(GetChunk(userConfiguration, replies, maxLength, false, out replies));
             }
 
             return replylist;
         }
 
-        private void DoReplacements(ref string texttopublish)
+        private void DoReplacements(UserConfiguration userConfiguration, ref string texttopublish)
         {
             texttopublish = $" {texttopublish} ";
-            foreach (var translation in _userConfiguration.Replacements)
+            foreach (var translation in userConfiguration.Replacements)
             {
                 texttopublish = texttopublish.Replace($" {translation.Key} ", $" {translation.Value} ", StringComparison.CurrentCultureIgnoreCase);
             }
             texttopublish = texttopublish.Trim();
         }
 
-        private string GetChunk(string completeText, int maxLength, bool isFirst, out string? remaining)
+        private string GetChunk(UserConfiguration userConfiguration, string completeText, int maxLength, bool isFirst, out string? remaining)
         {
             remaining = null;
             if (completeText.Length <= maxLength) return completeText;
-            if (!isFirst) maxLength -= _userConfiguration.LongContentThreadOptions.Prefix.Length;
+            if (!isFirst) maxLength -= userConfiguration.LongContentThreadOptions.Prefix.Length;
             bool isLast = completeText.Length <= maxLength;
 
-            if (!isLast) maxLength -= _userConfiguration.LongContentThreadOptions.Suffix.Length;
+            if (!isLast) maxLength -= userConfiguration.LongContentThreadOptions.Suffix.Length;
 
             int lastSpace;
             for (lastSpace = maxLength; lastSpace >= _config.App.MinSplitLength; lastSpace--)
@@ -84,8 +80,8 @@ namespace Toot2Toulouse.Backend
             }
 
             string chunk = completeText[..lastSpace].TrimEnd();
-            if (!isFirst) chunk = _userConfiguration.LongContentThreadOptions.Prefix + chunk;
-            if (!isLast) chunk += _userConfiguration.LongContentThreadOptions.Suffix;
+            if (!isFirst) chunk = userConfiguration.LongContentThreadOptions.Prefix + chunk;
+            if (!isLast) chunk += userConfiguration.LongContentThreadOptions.Suffix;
             remaining = completeText[lastSpace..].TrimStart();
             return chunk;
         }

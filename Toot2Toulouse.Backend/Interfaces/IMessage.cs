@@ -4,8 +4,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IMessage
     {
-        List<string>? GetReplies(string originalToot, out string mainTweet);
-        void InitUser(UserConfiguration userConfiguration);
+        List<string>? GetReplies(UserConfiguration userConfiguration, string originalToot, out string mainTweet);
         string StripHtml(string content);
     }
 }
