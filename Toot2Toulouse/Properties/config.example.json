@@ -3,7 +3,7 @@
 {
   "Secrets": {
     "Salt": "Use your own Salt here. Can be any combination of characters",
-    "Twitter": {
+    "Twitter": {  // These values can be found in the twitter api - settings
       "Consumer": {
         "ApiKey": "",
         "ApiKeySecret": ""
@@ -13,43 +13,54 @@
         "AccessTokenSecret": ""
       }
     },
-    "Mastodon": {
+    "Mastodon": { // these values can be found in the mastodon api - settings (and are purely used for sending status messages)
       "ClientId": "",
       "ClientSecret": "",
       "AccessToken": ""
     }
   },
   "App": {
-    "AvailableLanguages": [ "en" ],
-    "DefaultLanguage": "en",
+    // Html is allowd on disclaimer
+    "Disclaimer": "We store your data in our local database and also as a cookie on your browser. We store any setting you enter, store your credentials for Mastodon and Twitter and keep a history of your posted content\n\nYou agree that you will not use this App to post illegal, sexist or discriminating contents. You agree that we do not guarantee any service and also cannot guarantee that the wrong contents are posted. You also agree that we can delete your data and block your account without providing a reason. This service may be shutdown on any time"
+    "Ping": [ "https://p2p/maintenance/ping" ], // Ping these Servers to inform others searching for an instance (enter "null" if you don't want to periodiacly send your stats to any search server) [NOTYETIMPLEMENTED]
+    "GenerateStats": "weekly", // How often to generate stats (like users active, etc.) and send them to the ping [NOTYETIMPLEMENTED]
+    "AvailableLanguages": [ "en" ], // available languages [NOTYETIMPLEMENTED]
+    "DefaultLanguage": "en", // the language files to use
     "Modes": {
-      "Active": "Open",
-      "AutoInvite": 100,
-      "AutoClose": 1000,
-      "AllowedInstances": null,
-      "BlockedInstances": null,
-      "AllowBots": false,
-      "MaxTootsPerDay": 960
+      "Active": "Open", // can be Open|Closed|Invite
+      "AutoInvite": 100, // Switch to "invite" automatically if x users are on this server
+      "AutoClose": 1000, // Switch to "closed" automaticylly if x users are on this server
+      "AllowedInstances": null, // Limit new registrations to the following instances. Seperate by ","
+      "BlockedInstances": null, // Block anyone from registration if the following instance is used. Seperate by ","
+      "AllowBots": false, // Allow bot accounts to use this.
+      "MaxTootsPerDay": 960 // Max. toots per day per user
     },
-    "ServiceAppSuffix": " -- 🐘²🦜",
-    "Instance": "mastodon.social",
+    "ServiceAppSuffix": " -- 🐘²🦜", // When sending a service message to mastodon user this will added at the end
+    "Instance": "mastodon.social", // Instance your service app is installed
     "ClientName": "toot2toulouse on [mydomain]",
     "Accountname": "handle@instance", // Account which sends status update to user
-    "Url": "https://example.com",
+    "Url": "https://example.com", // your URL
     "Intervals": {
-      "Sending": "0:5:00",
-      "FollowerCheckApp": "1:0:0",
-      "FollowerCheckUser": "7.0:0:0",
-      "MinDelay": "0:1:0",
-      "MaxDelay": "1:0:0"
+      "Sending": "0:5:00", // How often will this app look for new toots
+      "FollowerCheckApp": "1:0:0", // [NOTYETIMPLEMENTED]
+      "FollowerCheckUser": "7.0:0:0", // [NOTYETIMPLEMENTED]
+      "MinDelay": "0:1:0", // Minimum delay for each toot before it is sent to twitter
+      "MaxDelay": "1:0:0" // maximum delay for each toot before it is sent to twitter
     },
-    "MaxImageSize": 5,
-    "MaxGifSize": 15,
-    "MaxVideoSize": 512,
+    "MaxImageSize": 5, // max size in MB never go ABOVE the default values as Twitter will not allow it
+    "MaxGifSize": 15, // max size in MB never go ABOVE the default values as Twitter will not allow it
+    "MaxVideoSize": 512, // max size in MB never go ABOVE the default values as Twitter will not allow it
     "TwitterCharacterLimit": 280,
-    "MinSplitLength": 260
+    "MinSplitLength": 260, // After how many characters should the algoritm give up to find a space to split the contents ans just split inside a word,
+    "DonateTarget": "App", // Changes what the donations are for (and displayed for). Can be "App" = Donations for the app, or "Server" = For the server (aka you). Change the urls accordingly if you switch to server (which is absolutely fine BTW) [NOTYETIMPLEMENTED]
+    "Donations": [ //  [NOTYETIMPLEMENTED]
+      {
+        "Name": "GitHub",
+        "Target": "https://github.com/sponsors/Guacam-Ole"
+      }
+    ]
   },
-  "Defaults": {
+  "Defaults": {  // Default user settings that are applied after registration. (User can change those)
     "AppSuffix": {
       "Content": " 🐘²🦜",
       "HideIfBreaks": true,
@@ -57,13 +68,6 @@
       "OnlyFirstInThread": false
     },
     "Followers": {
-      "Search": [
-        "PersonalTranslation",
-        "TwitterContactName",
-        "TwitterContactDescription",
-        "GlobalTranslation",
-        "Text"
-      ],
       "FollowerText": {
         "Prefix": "🐘",
         "HideInstance": true
@@ -74,7 +78,7 @@
       "Prefix": "...",
       "Suffix": "..."
     },
-    "Replacements": {
+    "Replacements": {   
       "Toot": "Tweet",
       "Boost": "Retweet",
       "Tröt": "Tweet"

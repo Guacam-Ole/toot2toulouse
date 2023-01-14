@@ -19,7 +19,7 @@ namespace Toot2Toulouse.Backend
         private readonly TootConfiguration _config;
         private readonly ILogger<Toulouse> _logger;
 
-        public Toulouse(ILogger<Toulouse> logger, ConfigReader configReader, ITwitter twitter, IMastodon mastodon, IDatabase database)
+        public Toulouse(ILogger<Toulouse> logger, ConfigReader configReader, ITwitter twitter, IMastodon mastodon, IDatabase database, ICookies cookies)
         {
             _twitter = twitter;
             _mastodon = mastodon;
@@ -28,11 +28,22 @@ namespace Toot2Toulouse.Backend
             _logger = logger;
 
             // Quick and dirty until storage methods implemented:
-            var userCredentials = configReader.ReadJsonFile<TwitterCredentials>("developmentUserCredentials.json");
-            var userClient = new TwitterClient(userCredentials);
-            _twitter.InitUserAsync(userClient, _config.Defaults);
+            //var userCredentials = configReader.ReadJsonFile<TwitterCredentials>("developmentUserCredentials.json");
+            //var userClient = new TwitterClient(userCredentials);
+
+            //var id = cookies.UserIdGetCookie();
+            //var hash=cookies.UserHashGetCookie();
+
+            //var usr=_database.GetUserByIdAndHash(id, hash);
+
+            //_twitter.InitUserAsync(usr);
         }
 
+
+        public async Task InitUserAsync(UserData userdata)
+        {
+            await _twitter.InitUserAsync(userdata);
+        }
         public async Task TweetServicePostsAsync()
         {
             await TweetServicePostsContaining("[VIDEO]", "[YT]");
@@ -105,36 +116,6 @@ namespace Toot2Toulouse.Backend
             var displaySettings = new List<DisplaySettingsItem>();
             GetSettingsForDisplayRecursive(_config.App, string.Empty, displaySettings);
             return displaySettings.OrderBy(q => q.Category).ThenBy(q => q.DisplayName).ToList();
-        }
-
-        public string GetHashString(string inputString)
-        {
-            using HashAlgorithm algorithm = SHA256.Create();
-            var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
-
-            var sb = new StringBuilder();
-            foreach (byte b in hash)
-            {
-                sb.Append(b.ToString("X2"));
-            }
-
-            return sb.ToString();
-        }
-
-        public void AddHashToUser(User user)
-        {
-            user.Hash = CalculateHashForUser(user);
-        }
-
-        public User? GetUserByHash(Guid userId, string hash)
-        {
-            return _database.GetUserByIdAndHash(userId, hash);
-        }
-
-        private string CalculateHashForUser(User user)
-        {
-            string valueToHash = $"{user.Id}{user.Mastodon.Id}{user.Twitter.Id}{_config.Secrets.Salt}";
-            return GetHashString(valueToHash);
         }
     }
 }

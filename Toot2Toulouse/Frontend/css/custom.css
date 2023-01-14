@@ -9,3 +9,12 @@ cursor:  not-allowed;
 th.right, td.right {
     text-align: right;
 }
+
+.error {
+    background: darkred;
+    color: white;
+}
+
+#mastodoncode, #twitter, #error {
+    display: none;
+}

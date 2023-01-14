@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 using Toot2Toulouse.Backend.Configuration;
+using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
 using Tweetinvi.Models;
@@ -40,7 +41,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task<bool> FinishAuthenticationAsync(string query);
 
-        Task InitUserAsync(TwitterClient userClient, UserConfiguration userConfiguration);
+        Task InitUserAsync(UserData userData);
 
         Task PublishAsync(Mastonet.Entities.Status toot);
     }

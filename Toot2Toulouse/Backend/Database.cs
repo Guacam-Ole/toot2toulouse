@@ -1,8 +1,11 @@
 ﻿using LiteDB;
 
+using System.Security.Cryptography;
+using System.Text;
+
+using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
-
 
 namespace Toot2Toulouse.Backend
 {
@@ -10,11 +13,13 @@ namespace Toot2Toulouse.Backend
     {
         private readonly ILogger<Database> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly TootConfiguration _config;
 
-        public Database(ILogger<Database> logger, IWebHostEnvironment webHostEnvironment)
+        public Database(ILogger<Database> logger, IWebHostEnvironment webHostEnvironment, ConfigReader configReader)
         {
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
+            _config = configReader.Configuration;
         }
 
         private string GetDatabaseFile()
@@ -22,32 +27,89 @@ namespace Toot2Toulouse.Backend
             return Path.Combine(_webHostEnvironment.ContentRootPath, "Data", "t2t.db");
         }
 
-        public User? GetUserById(Guid id)
+        public UserData? GetUserById(Guid id)
         {
-            using var db = new LiteDatabase(GetDatabaseFile());
-            var userCollection = db.GetCollection<User>(nameof(User));
-            return userCollection.FindById(id);
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                return userCollection.FindById(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed retrieving user {id}", id);
+                return null;
+            }
         }
 
-        public User? GetUserByIdAndHash(Guid id, string hash)
+        private string GetHashString(string inputString)
         {
-            var user=GetUserById(id);
-            if (user == null || user.Hash!=hash) return null;
+            using HashAlgorithm algorithm = SHA256.Create();
+            var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
+
+            var sb = new StringBuilder();
+            foreach (byte b in hash)
+            {
+                sb.Append(b.ToString("X2"));
+            }
+
+            return sb.ToString();
+        }
+
+        public string CalculateHashForUser(UserData user)
+        {
+            string valueToHash = $"{user.Id}{user.Mastodon.Id}{_config.Secrets.Salt}";
+            return GetHashString(valueToHash);
+        }
+
+        public UserData? GetUserByIdAndHash(Guid id, string hash)
+        {
+            var user = GetUserById(id);
+            if (user == null || CalculateHashForUser(user) != hash)
+            {
+                _logger.LogDebug("Retrieving user {id} failed. User missing or wrong hash", id);
+                return null;
+            }
+
+            _logger.LogDebug("Retrieved user {user}", user);
             return user;
         }
 
-        public void UpsertUser(User user)
+        public void UpsertUser(UserData user, bool replaceExistingMastodonUser = false)
         {
-            using var db = new LiteDatabase(GetDatabaseFile());
-            var userCollection = db.GetCollection<User>(nameof(User));
-            userCollection.Upsert(user);
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+
+                if (replaceExistingMastodonUser)
+                {
+                    var existingEntry = userCollection.Query().Where(q => q.Mastodon.Id == user.Mastodon.Id).FirstOrDefault();
+                    if (existingEntry != null) user.Id = existingEntry.Id;
+                }
+
+                userCollection.Upsert(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed upserting user {user}", user);
+                throw;
+            }
         }
 
         public void RemoveUser(Guid id)
         {
-            using var db = new LiteDatabase(GetDatabaseFile());
-            var userCollection = db.GetCollection<User>(nameof(User));
-            userCollection.Delete(id);
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                userCollection.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed removing user {id}", id);
+                throw;
+            }
         }
     }
 }

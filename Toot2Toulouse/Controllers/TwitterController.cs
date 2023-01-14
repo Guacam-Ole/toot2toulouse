@@ -14,13 +14,13 @@ namespace Toot2Toulouse.Controllers
     public class TwitterController : ControllerBase
     {
         private readonly ILogger<TwitterController> _logger;
-        private readonly TootConfiguration _configuration;
+        private readonly TootConfiguration _config;
         private readonly ITwitter _tweet;
 
         public TwitterController(ILogger<TwitterController> logger, ConfigReader configReader, ITwitter tweet)
         {
             _logger = logger;
-            _configuration = configReader.Configuration;
+            _config = configReader.Configuration;
             _tweet = tweet;
         }
 
@@ -37,10 +37,12 @@ namespace Toot2Toulouse.Controllers
 
         [Route("code")]
         [HttpGet]
-        public async Task AuthFinish()
+        public async Task<ActionResult> AuthFinish()
         {
-            if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return;
-            await _tweet.FinishAuthenticationAsync(Request.QueryString.Value);
+            if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return Content("query missing");
+            var success=await _tweet.FinishAuthenticationAsync(Request.QueryString.Value);
+            if (!success) return Content("twitter auth failed");
+            return new RedirectResult($"../Frontend/regfinished.{_config.App.DefaultLanguage}.html");
         }
     }
 }

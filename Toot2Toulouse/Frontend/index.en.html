@@ -14,7 +14,7 @@
     <script src="js/app.js"></script>
 </head>
 
-<body>
+<body onload="  fillServerdata();">
     <div class="container">
         <section class="header">
             <h2 class="title">🐘²🦜 Toot2Toulouse: Welcome</h2>
@@ -63,15 +63,13 @@
         </div>
     </div>
 
-    <div class="section" id="about">
+    <div class="section">
         <div class="container">
-            <h3 class="section-heading">The boring stuff</h3>
-            <p class="section-description">If you want to use t2t you have to agree to the following:</p>
-            <p class="section-description">We are not responsible to make sure your toots end up in Twitter. We are also not responsible if the WRONG toots end up in twitter</p>
-            <p class="section-description">You also agree to NOT use this tool to tweet any illegal, rascist or sexist bullshit </p>
-            <p class="section-description">We can block your account at any time if you violate this or because of technical difficulties and we cannot agree that the service is always working properly </p>
-            <button>Agree with the above and login/register</button>
+            <h3 class="section-heading">Let's go</h3>
+            <input class="button button-primary" id="login" value="Login" />
+            <input class="button" id="register" value="Register" />
         </div>
     </div>
+   
 </body>
 </html>

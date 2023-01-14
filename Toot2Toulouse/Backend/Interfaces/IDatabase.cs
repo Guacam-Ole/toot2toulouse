@@ -4,9 +4,10 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IDatabase
     {
-         User? GetUserById (Guid id);
-         User? GetUserByIdAndHash (Guid id, string hash);
-         void UpsertUser(User user);
+        UserData? GetUserById(Guid id);
+        UserData? GetUserByIdAndHash(Guid id, string hash);
+        void UpsertUser(UserData user, bool replaceExistingMastodonUser = false);
         void RemoveUser(Guid id);
+        string CalculateHashForUser(UserData user);
     }
 }

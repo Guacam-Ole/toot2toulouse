@@ -12,8 +12,22 @@ namespace Toot2Toulouse.Backend.Configuration
             MastodonAuthError,
             TwitterAuthError,
             UpAndRunning,
-            BackAgain
+            BackAgain,
+            RegistrationFinished
         }
+
+        public enum InterValNames
+        {
+            never,
+            daily,
+            weekly,
+            monthly
+        }
+
+        public string Disclaimer { get; set; }  
+
+        public string[] Ping { get; set; }
+        public InterValNames GenerateStats { get; set; }
 
         [OverviewCategory("General Information")]
         public string Instance { get; set; }

@@ -16,7 +16,7 @@ namespace Toot2Toulouse.Backend.Configuration
 
     public class UserConfigurationFollowers
     {
-        public List<ITwitter.Followersearch> Search { get; set; }
+        //public List<ITwitter.Followersearch> Search { get; set; }
         public UserConfigurationFollowersText FollowerText { get; set; }
 
     }

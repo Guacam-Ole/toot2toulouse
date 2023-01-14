@@ -13,23 +13,27 @@ namespace Toot2Toulouse.Controllers
     {
         private readonly IToulouse _app;
         private readonly IMastodon _mastodon;
+        private readonly IUser _user;
+        private readonly ICookies _cookies;
         private TootConfiguration _config;
 
-        public AppController(ILogger<TwitterController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon)
+        public AppController(ILogger<TwitterController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon, IUser user, ICookies cookies)
         {
             _config = configReader.Configuration;
             _app = app;
             _mastodon = mastodon;
+            _user = user;
+            _cookies = cookies;
         }
 
 
-        [Route("test")]
-        public async Task<ActionResult> TestToot()
-        {
-            await _mastodon.SendAllStatusMessagesToAsync("@stammtischphilosoph@chaos.social");
-            //await _app.ServiceToot("Das ist ein private test an @stammtischphilosoph@chaos.social. How awesome is that?🎉🥂💀⚽", Mastonet.Visibility.Direct);
-            return null; // new JsonResult();
-        }
+        //[Route("test")]
+        //public async Task<ActionResult> TestToot()
+        //{
+        //    await _mastodon.SendAllStatusMessagesToAsync("@stammtischphilosoph@chaos.social");
+        //    //await _app.ServiceToot("Das ist ein private test an @stammtischphilosoph@chaos.social. How awesome is that?🎉🥂💀⚽", Mastonet.Visibility.Direct);
+        //    return null; // new JsonResult();
+        //}
 
         //[HttpGet,Route("create")]
         //public async Task<ActionResult> Create()
@@ -52,10 +56,37 @@ namespace Toot2Toulouse.Controllers
             return new RedirectResult($"./Frontend/index.{_config.App.DefaultLanguage}.html");
         }
 
+        [Route("register")]
+        public ActionResult Register()
+        {
+            if (_config.App.Modes.Active    == TootConfigurationAppModes.ValidModes.Closed) return new RedirectResult($"../Frontend/closed.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"../Frontend/register.{_config.App.DefaultLanguage}.html");
+        }
+
+       
+
         [Route("server")]
         public ActionResult GetServerSettings()
         {
             return new JsonResult(_app.GetServerSettingsForDisplay());
         }
+
+        [Route("export")]
+        public async Task<ActionResult >GetUserExport()
+        {
+            var id = _cookies.UserIdGetCookie();
+            var hash = _cookies.UserHashGetCookie();
+await            _user.Login(id, hash);
+            return new JsonResult(_user.GetUserData());
+        }
+
+        [Route("delete")]
+        public ActionResult Delete()
+        {
+            return null;
+        }
+
+     
+
     }
 }

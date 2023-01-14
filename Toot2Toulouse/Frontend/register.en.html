@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <base href="./Frontend" target="_blank">
+    <title>🐘²🦜 Toot2Toulouse: Register</title>
+    <meta name="author" content="Ole Albers">
+    <link rel="stylesheet" href="./css/raleway.css">
+    <link rel="stylesheet" href="./css/normalize.css">
+    <link rel="stylesheet" href="./css/skeleton.css">
+    <link rel="stylesheet" href="./css/custom.css">
+    <script src="js/jquery-3.6.3.min.js"></script>
+    <script src="js/js.cookie.min.js"></script>
+    <script src="js/app.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <section class="header">
+            <h2 class="title">🐘²🦜 Toot2Toulouse: Register</h2>
+        </section>
+    </div>
+
+    <div class="section" id="prev">
+        <div class="container">
+            <h3 class="section-heading">First things first</h3>
+            <p class="section-description">
+                Before you can use toot2toulouse to crosspost your Mastotodon toots to Twitter you have to register. Not because we love to collect big amounts of data and sell them to Zuckerberg but because we need this to be able to communicate with Mastodon and Twitter.
+                <i>(you can watch/export/delete this data at any time) </i>
+            </p>
+            <p>
+                You will have to authenticate the App to Mastodon as well as to Twitter.
+            </p>
+        </div>
+    </div>
+
+    <div class="section" id="about">
+        <div class="container">
+            <h3 class="section-heading">The boring stuff</h3>
+            <p class="section-description">But before we can do that: If you want to use t2t you have to agree to the following:</p>
+            <p class="section-description" id="#disclaimer">[DISCLAIMER]</p>
+        </div>
+    </div>
+
+    <div class="section" id="register">
+        <div class="container">
+            <h3 class="section-heading">Register</h3>
+
+            <form>
+                <div class="row">
+                    <label>
+                        <input type="checkbox" id="agreement" onclick="switchAgreement()">
+                        <span class="label-body">I agree with everything above</span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label for="instance">Your Mastodon instance</label>
+                    <input class="u-full-width" type="text" id="instance" value="mastodon.social">
+                </div>
+
+                <button disabled="disabled" id="start" class="button u-full-width" onclick="authMastodonStart(); return false;">[1/3] Mastodon authentication</button>
+                (you might want to disable any popupblocker first)
+            </form>
+        </div>
+    </div>
+
+    <div class="section" id="mastodoncode">
+        <div class="container">
+            <h3 class="section-heading">Mastodon authentication</h3>
+            <p>You authentication should have opened in a new Window. Please copy the code shown there and continue</p>
+            <form>
+                <div class="row">
+                    <label for="code">Your Mastodon Validation Code</label>
+                    <input class="u-full-width" type="text" id="code" onkeydown="codeEntered();" onfocus="codeEntered();" onchange="codeEntered();" oninput="codeEntered();">
+                </div>
+                <button disabled="disabled" class="button u-full-width" id="finishmastodon" onclick="authMastodonFinish(); return false;">[2/3] Enter Authentication Code</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="section" id="twitter">
+        <div class="container">
+            <h3 class="section-heading">Twitter authentication</h3>
+            <p>Final Step. Also allow this app to post to twitter</p>
+            <form>
+                <a href="../twitter/auth" class="button u-full-width" value="">[3/3] Twitter authentication</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="section error" id="error">
+        <div class="container">
+            <h3 class="section-heading">That didn't work</h3>
+            <p>You did something stupid</p>
+        </div>
+    </div>
+</body>
+</html>

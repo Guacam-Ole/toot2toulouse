@@ -1,4 +1,4 @@
-﻿$(document).ready(function () {
+﻿function fillServerdata() {
     $.getJSON("../app/server", function (data) {
         var lastCategory = undefined;
 
@@ -19,5 +19,48 @@
         table += "</tbody></table>";
 
         $(table).appendTo("#serverlimitstable");
+    }, function (error, whatever) {
+        var e = error;
     });
-});
+    return false;
+}
+
+function switchAgreement() {
+    var accepted = $("#agreement").prop('checked');
+    $("#start").prop("disabled", !accepted);
+}
+
+function authMastodonStart() {
+    var instance = $("#instance").val();
+    $.getJSON("../mastodon/auth?instance=" + instance, function (data) {
+        window.open(data);
+    });
+
+    $("#mastodoncode").show();
+    $("#register").hide();
+}
+
+function codeEntered() {
+    var code = $("#code").val();
+    $("#finishmastodon").prop("disabled", code.length== 0);
+}
+
+function authMastodonFinish() {
+    var instance = $("#instance").val();
+    var code = $("#code").val();
+
+    $.getJSON("../mastodon/code?instance=" + instance + "&code=" + code, function (data) {
+        var success = data.key;
+
+        if (success) {
+            $("#mastodoncode").hide();
+            $("#twitter").show();
+        } else {
+            $($("#error").find("p")).text(data.value);
+            $("#error").show();
+        }
+    });
+}
+
+
+

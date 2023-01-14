@@ -24,15 +24,27 @@ namespace Toot2Toulouse.Controllers
         [HttpGet]
         public async Task<ActionResult> AuthStart(string instance)
         {
-            var redirectUrl=await _mastodon.GetAuthenticationUrl(GetRequestHost(), instance);
-            return new RedirectResult(redirectUrl);
+            string redirectUrl;
+            try
+            {
+                redirectUrl = await _mastodon.GetAuthenticationUrl(GetRequestHost(), instance);
+            }
+            catch (HttpRequestException hex)
+            {
+                return Content($"Sorry. Something went wrong. Most likely your instance wasn't correct: {hex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return Content($"Sorry. Something went terribly wrong: {ex.Message}");
+            }
+            return new JsonResult(redirectUrl);
         }
 
         [Route("code")]
         [HttpGet]
-        public ActionResult AuthFinish(string instance, string code)
+        public async Task<ActionResult> AuthFinish(string instance, string code)
         {
-            return null;
+            return new JsonResult(await _mastodon.UserIsAllowedToRegister(instance, code));
         }
     }
 }

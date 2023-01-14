@@ -14,16 +14,19 @@ namespace Toot2Toulouse.Backend
             _mastodon = mastodon;
         }
 
-        public void Error(string mastodonId, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
+        public void Error(Guid id, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
         {
-            _logger.LogInformation($"Error sent to {mastodonId}. Messageode:{messageCode}. AdditionalInfo:{additionalInfo}");
-            // TODO: Send message to user
+            _mastodon.SendStatusMessageTo(id, "💣 ERROR 💣\n", messageCode);
         }
 
-        public void Warning(string mastodonId, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
+        public void Info(Guid id, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
         {
-            _logger.LogInformation($"Warning sent to {mastodonId}. Messagecode:{messageCode}. AdditionalInfo:{additionalInfo}");
-            // TODO: Send message to user
+            _mastodon.SendStatusMessageTo(id,null, messageCode);
+        }
+
+        public void Warning(Guid id, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
+        {
+            _mastodon.SendStatusMessageTo(id, "⚠️ WARNING ⚠️\n", messageCode);
         }
     }
 }

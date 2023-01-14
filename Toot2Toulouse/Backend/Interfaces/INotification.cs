@@ -4,8 +4,9 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface INotification
     {
-        void Warning(string mastodonId, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null);
+        void Info(Guid userId, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null);
+        void Warning(Guid userId, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null);
 
-        void Error(string mastodonId, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null);
+        void Error(Guid userId, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null);
     }
 }

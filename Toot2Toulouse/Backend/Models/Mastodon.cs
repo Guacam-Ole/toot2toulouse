@@ -9,6 +9,7 @@ namespace Toot2Toulouse.Backend.Models
         public string Secret { get; set; }  
         public string Id { get; set; }
         public string Handle { get; set; }
+        public string DisplayName { get; set; }
         public long LastToot { get; set; }
         public DateTime? LastTootDate { get; set; }
     }
