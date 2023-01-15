@@ -60,7 +60,8 @@
       }
     ]
   },
-  "Defaults": {  // Default user settings that are applied after registration. (User can change those)
+  "Defaults": { // Default user settings that are applied after registration. (User can change those)
+    "Delay":  "0:5:0",
     "AppSuffix": {
       "Content": " 🐘²🦆",
       "HideIfBreaks": true,
@@ -78,7 +79,7 @@
       "Prefix": "...",
       "Suffix": "..."
     },
-    "Replacements": {   
+    "Replacements": {
       "Toot": "Tweet",
       "Boost": "Retweet",
       "Tröt": "Tweet"
