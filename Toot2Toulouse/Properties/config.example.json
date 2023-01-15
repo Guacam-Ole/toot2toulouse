@@ -35,7 +35,7 @@
       "AllowBots": false, // Allow bot accounts to use this.
       "MaxTootsPerDay": 960 // Max. toots per day per user
     },
-    "ServiceAppSuffix": " -- 🐘²🦜", // When sending a service message to mastodon user this will added at the end
+    "ServiceAppSuffix": " -- 🐘²🦆", // When sending a service message to mastodon user this will added at the end
     "Instance": "mastodon.social", // Instance your service app is installed
     "ClientName": "toot2toulouse on [mydomain]",
     "Accountname": "handle@instance", // Account which sends status update to user
@@ -62,7 +62,7 @@
   },
   "Defaults": {  // Default user settings that are applied after registration. (User can change those)
     "AppSuffix": {
-      "Content": " 🐘²🦜",
+      "Content": " 🐘²🦆",
       "HideIfBreaks": true,
       "OnlyLastInThread": true,
       "OnlyFirstInThread": false

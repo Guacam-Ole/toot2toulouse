@@ -41,6 +41,6 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         //Task InitUserAsync(UserData userData);
 
-        Task PublishAsync(UserData userData, Mastonet.Entities.Status toot);
+        Task<List<long>> PublishAsync(UserData userData, Mastonet.Entities.Status toot);
     }
 }

@@ -7,6 +7,9 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 using Toot2Toulouse.Interfaces;
 
+using Tweetinvi.Core.DTO;
+using Tweetinvi.Core.Models;
+
 namespace Toot2Toulouse
 {
     public class MastodonClientAuthentication : IMastodonClientAuthentication
@@ -32,8 +35,13 @@ namespace Toot2Toulouse
             try
             {
                 var authToken = await GetUserAccessTokenByCode(userInstance, verificationCode);
+                var userData = new UserData {
+                    Mastodon = new Backend.Models.Mastodon { Instance = userInstance, Secret = authToken }
+                };
 
-                var userAccount = await _mastodon.GetUserAccountByAccessToken(userInstance, authToken);
+                
+
+                var userAccount = await _mastodon.GetUserAccount(userData);
                 if (userAccount == null)
                     return new KeyValuePair<bool, string>(false, "authorization failed");
 
@@ -52,7 +60,7 @@ namespace Toot2Toulouse
 
                 // TODO: Check maxTootsPerDay
 
-                StoreNewUser(userInstance, authToken, userAccount);
+                StoreNewUser(userData, userAccount);
 
                 return new KeyValuePair<bool, string>(true, "success");
             }
@@ -62,21 +70,15 @@ namespace Toot2Toulouse
             }
         }
 
-        private void StoreNewUser(string instance, string accessToken, Account userAccount)
+        private void StoreNewUser(UserData user, Account userAccount)
         {
-            var user = new UserData
-            {
-                Config = _configuration.Defaults,
-                Id = Guid.NewGuid(),
-                Mastodon = new Backend.Models.Mastodon
-                {
-                    Id = userAccount.Id,
-                    DisplayName = userAccount.DisplayName,
-                    Handle = userAccount.AccountName,
-                    Instance = instance,
-                    Secret = accessToken
-                }
-            };
+            user.Config = _configuration.Defaults;
+            user.Mastodon.Id= userAccount.Id;
+            user.Mastodon.DisplayName = userAccount.DisplayName;
+            user.Mastodon.Handle = userAccount.AccountName;
+            user.Mastodon.LastTootDate=userAccount.LastStatusAt;
+           
+
             _database.UpsertUser(user, true);
             string hash = _database.CalculateHashForUser(user);
 

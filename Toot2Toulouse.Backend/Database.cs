@@ -20,17 +20,16 @@ namespace Toot2Toulouse.Backend
         public Database(ILogger<Database> logger, ConfigReader configReader, string path)
         {
             _logger = logger;
-            //_webHostEnvironment = webHostEnvironment;
             _config = configReader.Configuration;
             _path = path;
         }
+
 
      
 
         private string GetDatabaseFile()
         {
             return Path.Combine(_path, "t2t.db");
-            //return Path.Combine(_webHostEnvironment.ContentRootPath, "Data", "t2t.db");
         }
 
         public UserData? GetUserById(Guid id)
@@ -114,6 +113,21 @@ namespace Toot2Toulouse.Backend
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed removing user {id}", id);
+                throw;
+            }
+        }
+
+        public List<UserData> GetAllValidUsers()
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                return userCollection.Find(q=>q.Mastodon.Secret!=null && q.Twitter.AccessSecret!=null).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed retrieving users");
                 throw;
             }
         }

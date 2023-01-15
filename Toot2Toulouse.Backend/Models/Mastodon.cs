@@ -1,4 +1,6 @@
-﻿using Toot2Toulouse.Backend.Configuration;
+﻿using System.Data;
+
+using Toot2Toulouse.Backend.Configuration;
 
 namespace Toot2Toulouse.Backend.Models
 {
@@ -10,7 +12,7 @@ namespace Toot2Toulouse.Backend.Models
         public string Id { get; set; }
         public string Handle { get; set; }
         public string DisplayName { get; set; }
-        public long LastToot { get; set; }
+        public string LastToot { get; set; }
         public DateTime? LastTootDate { get; set; }
     }
 }

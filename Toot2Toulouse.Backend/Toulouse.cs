@@ -1,15 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
-using Toot2Toulouse.Backend.Models;
-
-using Tweetinvi;
-using Tweetinvi.Models;
 
 namespace Toot2Toulouse.Backend
 {
@@ -29,30 +23,6 @@ namespace Toot2Toulouse.Backend
             _config = configReader.Configuration;
             _logger = logger;
         }
-
-
-    
-        //public async Task TweetServicePostsAsync()
-        //{
-        //    await TweetServicePostsContaining("[VIDEO]", "[YT]");
-        //}
-
-        //public async Task TweetServicePostsContaining(params string[] content)
-        //{
-        //    foreach (var item in content)
-        //    {
-        //        await TweetServicePostContaining(item);
-        //    }
-        //}
-
-        //public async Task TweetServicePostContaining(string content)
-        //{
-        //    var toots = await _mastodon.GetServicePostsContainingAsync(content);
-        //    if (toots != null && toots.Count() > 0)
-        //    {
-        //        foreach (var toot in toots) await _twitter.PublishAsync(toot);
-        //    }
-        //}
 
         private bool IsSimpleType(Type type)
         {
@@ -103,6 +73,26 @@ namespace Toot2Toulouse.Backend
             var displaySettings = new List<DisplaySettingsItem>();
             GetSettingsForDisplayRecursive(_config.App, string.Empty, displaySettings);
             return displaySettings.OrderBy(q => q.Category).ThenBy(q => q.DisplayName).ToList();
+        }
+
+        public async Task SendTootsForAllUsers()
+        {
+            var users=_database.GetAllValidUsers().ToList();
+            _logger.LogInformation("Sending toots for {count} users", users.Count());
+            foreach (var user in users) {
+                var notTooted = await _mastodon.GetNonPostedToots(user.Id);
+                foreach  (var toot in notTooted)
+                {
+                    if (toot.InReplyToId != null) continue; // TODO: This does fake the counts
+                    // TODO: DELAY
+                    var twitterIds=  await _twitter.PublishAsync(user, toot);
+                    user.Mastodon.LastToot = toot.Id;
+                    user.Crossposts.Add(new Models.Crosspost { TootId = toot.Id, TwitterIds = twitterIds });
+                    _database.UpsertUser(user);
+                }
+
+                _logger.LogDebug("Tweeted {count} toots to twitter for {user}", notTooted.Count,user.Mastodon.DisplayName);
+            }
         }
     }
 }

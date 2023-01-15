@@ -8,6 +8,7 @@ namespace Toot2Toulouse.Backend.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         public Twitter Twitter { get; set; }
         public Mastodon Mastodon { get; set; }
+        public List<Crosspost> Crossposts { get; set; }  =new List<Crosspost>();
 
         public override string ToString()
         {

@@ -2,8 +2,10 @@ using Autofac.Core;
 
 using Microsoft.Extensions.FileProviders;
 
+using Toot2Toulouse;
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Interfaces;
+using Toot2Toulouse.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +30,10 @@ builder.Services.AddScoped<INotification, Notification>();
 builder.Services.AddScoped<IMessage, Message>();
 builder.Services.AddScoped<IDatabase, Database>(db => new Database(db.GetService<ILogger<Database>>(), db.GetService<ConfigReader>(), Path.Combine(builder.Environment.ContentRootPath, "Data")));
 builder.Services.AddScoped<IUser, User>();
+
 builder.Services.AddScoped<ICookies, Cookies>();
+builder.Services.AddScoped<IMastodonClientAuthentication, MastodonClientAuthentication>();
+builder.Services.AddScoped<ITwitterClientAuthentication, TwitterClientAuthentication>();
 
 
 builder.Host.ConfigureLogging(logging =>

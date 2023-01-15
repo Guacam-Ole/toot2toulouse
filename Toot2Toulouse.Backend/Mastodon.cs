@@ -14,15 +14,15 @@ namespace Toot2Toulouse.Backend
     public class Mastodon : IMastodon
     {
         private readonly ILogger<Mastodon> _logger;
-        //private readonly IWebHostEnvironment _webHostEnvironment;
+
         private readonly IDatabase _database;
+
         private readonly TootConfiguration _configuration;
         private readonly Dictionary<MessageCodes, string> _messages;
 
-        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration,  IDatabase database)
+        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration, IDatabase database)
         {
             _logger = logger;
-            //_webHostEnvironment = webHostEnvironment;
             _database = database;
             _configuration = configuration.Configuration;
             _messages = configuration.GetMessagesForLanguage(_configuration.App.DefaultLanguage);   // TODO: Allow per-user Language setting
@@ -31,48 +31,58 @@ namespace Toot2Toulouse.Backend
         public async Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode)
         {
             var user = _database.GetUserById(id);
-            string recipient = "@"+ user.Mastodon.Handle + "@" + user.Mastodon.Instance;
+            string recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
             await ServiceToot($"{recipient}\n{prefix}{_messages[messageCode]}{_configuration.App.ServiceAppSuffix}", Visibility.Direct);
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
         }
 
 
-        //public async Task<Account?> ConnectUserAccountByAuthToken(string instance, string accessToken)
-        //{
-        //    try
-        //    {
-        //        return await GetUserAccountByAccessToken(instance, accessToken);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogDebug(ex, "Error trying to connect by code to '{instance}'", instance);
-        //        throw;
-        //    }
-        //}
-
-        public async Task<Account?> GetUserAccountByAccessToken(string instance, string accessToken)
+        private MastodonClient GetUserClientByAccessToken(string instance, string accessToken)
         {
-            try
-            {
-                var serviceClient = new MastodonClient(instance, accessToken);
-                if (serviceClient == null) return null;
-
-                return await serviceClient.GetCurrentUser();
-            }
-            catch (ServerErrorException mastoEx)
-            {
-                _logger.LogWarning(mastoEx, "Mastodon Auth error on '{instance}'", instance);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unexpected Mastodon error on '{instance}'", instance);
-                return null;
-            }
+            return new MastodonClient(instance, accessToken);
         }
 
+        public MastodonClient GetUserClient(UserData userData)
+        {
+            return GetUserClientByAccessToken(userData.Mastodon.Instance, userData.Mastodon.Secret);
+        }
 
+        public async Task<Account?> GetUserAccount(UserData userData)
+        {
+            var userClient = GetUserClient(userData);
+            return await userClient.GetCurrentUser();
+        }
 
+        public async Task<Account?> GetUserAccount(MastodonClient mastodonClient)
+        {
+            return await mastodonClient.GetCurrentUser();
+        }
+
+        public async Task<Account?> GetUserAccount(string instance, string accessToken)
+        {
+            return await GetUserAccount(new UserData { Mastodon = new Models.Mastodon { Instance = instance, Secret = accessToken } });
+        }
+
+        private async Task AssignLastTweetedIfMissing(Guid id)
+        {
+            var user = _database.GetUserById(id);
+            if (user.Mastodon.LastToot != null) return;
+
+            var client = GetUserClient(user);
+
+            var lastStatuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1 }, false, true, false, true);
+            var lastTweeted = lastStatuses.OrderBy(q => q.CreatedAt).FirstOrDefault();
+            user.Mastodon.LastToot = lastTweeted.Id;
+            _database.UpsertUser(user);
+        }
+
+        public async Task<List<Status>> GetNonPostedToots(Guid id)
+        {
+            await AssignLastTweetedIfMissing(id);
+            var user = _database.GetUserById(id);
+            var client = GetUserClient(user);
+            return await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId=user.Mastodon.LastToot }, false, true, false, true);
+        }
 
 
 
@@ -114,7 +124,5 @@ namespace Toot2Toulouse.Backend
             _logger.LogDebug("Found {matchtes} matches when searching for '{searchString}' in service User", matches.Count(), searchString);
             return matches;
         }
-
-    
     }
 }

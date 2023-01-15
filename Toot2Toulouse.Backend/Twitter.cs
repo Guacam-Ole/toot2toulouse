@@ -46,14 +46,15 @@ namespace Toot2Toulouse.Backend
             return !string.IsNullOrWhiteSpace(toot.Content);
         }
 
-        public async Task PublishAsync(UserData userData, Status toot)
+        public async Task<List<long>> PublishAsync(UserData userData, Status toot)
         {
-            if (!ShouldITweetThis(toot)) return;
-            await PublishFromToot(userData, toot);
+            if (!ShouldITweetThis(toot)) return new List<long>();
+            return await PublishFromToot(userData, toot);
         }
 
-        private async Task PublishFromToot(UserData userData, Status toot)
+        private async Task<List<long>> PublishFromToot(UserData userData, Status toot)
         {
+            var tweetIds=new    List<long>();
             try
             {
                 bool isSensitive = toot.Sensitive ?? false;
@@ -76,7 +77,9 @@ namespace Toot2Toulouse.Backend
                             break;
 
                         case ITwitter.LongContent.Cut:
-                            await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                            var cuttweet= await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                            tweetIds.Add(cuttweet.Id);
+
                             _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser, content.Length, mainTweet.Length);
                             break;
 
@@ -85,9 +88,11 @@ namespace Toot2Toulouse.Backend
 
                             if (tweet.Id != 0)
                             {
+                                tweetIds.Add(tweet.Id);
                                 foreach (var reply in replies)
                                 {
                                     tweet = await TweetAsync(userData, reply, isSensitive, tweet.Id);
+                                    tweetIds.Add(tweet.Id);
                                 }
                             }
                             _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser, content.Length, replies.Count);
@@ -99,9 +104,11 @@ namespace Toot2Toulouse.Backend
                 }
                 else
                 {
-                    await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                    var singletweet= await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                    tweetIds.Add(singletweet.Id);
                     _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser, content.Length);
                 }
+                return tweetIds;
             }
             catch (Exception)
             {

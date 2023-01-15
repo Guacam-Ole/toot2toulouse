@@ -1,4 +1,7 @@
-﻿using Mastonet.Entities;
+﻿using Mastonet;
+using Mastonet.Entities;
+
+using Toot2Toulouse.Backend.Models;
 
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
 
@@ -18,6 +21,10 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode);
 
-        Task<Account?> GetUserAccountByAccessToken(string instance, string accessToken);
+        Task<Account?> GetUserAccount(UserData userData);
+        Task<Account?> GetUserAccount(MastodonClient mastodonClient);
+        //Task<Status?> GetLatestToot(Guid id);
+        Task<List<Status>> GetNonPostedToots(Guid id);
+        //MastodonClient GetUserClient(UserData userData);
     }
 }

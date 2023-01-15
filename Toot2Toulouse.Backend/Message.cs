@@ -24,6 +24,8 @@ namespace Toot2Toulouse.Backend
         {
             content = content.Replace("</p>", "\n\n");
             content = content.Replace("<br />", "\n");
+            content = content.Replace("&nbsp;", " ");
+            content = content.Replace("&quot;", "\"");
             return Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
         }
 
@@ -65,7 +67,11 @@ namespace Toot2Toulouse.Backend
         private string GetChunk(UserConfiguration userConfiguration, string completeText, int maxLength, bool isFirst, out string? remaining)
         {
             remaining = null;
-            if (completeText.Length <= maxLength) return completeText;
+            if (completeText.Length <= maxLength)
+            {
+                if (!isFirst && completeText.Length+userConfiguration.LongContentThreadOptions.Prefix.Length<=maxLength  ) return userConfiguration.LongContentThreadOptions.Prefix + completeText;
+                return completeText;
+            }
             if (!isFirst) maxLength -= userConfiguration.LongContentThreadOptions.Prefix.Length;
             bool isLast = completeText.Length <= maxLength;
 

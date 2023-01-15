@@ -7,7 +7,7 @@ namespace Toot2Toulouse.Backend.Interfaces
         //Task TweetServicePostsAsync();   // TODO: Remove when finished
 
         List<DisplaySettingsItem> GetServerSettingsForDisplay();
-
+        Task SendTootsForAllUsers();
 
     }
 }

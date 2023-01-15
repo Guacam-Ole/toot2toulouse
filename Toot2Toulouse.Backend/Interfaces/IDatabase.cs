@@ -9,5 +9,6 @@ namespace Toot2Toulouse.Backend.Interfaces
         void UpsertUser(UserData user, bool replaceExistingMastodonUser = false);
         void RemoveUser(Guid id);
         string CalculateHashForUser(UserData user);
+        List<UserData> GetAllValidUsers();
     }
 }

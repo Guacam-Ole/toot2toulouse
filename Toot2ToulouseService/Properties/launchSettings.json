@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Toot2ToulouseService": {
+      "commandName": "Project",
+      "commandLineArgs": "loop"
+    }
+  }
+}
