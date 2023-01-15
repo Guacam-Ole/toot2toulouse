@@ -15,4 +15,10 @@
     <ProjectReference Include="..\Toot2Toulouse.Backend\Toot2Toulouse.Backend.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Properties\path.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
