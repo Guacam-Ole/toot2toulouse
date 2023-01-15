@@ -18,6 +18,7 @@ Also what limitation you have on Twitter can be a bit random. You will have to c
 ### Web Application:
 Copy the config.example.json to config.json and start by entering the secrets from Twitter and Mastodon:
 ```
+{
 "Secrets": {
 "Salt":"JustASalt",
 "Twitter": {
@@ -53,7 +54,8 @@ At this point the userdata is stored in the database. Crossposting is not done b
 
 ### Service
 The Service can be installed onto any location on your server. But it will need to access the configfile and databasefile from the web application. These paths are the only things to configure on the service:
-```{
+```
+{
   "database": "<path do your database dir>",
   "config": "<path to your config directory>",
   "log": "<path to the logfile>"
@@ -62,10 +64,12 @@ The Service can be installed onto any location on your server. But it will need 
 
 The service can be used in two ways. If you start it without any parameter it only checks for toots to crosspost *once*. This is meant to be used when you want to run it as cronjob (recommened):
 ```.\toot2toulouseservice.exe```
+
 The application should log "Sending toots for xx users" within a few seconds and stop once it is finished.
 
 You can also start it with the loop parameter:
 ```.\toot2toulouseservice.exe loop```
+
 
 Call this if you don't want to use a cronjob. The application will loop infinitely until it is aborted.
 
