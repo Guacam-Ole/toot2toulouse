@@ -4,5 +4,13 @@
       "commandName": "Project",
       "commandLineArgs": "loop"
     }
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "Microsoft.AspNetCore": "Warning",
+      "Toot2Toulouse": "Debug"
+    }
   }
 }
