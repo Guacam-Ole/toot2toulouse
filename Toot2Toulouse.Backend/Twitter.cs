@@ -7,6 +7,7 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
+using Tweetinvi.Logic.QueryParameters;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 
@@ -134,23 +135,35 @@ namespace Toot2Toulouse.Backend
                     case ".jpeg":
                     case ".webp":
                         fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
-                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
-                        mediafile.Name = "Das ist ein tolles bild";
-                        return mediafile;
+                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents );
+                      
+
+                        break;
+                        //return mediafile;
 
                     case ".gif":
                         fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
-                        return await userClient.Upload.UploadTweetImageAsync(fileContents);
+                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
+                        break;
 
                     case ".mp4":
                         fileContents = await DownloadFile(attachment.Url, null, _config.App.MaxVideoSize);
                         mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
-                        mediafile.Name = "Das ist ein tolles video";
-                        return mediafile;
+                        break;
+                        //return mediafile;
 
                     default:
                         throw new NotImplementedException(); // TODO: Own exceptiontype
                 }
+                if (mediafile != null)
+                {
+                    await userClient.Upload.AddMediaMetadataAsync(new MediaMetadata(mediafile)
+                    {
+                        AltText = attachment.Description
+                    });
+                }
+                return mediafile;
+
             }
             catch (Exception ex)
             {
