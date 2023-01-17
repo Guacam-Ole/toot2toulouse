@@ -9,11 +9,54 @@ using System.Text.Json.Nodes;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Interfaces;
+
+using Tweetinvi.Streams;
+
 namespace Toot2ToulouseService
 {
 
+
     public class Program
     {
+        private static IToulouse? _toulouse;
+        private static Publish? _publish;
+        private static Maintenance? _maintenance;
+
+        private static async Task Checkparameters(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                await _publish.PublishToots(false);
+            } else
+            {
+                switch (args[0])
+                {
+                    case "loop":
+                        await _publish.PublishToots(true);
+                        break;
+                    case "upgrade":
+                        if (args.Length>1)
+                        {
+                            _maintenance.Upgrade(new Version(args[1]));
+                        } else
+                        {
+                            _maintenance.Upgrade(null);
+                        }
+                        break;
+                    case "search":
+                        if (args.Length<3)
+                        {
+                            Console.WriteLine("missing paramters: mastodonhandle, searchstring");
+                            return;
+                        }
+                        await _publish.PublishTootsContaining(args[1], args[2], 100);
+                        break;
+                    default:
+                        Console.WriteLine("Parameter unknown");
+                        break;
+                }
+            }
+        }
 
         static async Task Main(string[] args)
         {
@@ -27,6 +70,8 @@ namespace Toot2ToulouseService
             collection.AddScoped<IMessage, Message>();
             collection.AddScoped<IDatabase, Database>(db => new Database(db.GetService<ILogger<Database>>(), db.GetService<ConfigReader>(), databasePath));
             collection.AddScoped<IUser, User>();
+            collection.AddScoped<Publish>();
+            collection.AddScoped<Maintenance>();
 
             collection.AddLogging(logging =>
             {
@@ -36,20 +81,11 @@ namespace Toot2ToulouseService
                 logging.AddFile(Path.Combine(logPath, "t2t.service.log"), append: true);
             });
 
-            bool loop = args.Length > 0 && args[0] == "loop";
-
-            // ...
-            // Add other services
-            // ...
             var serviceProvider = collection.BuildServiceProvider();
-            var toulouse = serviceProvider.GetService<IToulouse>();
+            _publish= serviceProvider.GetService<Publish>();
+            _maintenance= serviceProvider.GetService<Maintenance>();
 
-            
-            do
-            {
-                await toulouse.SendTootsForAllUsers();
-                if (loop) Thread.Sleep(1000 * 60); // TODO: Config
-            } while (loop);
+            await Checkparameters(args);
 
             serviceProvider.Dispose();
         }
@@ -57,7 +93,7 @@ namespace Toot2ToulouseService
         private static void ReadBasicPaths(out string databasePath, out string configPath, out string logPath)
         {
             //var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            using var r = new StreamReader(Path.Combine(GetPropertiesPath(),  "path.json"));
+            using var r = new StreamReader(Path.Combine(GetPropertiesPath(), "path.json"));
             string json = r.ReadToEnd();
             var pathConfig = JsonConvert.DeserializeObject<dynamic>(json);
             databasePath = pathConfig.database;

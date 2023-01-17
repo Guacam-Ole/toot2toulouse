@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 
 using Toot2Toulouse.Backend.Configuration;
-using Toot2Toulouse.Backend.Interfaces;
 
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
 
@@ -18,15 +17,15 @@ namespace Toot2Toulouse.Backend
         {
             _path = path;
             //   _webHostEnvironment = webHostEnvironment;
-            Configuration = RetApplicationConfig();
+            Configuration = GetApplicationConfig();
+            Configuration.CurrentVersion = GetType().Assembly.GetName().Version;
             if (SecretsAreMissing())
             {
                 throw new Exception("Not all Secrets are configured");
             }
-            
         }
 
-        private TootConfiguration RetApplicationConfig()
+        private TootConfiguration GetApplicationConfig()
         {
             return ReadJsonFile<TootConfiguration>("config.json");
         }
@@ -34,7 +33,7 @@ namespace Toot2Toulouse.Backend
         public T ReadJsonFile<T>(string filename)
         {
             string fullpath = Path.Combine(_path, filename);
-                //_webHostEnvironment.ContentRootPath, "Properties", filename);
+            //_webHostEnvironment.ContentRootPath, "Properties", filename);
             using var r = new StreamReader(fullpath);
             string json = r.ReadToEnd();
             return JsonConvert.DeserializeObject<T>(json);
@@ -49,12 +48,12 @@ namespace Toot2Toulouse.Backend
         {
             bool twitterSecretsMissing = SecretsAreMissing(Configuration.Secrets.Twitter.Consumer.ApiKey, Configuration.Secrets.Twitter.Consumer.ApiKeySecret, Configuration.Secrets.Twitter.Personal.AccessToken, Configuration.Secrets.Twitter.Personal.AccessTokenSecret);
             bool mastodonSecretsMissing = SecretsAreMissing(Configuration.Secrets.Mastodon.AccessToken, Configuration.Secrets.Mastodon.ClientId, Configuration.Secrets.Mastodon.ClientSecret);
-            return twitterSecretsMissing|| mastodonSecretsMissing;
+            return twitterSecretsMissing || mastodonSecretsMissing;
         }
 
-        public Dictionary<MessageCodes,string> GetMessagesForLanguage(string language)
+        public Dictionary<MessageCodes, string> GetMessagesForLanguage(string language)
         {
-            return ReadJsonFile<Dictionary<MessageCodes,string>>($"messages.{language}.json");
+            return ReadJsonFile<Dictionary<MessageCodes, string>>($"messages.{language}.json");
         }
     }
 }

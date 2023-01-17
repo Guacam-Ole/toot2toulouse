@@ -7,6 +7,7 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
+using Tweetinvi.Exceptions;
 using Tweetinvi.Logic.QueryParameters;
 using Tweetinvi.Models;
 using Tweetinvi.Parameters;
@@ -93,6 +94,7 @@ namespace Toot2Toulouse.Backend
                                 foreach (var reply in replies)
                                 {
                                     tweet = await TweetAsync(userData, reply, isSensitive, tweet.Id);
+                                    if (tweet == null);
                                     tweetIds.Add(tweet.Id);
                                 }
                             }
@@ -218,7 +220,7 @@ namespace Toot2Toulouse.Backend
             return memoryStream.ToArray();
         }
 
-        public async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long replyTo)
+        private async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long replyTo)
         {
             return await TweetAsync(userData, new PublishTweetParameters
             {
@@ -228,11 +230,18 @@ namespace Toot2Toulouse.Backend
             });
         }
 
-        public async Task<ITweet> TweetAsync(UserData userData, PublishTweetParameters tweetParameters)
+        private async Task<ITweet> TweetAsync(UserData userData, PublishTweetParameters tweetParameters)
         {
             try
             {
                 return await GetUserClient(userData).Tweets.PublishTweetAsync(tweetParameters);
+            }
+            catch (TwitterException tex) when (tex.StatusCode==403)
+            {
+                _logger.LogWarning(tex, "Tweet-error {text} to {reply} ", tweetParameters.Text, tweetParameters.InReplyToTweet);
+
+                
+                throw;
             }
             catch (Exception ex)
             {

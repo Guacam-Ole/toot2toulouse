@@ -408,3 +408,4 @@ Toot2Toulouse/Properties/config.json
 Toot2Toulouse/Properties/developmentUserCredentials.json
 Toot2Toulouse/Data/
 Toot2ToulouseService/Properties/path.json
+Toot2ToulouseService/cron.bat

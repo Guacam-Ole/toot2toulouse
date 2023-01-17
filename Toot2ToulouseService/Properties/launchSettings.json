@@ -2,15 +2,14 @@
   "profiles": {
     "Toot2ToulouseService": {
       "commandName": "Project",
-      "commandLineArgs": "loop"
-    }
-  },
-
-  "Logging": {
-    "LogLevel": {
-      "Default": "Debug",
-      "Microsoft.AspNetCore": "Warning",
-      "Toot2Toulouse": "Debug"
+      "commandLineArgs": "search guacamole@chaos.social private",
+      "Logging": {
+        "LogLevel": {
+          "Default": "Debug",
+          "Microsoft.AspNetCore": "Warning",
+          "Toot2Toulouse": "Debug"
+        }
+      }
     }
   }
 }

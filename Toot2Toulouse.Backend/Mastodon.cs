@@ -85,6 +85,23 @@ namespace Toot2Toulouse.Backend
         }
 
 
+        public async Task<List<Status>> GetTootsContaining(Guid id, string content, int limit=100) {
+            try
+            {
+                var user = _database.GetUserById(id);
+                var client = GetUserClient(user);
+                var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = limit}, false, true, false, true);
+                var matches = statuses.Where(q => q.Content.Contains(content));
+                if (matches.Any()) return matches.ToList();
+                return new List<Status>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "failed searching for toots");
+                return new List<Status>();
+            }
+        }
+
 
         private MastodonClient GetServiceClient()
         {

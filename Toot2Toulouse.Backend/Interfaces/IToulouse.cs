@@ -8,6 +8,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         List<DisplaySettingsItem> GetServerSettingsForDisplay();
         Task SendTootsForAllUsers();
+        Task GetTootsContaining(string mastodonHandle, string searchstring, int limit);
 
     }
 }

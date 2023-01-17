@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 
+using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -80,6 +81,21 @@ namespace Toot2Toulouse.Backend
             return user;
         }
 
+        public UserData GetUserByUsername(string handle,  string instance)
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                return userCollection.Find(q=>q.Mastodon.Handle==handle && q.Mastodon.Instance==instance).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed retrieving user {handle}@{instance}", handle);
+                return null;
+            }
+        }
+
         public void UpsertUser(UserData user, bool replaceExistingMastodonUser = false)
         {
             try
@@ -128,6 +144,38 @@ namespace Toot2Toulouse.Backend
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed retrieving users");
+                throw;
+            }
+        }
+
+        public Stats GetServerStats()
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var statsCollection = db.GetCollection<Stats>(nameof(Stats));
+             //   statsCollection.DeleteAll();
+                return statsCollection.FindAll().FirstOrDefault() ?? new Stats();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed retrieving stats");
+                throw;
+            }
+        }
+
+        public void UpSertServerStats(Stats stats)
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var statsCollection = db.GetCollection<Stats>(nameof(Stats));
+                statsCollection.DeleteAll();
+                statsCollection.Upsert(stats);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed updating stats");
                 throw;
             }
         }

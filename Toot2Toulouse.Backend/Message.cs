@@ -22,10 +22,12 @@ namespace Toot2Toulouse.Backend
 
         public string StripHtml(string content)
         {
+            
             content = content.Replace("</p>", "\n\n");
             content = content.Replace("<br />", "\n");
-            content = content.Replace("&nbsp;", " ");
-            content = content.Replace("&quot;", "\"");
+            content = System.Net.WebUtility.HtmlDecode(content);
+            //content = content.Replace("&nbsp;", " ");
+            //content = content.Replace("&quot;", "\"");
             return Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
         }
 

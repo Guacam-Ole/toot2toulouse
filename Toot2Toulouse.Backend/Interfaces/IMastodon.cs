@@ -23,8 +23,9 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task<Account?> GetUserAccount(UserData userData);
         Task<Account?> GetUserAccount(MastodonClient mastodonClient);
-        //Task<Status?> GetLatestToot(Guid id);
         Task<List<Status>> GetNonPostedToots(Guid id);
-        //MastodonClient GetUserClient(UserData userData);
+
+        Task<List<Status>> GetTootsContaining(Guid id, string content, int limit=1000);
+
     }
 }

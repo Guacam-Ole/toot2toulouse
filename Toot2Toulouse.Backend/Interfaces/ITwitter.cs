@@ -33,7 +33,7 @@ namespace Toot2Toulouse.Backend.Interfaces
             Backlink
         }
 
-        Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long replyTo);
+        //Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long replyTo);
 
         //Task<string> GetAuthenticationUrlAsync(string baseUrl);
 

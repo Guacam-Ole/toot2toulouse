@@ -13,8 +13,11 @@ namespace Toot2Toulouse.Backend.Configuration
         
         public UserConfigurationAppSuffix AppSuffix { get; set; } // suffix to show on tweets
         public TimeSpan Delay { get; set; }
+        public List<Mastonet.Visibility> VisibilitiesToPost { get; set; } 
     }
 
+
+   
     public class UserConfigurationFollowers
     {
         //public List<ITwitter.Followersearch> Search { get; set; }
