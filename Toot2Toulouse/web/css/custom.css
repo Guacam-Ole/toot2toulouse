@@ -18,3 +18,7 @@ th.right, td.right {
 #mastodoncode, #twitter, #error {
     display: none;
 }
+
+#myconfig input[type=checkbox] {
+    visibility: hidden;
+}

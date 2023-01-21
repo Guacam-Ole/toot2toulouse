@@ -96,19 +96,12 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public void UpsertUser(UserData user, bool replaceExistingMastodonUser = false)
+        public void UpsertUser(UserData user)
         {
             try
             {
                 using var db = new LiteDatabase(GetDatabaseFile());
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
-
-                if (replaceExistingMastodonUser)
-                {
-                    var existingEntry = userCollection.Query().Where(q => q.Mastodon.Id == user.Mastodon.Id).FirstOrDefault();
-                    if (existingEntry != null) user.Id = existingEntry.Id;
-                }
-
                 userCollection.Upsert(user);
             }
             catch (Exception ex)
@@ -178,6 +171,23 @@ namespace Toot2Toulouse.Backend
                 _logger.LogError(ex, "Failed updating stats");
                 throw;
             }
+        }
+
+        public Guid? GetUserIdByMastodonId(string instance,string mastodonId)
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection= db.GetCollection<UserData>(nameof(UserData));
+                var user=userCollection.FindOne(q => q.Mastodon.Id == mastodonId && q.Mastodon.Instance==instance);
+                return user?.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed updating stats");
+                throw;
+            }
+
         }
     }
 }

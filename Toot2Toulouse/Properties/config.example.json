@@ -21,7 +21,7 @@
   },
   "App": {
     // Html is allowd on disclaimer
-    "Disclaimer": "We store your data in our local database and also as a cookie on your browser. We store any setting you enter, store your credentials for Mastodon and Twitter and keep a history of your posted content\n\nYou agree that you will not use this App to post illegal, sexist or discriminating contents. You agree that we do not guarantee any service and also cannot guarantee that the wrong contents are posted. You also agree that we can delete your data and block your account without providing a reason. This service may be shutdown on any time"
+    "Disclaimer": "We store your data in our local database and also as a cookie on your browser. We store any setting you enter, store your credentials for Mastodon and Twitter and keep a history of your posted content\n\nYou agree that you will not use this App to post illegal, sexist or discriminating contents. You agree that we do not guarantee any service and also cannot guarantee that the wrong contents are posted. You also agree that we can delete your data and block your account without providing a reason. This service may be shutdown on any time",
     "Ping": [ "https://p2p/maintenance/ping" ], // Ping these Servers to inform others searching for an instance (enter "null" if you don't want to periodiacly send your stats to any search server) [NOTYETIMPLEMENTED]
     "GenerateStats": "weekly", // How often to generate stats (like users active, etc.) and send them to the ping [NOTYETIMPLEMENTED]
     "AvailableLanguages": [ "en" ], // available languages [NOTYETIMPLEMENTED]
@@ -41,11 +41,11 @@
     "Accountname": "handle@instance", // Account which sends status update to user
     "Url": "https://example.com", // your URL
     "Intervals": {
-      "Sending": "0:5:00", // How often will this app look for new toots
-      "FollowerCheckApp": "1:0:0", // [NOTYETIMPLEMENTED]
-      "FollowerCheckUser": "7.0:0:0", // [NOTYETIMPLEMENTED]
-      "MinDelay": "0:1:0", // Minimum delay for each toot before it is sent to twitter
-      "MaxDelay": "1:0:0" // maximum delay for each toot before it is sent to twitter
+      "Sending": "00:05:00", // How often will this app look for new toots
+      "FollowerCheckApp": "01:00:00", // [NOTYETIMPLEMENTED]
+      "FollowerCheckUser": "7.0:00:00", // [NOTYETIMPLEMENTED]
+      "MinDelay": "00:01:00", // Minimum delay for each toot before it is sent to twitter
+      "MaxDelay": "01:00:00" // maximum delay for each toot before it is sent to twitter
     },
     "MaxImageSize": 5, // max size in MB never go ABOVE the default values as Twitter will not allow it
     "MaxGifSize": 15, // max size in MB never go ABOVE the default values as Twitter will not allow it
@@ -61,8 +61,8 @@
     ]
   },
   "Defaults": { // Default user settings that are applied after registration. (User can change those)
-    "VisibilitiesToPost": [ "Public", "Unlisted" ],
-    "Delay": "0:5:0",
+    "VisibilitiesToPost": [ "Public" ],
+    "Delay": "00:05:00",
     "AppSuffix": {
       "Content": " 🐘🦆",
       "HideIfBreaks": true,

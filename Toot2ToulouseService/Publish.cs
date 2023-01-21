@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Mastonet.Entities;
+
+using Microsoft.Extensions.Logging;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
@@ -28,9 +30,11 @@ namespace Toot2ToulouseService
             } while (loop);
         }
 
-        public async Task PublishTootsContaining(string mastodonHandle, string contents, int searchLimit)
+        public async Task<List<Status>> GetTootsContaining(string mastodonHandle, string contents, int searchLimit)
         {
-            await _toulouse.GetTootsContaining(mastodonHandle, contents, searchLimit);
+            return await _toulouse.GetTootsContaining(mastodonHandle, contents, searchLimit);
         }
+
+     
     }
 }

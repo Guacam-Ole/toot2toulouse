@@ -1,5 +1,9 @@
-﻿function fillServerdata() {
-    $.getJSON("../app/server", function (data) {
+﻿/*const { Callbacks } = require("jquery");*/
+
+var userSettings;
+
+function fillServerdata() {
+    $.getJSON("server", function (data) {
         var lastCategory = undefined;
 
         var table = "<table><tbody>";
@@ -25,6 +29,15 @@
     return false;
 }
 
+function readDisclaimer() {
+    $.getJSON("disclaimer", function (data) {
+        $("#disclaimer").text(data);
+    }, function (error, whatever) {
+        var e = error;
+    });
+    return false;
+}
+
 function switchAgreement() {
     var accepted = $("#agreement").prop('checked');
     $("#start").prop("disabled", !accepted);
@@ -32,7 +45,7 @@ function switchAgreement() {
 
 function authMastodonStart() {
     var instance = $("#instance").val();
-    $.getJSON("../mastodon/auth?instance=" + instance, function (data) {
+    $.getJSON("mastodon/auth?instance=" + instance, function (data) {
         window.open(data);
     });
 
@@ -49,7 +62,7 @@ function authMastodonFinish() {
     var instance = $("#instance").val();
     var code = $("#code").val();
 
-    $.getJSON("../mastodon/code?instance=" + instance + "&code=" + code, function (data) {
+    $.getJSON("mastodon/code?instance=" + instance + "&code=" + code, function (data) {
         var success = data.key;
 
         if (success) {
@@ -60,6 +73,36 @@ function authMastodonFinish() {
             $("#error").show();
         }
     });
+}
+
+function loadUserSettings() {
+    $.getJSON("export", function (data) {
+        if (data.error == "auth") {
+            window.location = "/autherror";
+            return;
+        }
+        userSettings= data;
+        displayUserSettings(data);
+    });
+}
+
+function styletButtonByValue(button, chkBox) {
+    value = chkBox.attr("checked");
+    if (value) {
+        button.attr("class", "button button-primary");
+    } else {
+        button.attr("class", "button");
+    }
+}
+
+function displayUserSettings(xuserSettings) {
+    var isP = userSettings;
+    $("#VisibilitiesTootPublic").attr("checked", userSettings.VisibilitiesToPost.indexOf("Public") > 0);
+
+
+    styletButtonByValue($("#lblVisibilitiesTootPublic"), $("#VisibilitiesTootPublic"));
+    styletButtonByValue($("#lblVisibilitiesTootUnlisted"), $("#VisibilitiesTootUnlisted"));
+    styletButtonByValue($("#lblVisibilitiesTootPrivate"), $("#VisibilitiesTootPrivate"));
 }
 
 

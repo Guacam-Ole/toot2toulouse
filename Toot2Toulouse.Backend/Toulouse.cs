@@ -10,9 +10,6 @@ using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
-using Tweetinvi.Core.Models;
-using Tweetinvi.Models;
-
 namespace Toot2Toulouse.Backend
 {
     public class Toulouse : IToulouse
@@ -83,12 +80,18 @@ namespace Toot2Toulouse.Backend
             return displaySettings.OrderBy(q => q.Category).ThenBy(q => q.DisplayName).ToList();
         }
 
-        public async Task GetTootsContaining(string mastodonHandle, string searchstring, int limit)
+        private UserData GetUserByMastodonHandle(string mastodonHandle)
         {
-            var parts=mastodonHandle.Split('@');
-            var user = _database.GetUserByUsername(parts[0], parts[1]);
+            // TODO: Error handling
+            var parts = mastodonHandle.Split('@');
+            return _database.GetUserByUsername(parts[0], parts[1]);
+        }
+
+        public async Task<List<Status>> GetTootsContaining(string mastodonHandle, string searchstring, int limit)
+        {
+            var user = GetUserByMastodonHandle(mastodonHandle);
             var toots = await _mastodon.GetTootsContaining(user.Id, searchstring, limit);
-            await SendToots(user,toots,false); 
+            return toots;
         }
 
         private async Task SendToots(UserData user, List<Status> toots, bool updateUserData)
@@ -105,15 +108,15 @@ namespace Toot2Toulouse.Backend
                         _logger.LogWarning("already tweeted");
                         continue; // already tweeted
                     }
-                    if (toot.CreatedAt < user.Mastodon.LastTootDate)
+                    if (user.Crossposts.FirstOrDefault(q => q.TootId == toot.Id) != null)
                     {
-                        _logger.LogWarning("toot is older than it should be");
-                        continue; // already tweeted
+                        _logger.LogWarning("already tweeted this");
+                        continue;
                     }
                     if (toot.InReplyToId != null) continue;
-                    if (!user.Config.VisibilitiesToPost.Contains(toot.Visibility)) continue; // wrong visibility
+
                     var twitterIds = await _twitter.PublishAsync(user, toot);
-                    user.Crossposts.Add(new Models.Crosspost { TootId = toot.Id, TwitterIds = twitterIds });
+                    user.Crossposts.Add(new Crosspost { TootId = toot.Id, TwitterIds = twitterIds });
                 }
                 catch (Exception ex)
                 {
@@ -125,18 +128,27 @@ namespace Toot2Toulouse.Backend
             if (updateUserData) _database.UpsertUser(user);
 
             _logger.LogDebug("Sent {count} toots to twitter for {user}", toots.Count, user.Mastodon.DisplayName);
+        }
 
+        public async Task Invite(string mastodonHandle)
+        {
+            var user = GetUserByMastodonHandle(mastodonHandle);
+            if (user == null)
+            {
+                _logger.LogWarning("user not found");
+                return;
+            }
+
+            await _mastodon.SendStatusMessageTo(user.Id, "[INVITE] ", TootConfigurationApp.MessageCodes.Invite);
         }
 
         public async Task SendTootsForAllUsers()
         {
-
             var users = _database.GetAllValidUsers().ToList();
             _logger.LogInformation("Sending toots for {count} users", users.Count());
             int totalTootCount = 0;
             foreach (var user in users)
             {
-        
                 var notTooted = await _mastodon.GetNonPostedToots(user.Id);
                 await SendToots(user, notTooted, true);
             }

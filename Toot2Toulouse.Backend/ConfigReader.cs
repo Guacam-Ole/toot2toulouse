@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-
+﻿
+using System.Text.Json;
 using Toot2Toulouse.Backend.Configuration;
 
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
@@ -36,7 +36,7 @@ namespace Toot2Toulouse.Backend
             //_webHostEnvironment.ContentRootPath, "Properties", filename);
             using var r = new StreamReader(fullpath);
             string json = r.ReadToEnd();
-            return JsonConvert.DeserializeObject<T>(json);
+            return JsonSerializer.Deserialize<T>(json.StripComments());
         }
 
         private static bool SecretsAreMissing(params string[] properties)

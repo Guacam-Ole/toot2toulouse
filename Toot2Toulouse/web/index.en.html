@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <base href="./Frontend" target="_blank">
+    <base href="./web" target="_blank">
     <title>🐘🦆 Toot2Toulouse: Welcome</title>
     <meta name="author" content="Ole Albers">
     <link rel="stylesheet" href="./css/raleway.css">
@@ -26,7 +26,7 @@
             <h3 class="section-heading">What is this all about?</h3>
             <p class="section-description">Toot2Toulouse(t2t) is a crossposter that publishes your toots(Mastodon) as tweets(Twitter). Before you decide if you want to use it let's make sure you know what it does (and what it doesn't). <strong>Please check if this fits your needs before signing up</strong></strong></p>
             <p class="section-description">
-                What it <strong>does:</strong>:
+                <h5> What it <strong>does:</strong>:</h5>
                 <ul>
                     <li>Publish your <b>public</b> toots as tweets in Twitter</li>
                     <li>Add Content-Warning Information on the tweets</li>
@@ -35,8 +35,9 @@
                     <li>Delay tweeting your toots</li>
                 </ul>
             <p class="section-description">
-                What it <strong>doesn't:</strong>
+                <h5>What it <strong>doesn't:</strong></h5>
                 <ul>
+                    <li>remain the "sensitive" flag (e.g. from content warnings)</li>
                     <li>Crosspost into the other direction. So <strong>NO</strong> Twitter -> Mastodon crossposts</li>
                     <li>Allow any other than public posts on Twitter</li>
                     <li>Allow any other media type</li>
@@ -44,10 +45,9 @@
                     <li>Tweet boosts</li>
                 </ul>
             <p class="section-description">
-                What it <strong>can't do</strong> yet: (working on that)
+                <h5>What it <strong>can't do</strong> yet: (working on that)</h5>
                 <ul>
                     <li>Replace mentioned users on Mastodon by the according Twitter-Account</li>
-                    <li>Post ALT-Tags of your media to Twitter</li>
                     <li>Tweet your replies to your <strong>own</strong> toots</li>
                 </ul>
             </p>
@@ -66,8 +66,8 @@
     <div class="section">
         <div class="container">
             <h3 class="section-heading">Let's go</h3>
-            <input class="button button-primary" id="login" value="Login" />
-            <input class="button" id="register" value="Register" />
+            <a class="button button-primary" target="_self" href="/config">Login</a>
+            <a class="button" href="/register" target="_self" >Register</a>
         </div>
     </div>
    

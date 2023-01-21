@@ -44,7 +44,7 @@ namespace Toot2Toulouse.Controllers
             if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return Content("query missing");
             var success=await _twitterClientAuthentication.FinishAuthenticationAsync(Request.QueryString.Value);
             if (!success) return Content("twitter auth failed");
-            return new RedirectResult($"../Frontend/regfinished.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"/regfinished.{_config.App.DefaultLanguage}.html");
         }
     }
 }

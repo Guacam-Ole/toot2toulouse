@@ -5,5 +5,6 @@
   "TwitterAuthError": "Cannot authenticate with your Twitter Account. If you removed your permission please add it again (or wait AUTHDELDAYS days if this was on purpose. We will remove all your data after that time)",
   "UpAndRunning": "Everything is fine again",
   "BackAgain": "Everything is working again",
-  "RegistrationFinished": "Whoop! Whoop! Registration succeeded.\nToot2Toulouse will now start posting your toots to the Birdsite "
+  "RegistrationFinished": "Whoop! Whoop! Registration succeeded.\nToot2Toulouse will now start posting your toots to the Birdsite",
+  "Invite": "This is an invitation to use toot2toulouse. You can now register on [App.Url]. Have fun!"
 }

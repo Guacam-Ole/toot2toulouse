@@ -1,7 +1,6 @@
 ﻿using Mastonet.Entities;
 
-using Newtonsoft.Json;
-
+using System.Text.Json;
 using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Backend
@@ -56,25 +55,27 @@ namespace Toot2Toulouse.Backend
         private void SetSessionValue<T>(string name, T value)
         {
             var context = _httpContextAccessor.HttpContext;
-            context.Session.SetString(name, JsonConvert.SerializeObject(value));
+            context.Session.SetString(name, JsonSerializer.Serialize(value));
         }
 
         private T GetSessionValue<T>(string name)
         {
             var context = _httpContextAccessor.HttpContext;
-            return JsonConvert.DeserializeObject<T>(context.Session.GetString(name));
+            return JsonSerializer.Deserialize<T>(context.Session.GetString(name));
         }
 
         private void SetCookieValue<T>(string name, T value)
         {
             var context = _httpContextAccessor.HttpContext;
-            context.Response.Cookies.Append(name, JsonConvert.SerializeObject(value));
+            context.Response.Cookies.Append(name, JsonSerializer.Serialize(value));
         }
 
         private T GetCookieValue<T>(string name)
         {
             var context = _httpContextAccessor.HttpContext;
-            return JsonConvert.DeserializeObject<T>(context.Request.Cookies[name]);
+            var cookieValue = context.Request.Cookies[name];
+            if (cookieValue ==null) return default(T);
+            return JsonSerializer.Deserialize<T>(cookieValue);
         }
     }
 }

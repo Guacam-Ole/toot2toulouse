@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Serialization;
-
+﻿
 namespace Toot2Toulouse.Backend.Models
 {
     public class Stats

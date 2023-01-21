@@ -32,10 +32,46 @@ namespace Toot2Toulouse.Backend
         {
             var user = _database.GetUserById(id);
             string recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
-            await ServiceToot($"{recipient}\n{prefix}{_messages[messageCode]}{_configuration.App.ServiceAppSuffix}", Visibility.Direct);
+            string message = $"{recipient}\n{prefix}{_messages[messageCode]}{_configuration.App.ServiceAppSuffix}";
+            ReplaceServiceTokens(ref message);
+            await ServiceToot(message, Visibility.Direct);
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
         }
 
+        private void ReplaceServiceTokens(ref string message)
+        {
+            if (message == null) return;
+            var replacements = new Dictionary<string, string>();
+            GetConfigValues(_configuration, string.Empty, replacements);
+            foreach (var replacement in replacements)
+            {
+                message = message.Replace($"[{replacement.Key}]", replacement.Value);
+            }
+        }
+
+        private void GetConfigValues<T>(T root, string prefix, Dictionary<string, string> displayProperties)
+        {
+            if (root == null) return;
+            //     if (prefix.Contains("Secret")) return;
+
+            var properties = root.GetType().GetProperties();
+            foreach (var propertyInfo in properties)
+            {
+                if (propertyInfo.PropertyType.Name.Contains("Secret")) continue;
+                if (!propertyInfo.CanRead) continue;
+                var value = propertyInfo.GetValue(root);
+
+                if (propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType.Namespace.StartsWith("Toot2Toulouse"))
+                {
+                    //string subPrefix = prefix;
+                    //if (!string.IsNullOrEmpty(subPrefix)) subPrefix += ".";
+                    GetConfigValues(value, prefix + propertyInfo.Name + ".", displayProperties);
+                }
+                var stringValue = string.Empty;
+                if (value != null) stringValue = value.ToString();
+                displayProperties.Add(prefix + propertyInfo.Name, stringValue);
+            }
+        }
 
         private MastodonClient GetUserClientByAccessToken(string instance, string accessToken)
         {
@@ -81,19 +117,19 @@ namespace Toot2Toulouse.Backend
             await AssignLastTweetedIfMissing(id);
             var user = _database.GetUserById(id);
             var client = GetUserClient(user);
-            return await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId=user.Mastodon.LastToot }, false, true, false, true);
+            var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
+            return statuses.OrderBy(q => q.CreatedAt).ToList();
         }
 
-
-        public async Task<List<Status>> GetTootsContaining(Guid id, string content, int limit=100) {
+        public async Task<List<Status>> GetTootsContaining(Guid id, string content, int limit = 100)
+        {
             try
             {
                 var user = _database.GetUserById(id);
                 var client = GetUserClient(user);
-                var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = limit}, false, true, false, true);
-                var matches = statuses.Where(q => q.Content.Contains(content));
-                if (matches.Any()) return matches.ToList();
-                return new List<Status>();
+                var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = limit }, false, true, false, true);
+                var matches = statuses.Where(q => q.Content.Contains(content, StringComparison.InvariantCultureIgnoreCase));
+                return matches.OrderBy(q => q.CreatedAt).ToList();
             }
             catch (Exception ex)
             {
@@ -101,7 +137,6 @@ namespace Toot2Toulouse.Backend
                 return new List<Status>();
             }
         }
-
 
         private MastodonClient GetServiceClient()
         {

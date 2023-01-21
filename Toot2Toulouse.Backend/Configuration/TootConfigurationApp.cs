@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Toot2Toulouse.Backend.Configuration
 {
     public class TootConfigurationApp
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum MessageCodes
         {
             MastodonDown,
@@ -13,9 +15,11 @@ namespace Toot2Toulouse.Backend.Configuration
             TwitterAuthError,
             UpAndRunning,
             BackAgain,
-            RegistrationFinished
+            RegistrationFinished,
+            Invite
         }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum InterValNames
         {
             never,
@@ -63,6 +67,7 @@ namespace Toot2Toulouse.Backend.Configuration
 
     public class TootConfigurationAppModes
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum ValidModes
         {
             Open,

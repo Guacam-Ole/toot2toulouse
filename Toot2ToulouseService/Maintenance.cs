@@ -10,12 +10,14 @@ namespace Toot2ToulouseService
     {
         private readonly ILogger<Maintenance> _logger;
         private readonly IDatabase _database;
+        private readonly IToulouse _toulouse;
         private readonly TootConfiguration _config;
 
-        public Maintenance(ILogger<Maintenance> logger,  ConfigReader configReader, IDatabase database)
+        public Maintenance(ILogger<Maintenance> logger,  ConfigReader configReader, IDatabase database, IToulouse toulouse)
         {
             _logger = logger;
             _database = database;
+            _toulouse = toulouse;
             _config = configReader.Configuration;
         }
 
@@ -45,6 +47,11 @@ namespace Toot2ToulouseService
                     }
                     break;
             }
+        }
+
+        public async Task Invite(string mastodonHandle)
+        {
+            await _toulouse.Invite(mastodonHandle);
         }
 
         public void Upgrade(Version? fromVersion)

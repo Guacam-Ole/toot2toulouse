@@ -1,6 +1,9 @@
 ﻿using Mastonet;
 using Mastonet.Entities;
 
+
+using System.Text.Json.Serialization;
+
 using Toot2Toulouse.Backend.Models;
 
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
@@ -9,6 +12,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IMastodon
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum Visibilites
         {
             Public,

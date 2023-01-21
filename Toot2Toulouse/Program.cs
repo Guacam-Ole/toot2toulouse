@@ -1,5 +1,3 @@
-using Autofac.Core;
-
 using Microsoft.Extensions.FileProviders;
 
 using Toot2Toulouse;
@@ -17,12 +15,11 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(10);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-
 });
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
-builder.Services.AddScoped<ConfigReader>(cr=>new ConfigReader(builder.Environment.ContentRootPath+"\\Properties"));
+builder.Services.AddScoped<ConfigReader>(cr => new ConfigReader(builder.Environment.ContentRootPath + "\\Properties"));
 builder.Services.AddScoped<ITwitter, Twitter>();
 builder.Services.AddScoped<IMastodon, Mastodon>();
 builder.Services.AddScoped<IToulouse, Toulouse>();
@@ -34,7 +31,6 @@ builder.Services.AddScoped<IUser, User>();
 builder.Services.AddScoped<ICookies, Cookies>();
 builder.Services.AddScoped<IMastodonClientAuthentication, MastodonClientAuthentication>();
 builder.Services.AddScoped<ITwitterClientAuthentication, TwitterClientAuthentication>();
-
 
 builder.Host.ConfigureLogging(logging =>
 {
@@ -51,11 +47,6 @@ app.UseSession();
 
 app.MapControllers();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-           Path.Combine(builder.Environment.ContentRootPath, "Frontend")),
-    RequestPath = "/Frontend"
-});
+app.UseStaticFiles(new StaticFileOptions { FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "web")), RequestPath = "" });
 
 app.Run();

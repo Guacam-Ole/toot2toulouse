@@ -11,7 +11,6 @@ namespace Toot2Toulouse.Backend
         private readonly ILogger<User> _logger;
         private readonly IDatabase _database;
         private readonly INotification _notification;
-        private UserData? _authenticatedUser;
 
         public User(ILogger<User> logger,  IDatabase database, INotification notification)
         {
@@ -28,10 +27,10 @@ namespace Toot2Toulouse.Backend
         public UserData? ExportUserData(UserData userData)
         {
             if (userData == null) return null;
-            var userExport = _authenticatedUser.Clone();
-            userExport.RemoveSecrets();
-            _logger.LogDebug("Exported userdata for {user}", _authenticatedUser);
-            return userExport;
+            var expoortUserData = userData.Clone();
+            expoortUserData.RemoveSecrets();
+            _logger.LogDebug("Exported userdata for {user}", expoortUserData.Id);
+            return expoortUserData;
         }
     }
 }

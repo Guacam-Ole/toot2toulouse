@@ -7,9 +7,6 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 using Toot2Toulouse.Interfaces;
 
-using Tweetinvi.Core.DTO;
-using Tweetinvi.Core.Models;
-
 namespace Toot2Toulouse
 {
     public class MastodonClientAuthentication : IMastodonClientAuthentication
@@ -29,17 +26,15 @@ namespace Toot2Toulouse
             _mastodon = mastodon;
         }
 
-
         public async Task<KeyValuePair<bool, string>> UserIsAllowedToRegister(string userInstance, string verificationCode)
         {
             try
             {
                 var authToken = await GetUserAccessTokenByCode(userInstance, verificationCode);
-                var userData = new UserData {
+                var userData = new UserData
+                {
                     Mastodon = new Backend.Models.Mastodon { Instance = userInstance, Secret = authToken }
                 };
-
-                
 
                 var userAccount = await _mastodon.GetUserAccount(userData);
                 if (userAccount == null)
@@ -51,9 +46,9 @@ namespace Toot2Toulouse
                     return new KeyValuePair<bool, string>(false, $"Only users from the following instances are allowed currently: {_configuration.App.Modes.AllowedInstances}");
                 if (!string.IsNullOrWhiteSpace(_configuration.App.Modes.BlockedInstances) && _configuration.App.Modes.BlockedInstances.Contains(userInstance, StringComparison.InvariantCultureIgnoreCase))
                     return new KeyValuePair<bool, string>(false, "Your Instance is blocked");
-                if (_configuration.App.Modes.Active== TootConfigurationAppModes.ValidModes.Closed)
+                if (_configuration.App.Modes.Active == TootConfigurationAppModes.ValidModes.Closed)
                     return new KeyValuePair<bool, string>(false, "This server isn't accepting new registrations. (I thought we already told you that?)");
-                if (_configuration.App.Modes.Active== TootConfigurationAppModes.ValidModes.Invite)
+                if (_configuration.App.Modes.Active == TootConfigurationAppModes.ValidModes.Invite)
                 {
                     // TODO: Check if Invation has been sent by Service Account
                 }
@@ -72,14 +67,24 @@ namespace Toot2Toulouse
 
         private void StoreNewUser(UserData user, Account userAccount)
         {
-            user.Config = _configuration.Defaults;
-            user.Mastodon.Id= userAccount.Id;
+            
+            var oldUserId = _database.GetUserIdByMastodonId(user.Mastodon.Instance, userAccount.Id);
+            if (oldUserId != null)
+            {
+                var secret = user.Mastodon.Secret;
+                user = _database.GetUserById(oldUserId.Value);
+                user.Mastodon.Secret = secret;
+            }
+            else
+            {
+                user.Config = _configuration.Defaults;
+                user.Mastodon.LastTootDate = userAccount.LastStatusAt;
+            }
+            user.Mastodon.Id = userAccount.Id;
             user.Mastodon.DisplayName = userAccount.DisplayName;
             user.Mastodon.Handle = userAccount.AccountName;
-            user.Mastodon.LastTootDate=userAccount.LastStatusAt;
-           
 
-            _database.UpsertUser(user, true);
+            _database.UpsertUser(user);
             string hash = _database.CalculateHashForUser(user);
 
             _cookies.UserIdSetCookie(user.Id);
@@ -123,7 +128,5 @@ namespace Toot2Toulouse
                 throw;
             }
         }
-
-     
     }
 }

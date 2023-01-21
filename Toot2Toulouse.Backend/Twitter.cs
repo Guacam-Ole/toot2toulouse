@@ -7,6 +7,7 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
+using Tweetinvi.Core.Models;
 using Tweetinvi.Exceptions;
 using Tweetinvi.Logic.QueryParameters;
 using Tweetinvi.Models;
@@ -42,15 +43,20 @@ namespace Toot2Toulouse.Backend
             return await GetUserClient(userData).Users.GetAuthenticatedUserAsync();
         }
 
-        private bool ShouldITweetThis(Status toot)
+        private bool ShouldITweetThis(UserData user, Status toot)
         {
-            // TODO: CHeck visibilitysettings
-            return !string.IsNullOrWhiteSpace(toot.Content);
+            if (string.IsNullOrWhiteSpace(toot.Content)) return false;
+            if (!user.Config.VisibilitiesToPost.Contains(toot.Visibility.ToT2t())) return false;
+            return true;
         }
 
         public async Task<List<long>> PublishAsync(UserData userData, Status toot)
         {
-            if (!ShouldITweetThis(toot)) return new List<long>();
+            if (!ShouldITweetThis(userData, toot))
+            {
+                _logger.LogDebug("Didn't tweet toot {id} ", toot.Id);
+                return new List<long>();
+            }
             return await PublishFromToot(userData, toot);
         }
 
@@ -59,12 +65,12 @@ namespace Toot2Toulouse.Backend
             var tweetIds=new    List<long>();
             try
             {
-                bool isSensitive = toot.Sensitive ?? false;
                 if (!string.IsNullOrWhiteSpace(toot.SpoilerText))
                 {
                     toot.Sensitive = true;
-                    toot.Text = $"CW: {toot.SpoilerText}\n\n{toot.Text}";
+                    toot.Content = $"CW: {toot.SpoilerText}\n\n{toot.Content}";
                 }
+                bool isSensitive = toot.Sensitive ?? false;
 
                 string content = _toot.StripHtml(toot.Content);
                 var twitterUser = GetTwitterUser(userData);
@@ -157,7 +163,7 @@ namespace Toot2Toulouse.Backend
                     default:
                         throw new NotImplementedException(); // TODO: Own exceptiontype
                 }
-                if (mediafile != null)
+                if (mediafile != null && attachment.Description!=null)
                 {
                     await userClient.Upload.AddMediaMetadataAsync(new MediaMetadata(mediafile)
                     {
@@ -186,7 +192,7 @@ namespace Toot2Toulouse.Backend
             return await TweetAsync(userData, new PublishTweetParameters
             {
                 Text = content,
-                PossiblySensitive = isSensitive,
+                PossiblySensitive = isSensitive, 
                 Medias = mediaFiles
             });
         }

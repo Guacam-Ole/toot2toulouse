@@ -1,14 +1,15 @@
-﻿using Toot2Toulouse.Backend.Models;
+﻿using Mastonet.Entities;
 
 namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IToulouse
     {
-        //Task TweetServicePostsAsync();   // TODO: Remove when finished
-
         List<DisplaySettingsItem> GetServerSettingsForDisplay();
-        Task SendTootsForAllUsers();
-        Task GetTootsContaining(string mastodonHandle, string searchstring, int limit);
 
+        Task SendTootsForAllUsers();
+
+        Task<List<Status>> GetTootsContaining(string mastodonHandle, string searchstring, int limit);
+
+        Task Invite(string mastodonHandle);
     }
 }

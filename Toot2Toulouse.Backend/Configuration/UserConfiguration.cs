@@ -1,9 +1,20 @@
-﻿using Toot2Toulouse.Backend.Interfaces;
+﻿using System.Text.Json.Serialization;
+
+using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Backend.Configuration
 {
     public class UserConfiguration
     {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public enum Visibilities
+        {
+            Public,
+            Unlisted,
+            Private,
+            Direct
+        }
+
 
         [OverviewCategory("Long Tweets", "If toot is longer than an allowed tweet")]
         public ITwitter.LongContent LongContent { get; set; } // What to do if toot is longer than allowed tweet
@@ -13,7 +24,8 @@ namespace Toot2Toulouse.Backend.Configuration
         
         public UserConfigurationAppSuffix AppSuffix { get; set; } // suffix to show on tweets
         public TimeSpan Delay { get; set; }
-        public List<Mastonet.Visibility> VisibilitiesToPost { get; set; } 
+ 
+        public List<Visibilities> VisibilitiesToPost { get; set; } 
     }
 
 

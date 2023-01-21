@@ -1,12 +1,15 @@
-﻿using Toot2Toulouse.Backend.Models;
+﻿using System.IO.Compression;
+
+using Toot2Toulouse.Backend.Models;
 
 namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IDatabase
     {
         UserData? GetUserById(Guid id);
+        Guid? GetUserIdByMastodonId(string instance, string mastodonId);
         UserData? GetUserByIdAndHash(Guid id, string hash);
-        void UpsertUser(UserData user, bool replaceExistingMastodonUser = false);
+        void UpsertUser(UserData user);
         void RemoveUser(Guid id);
         string CalculateHashForUser(UserData user);
         List<UserData> GetAllValidUsers();
