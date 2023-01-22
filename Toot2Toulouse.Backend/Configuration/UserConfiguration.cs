@@ -21,15 +21,16 @@ namespace Toot2Toulouse.Backend.Configuration
         public TootConfigurationAppThreadOptions LongContentThreadOptions { get; set; } // prefix and suffix when splitting toot into thread
         public Dictionary<string, string> Replacements { get; set; } // Autoreplacements for words (e.g. toot->tweet)
         public UserConfigurationFollowers Followers { get; set; } // followersearch settings (translate mastodon mentions to twitter mentions)
-        
+
         public UserConfigurationAppSuffix AppSuffix { get; set; } // suffix to show on tweets
         public TimeSpan Delay { get; set; }
- 
-        public List<Visibilities> VisibilitiesToPost { get; set; } 
+    
+
+        public List<Visibilities> VisibilitiesToPost { get; set; }
     }
 
 
-   
+
     public class UserConfigurationFollowers
     {
         //public List<ITwitter.Followersearch> Search { get; set; }
@@ -58,6 +59,6 @@ namespace Toot2Toulouse.Backend.Configuration
         [OverviewCategory("Crossposter", "Suffix to show after Tweet (To inform others this is a crossposter-tweet)")]
         public string Content { get; set; }
         [OverviewCategory("Crossposter", "Remove suffix when this would cause the tweet to be too long")]
-        public bool HideOnLongText { get; set; }
+        public bool HideIfBreaks { get; set; }
     }
 }

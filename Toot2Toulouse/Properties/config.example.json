@@ -65,9 +65,7 @@
     "Delay": "00:05:00",
     "AppSuffix": {
       "Content": " 🐘🦆",
-      "HideIfBreaks": true,
-      "OnlyLastInThread": true,
-      "OnlyFirstInThread": false
+      "HideIfBreaks": true
     },
     "Followers": {
       "FollowerText": {

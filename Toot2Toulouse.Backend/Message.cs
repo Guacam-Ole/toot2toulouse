@@ -40,7 +40,7 @@ namespace Toot2Toulouse.Backend
             string suffix = userConfiguration.AppSuffix.Content ?? string.Empty;
 
             bool needsSplit = originalToot.Length > maxLength;
-            if (!needsSplit && originalToot.Length + suffix.Length > maxLength && userConfiguration.AppSuffix.HideOnLongText) addSuffix = false;
+            if (!needsSplit && originalToot.Length + suffix.Length > maxLength && userConfiguration.AppSuffix.HideIfBreaks) addSuffix = false;
             mainTweet = originalToot;
             if (addSuffix) mainTweet += suffix;
 

@@ -1,6 +1,6 @@
 ﻿/*const { Callbacks } = require("jquery");*/
 
-var userSettings;
+//var userSettings;
 
 function fillServerdata() {
     $.getJSON("server", function (data) {
@@ -81,13 +81,14 @@ function loadUserSettings() {
             window.location = "/autherror";
             return;
         }
-        userSettings= data;
         displayUserSettings(data);
     });
 }
 
-function styletButtonByValue(button, chkBox) {
-    value = chkBox.attr("checked");
+
+function styleButtonByValue(chkBox) {
+    var button = chkBox.prev();
+    value = chkBox.prop("checked");
     if (value) {
         button.attr("class", "button button-primary");
     } else {
@@ -95,14 +96,27 @@ function styletButtonByValue(button, chkBox) {
     }
 }
 
-function displayUserSettings(xuserSettings) {
-    var isP = userSettings;
-    $("#VisibilitiesTootPublic").attr("checked", userSettings.VisibilitiesToPost.indexOf("Public") > 0);
 
 
-    styletButtonByValue($("#lblVisibilitiesTootPublic"), $("#VisibilitiesTootPublic"));
-    styletButtonByValue($("#lblVisibilitiesTootUnlisted"), $("#VisibilitiesTootUnlisted"));
-    styletButtonByValue($("#lblVisibilitiesTootPrivate"), $("#VisibilitiesTootPrivate"));
+function displayUserSettings(user) {
+    var userSettings = user.config;
+    $("#name").text(user.mastodon.displayName);
+    $("#VisibilitiesTootPublic").prop("checked", userSettings.visibilitiesToPost.indexOf("Public") >= 0);
+    $("#VisibilitiesTootUnlisted").prop("checked", userSettings.visibilitiesToPost.indexOf("Unlisted") >= 0);
+    $("#VisibilitiesTootPrivate").prop("checked", userSettings.visibilitiesToPost.indexOf("Private") >= 0);
+
+    $("#Delay").val(userSettings.delay);
+    $("#AppSuffixContent").val(userSettings.appSuffix.content);
+    $("#AppSuffixHideIfBreaks").prop("checked", userSettings.appSuffix.hideIfBreaks);
+    $("#LongContentThreadOptionsPrefix").val(userSettings.longContentThreadOptions.prefix);
+    $("#LongContentThreadOptionsSuffix").val(userSettings.longContentThreadOptions.suffix);
+
+
+
+    styleButtonByValue($("#VisibilitiesTootPublic"));
+    styleButtonByValue($("#VisibilitiesTootUnlisted"));
+    styleButtonByValue($("#VisibilitiesTootPrivate"));
+    styleButtonByValue($("#AppSuffixHideIfBreaks"));
 }
 
 
