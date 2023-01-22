@@ -29,12 +29,7 @@ namespace Toot2Toulouse.Controllers
             return new RedirectResult($"index.{_config.App.DefaultLanguage}.html");
         }
 
-        [Route("register")]
-        public ActionResult Register()
-        {
-            if (_config.App.Modes.Active == TootConfigurationAppModes.ValidModes.Closed) return new RedirectResult($"closed.{_config.App.DefaultLanguage}.html");
-            return new RedirectResult($"register.{_config.App.DefaultLanguage}.html");
-        }
+     
 
         [Route("server")]
         public ActionResult GetServerSettings()
@@ -61,15 +56,7 @@ namespace Toot2Toulouse.Controllers
             return new RedirectResult($"config.{_config.App.DefaultLanguage}.html");
         }
 
-        [Route("export")]
-        public async Task<ActionResult> GetUserExport()
-        {
-            var id = _cookies.UserIdGetCookie();
-            var hash = _cookies.UserHashGetCookie();
-            if (id == Guid.Empty || hash == null) return AuthErrorResult();
-            var user = _user.GetUser(id, hash);
-            return new JsonResult(_user.ExportUserData(user));
-        }
+     
 
         [Route("autherror")]
         public ActionResult Autherror()
@@ -77,9 +64,6 @@ namespace Toot2Toulouse.Controllers
             return new RedirectResult($"unknown.{_config.App.DefaultLanguage}.html");
         }
 
-        private JsonResult AuthErrorResult()
-        {
-            return new JsonResult(new { Error = "auth", Success = false });
-        }
+       
     }
 }

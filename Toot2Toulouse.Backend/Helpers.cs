@@ -52,5 +52,20 @@ namespace Toot2Toulouse.Backend
             return Enum.Parse<Visibilities>(visibility.ToString());
         }
 
+
+        public static T? SetLimits<T>(this T? value, T min, T max) where T: IComparable
+        {
+            if (value == null) return value;  
+            if (value.CompareTo(min) < 0) value = min;
+            if (value.CompareTo(max)>0) value = max;   
+            return value;   
+        }
+
+        public static string  Shorten(this string? value, int maxLength)
+        {
+            if (value == null) return string.Empty;
+            if (value.Length>maxLength) return value[..maxLength];
+            return value;
+        }
     }
 }

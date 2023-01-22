@@ -1,6 +1,6 @@
 ﻿/*const { Callbacks } = require("jquery");*/
 
-//var userSettings;
+var userSettings;
 
 function fillServerdata() {
     $.getJSON("server", function (data) {
@@ -55,7 +55,7 @@ function authMastodonStart() {
 
 function codeEntered() {
     var code = $("#code").val();
-    $("#finishmastodon").prop("disabled", code.length== 0);
+    $("#finishmastodon").prop("disabled", code.length == 0);
 }
 
 function authMastodonFinish() {
@@ -76,7 +76,7 @@ function authMastodonFinish() {
 }
 
 function loadUserSettings() {
-    $.getJSON("export", function (data) {
+    $.getJSON("/user/export", function (data) {
         if (data.error == "auth") {
             window.location = "/autherror";
             return;
@@ -99,7 +99,7 @@ function styleButtonByValue(chkBox) {
 
 
 function displayUserSettings(user) {
-    var userSettings = user.config;
+    userSettings = user.config;
     $("#name").text(user.mastodon.displayName);
     $("#VisibilitiesTootPublic").prop("checked", userSettings.visibilitiesToPost.indexOf("Public") >= 0);
     $("#VisibilitiesTootUnlisted").prop("checked", userSettings.visibilitiesToPost.indexOf("Unlisted") >= 0);
@@ -117,6 +117,65 @@ function displayUserSettings(user) {
     styleButtonByValue($("#VisibilitiesTootUnlisted"));
     styleButtonByValue($("#VisibilitiesTootPrivate"));
     styleButtonByValue($("#AppSuffixHideIfBreaks"));
+
+    $("#savestatus").hide();
+}
+
+function saveVisibility() {
+    $.getJSON("/user/visibility", {
+        publicToots: ($("#VisibilitiesTootPublic").prop("checked")),
+        notListedToots: ($("#VisibilitiesTootUnlisted").prop("checked")),
+        privateToots: ($("#VisibilitiesTootPrivate").prop("checked"))
+    }, function (data) {
+        if (!data.success) saveError();
+        else saveDelay();
+    });
+}
+
+function saveDelay() {
+
+    $.getJSON("/user/delay", {
+        delay: $("#Delay").val()
+    }, function (data) {
+        if (!data.success) saveError();
+        else saveSuffix();
+    });
+}
+
+function saveSuffix() {
+    $.getJSON("/user/suffix", {
+        content: $("#AppSuffixContent").val(),
+        hideIfBreaks: $("#AppSuffixHideIfBreaks").prop("checked")
+    }, function (data) {
+        if (!data.success) saveError();
+        else saveThread();
+    });
+}
+
+function saveThread() {
+
+    $.getJSON("/user/thread", {
+        prefix: $("#LongContentThreadOptionsPrefix").val(),
+        suffix: $("#LongContentThreadOptionsSuffix").val()
+    }, function (data) {
+        if (!data.success) saveError();
+        else finishSave();
+    });
+}
+
+function finishSave() {
+    $("#savestatuscontent").text("Data Saved");
+    $("#savestatus").show();
+}
+
+function saveError() {
+    $("#savestatuscontent").text("Error on saving");
+    $("#savestatus").show();
+}
+
+function saveSettings() {
+    $("#savestatus").hide();
+    saveVisibility();
 }
 
 

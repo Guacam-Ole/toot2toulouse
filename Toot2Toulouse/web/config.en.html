@@ -31,49 +31,54 @@
     <div class="section" id="myconfig">
         <div class="container">
             <h3 class="section-heading">Settings</h3>
-            
-                <form>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>What to publish to Twitter: <br /><sub>These will <b>always be public</b> on Twitter</sub></td>
-                                <td>
-                                    <label id="lblVisibilitiesTootPublic" for="VisibilitiesTootPublic" class="button">Public</label>
-                                    <input type="checkbox" class="button" value="Public" id="VisibilitiesTootPublic" onchange="styleButtonByValue($(this))" />
-                                    <label id="lblVisibilitiesTootUnlisted" for="VisibilitiesTootUnlisted" class="button">Unlisted</label>
-                                    <input type="checkbox" value="Unlisted" id="VisibilitiesTootUnlisted" onchange="styleButtonByValue($(this))" />
-                                    <label id="lblVisibilitiesTootPrivate" for="VisibilitiesTootPrivate" class="button">Private</label>
-                                    <input type="checkbox" value="Private" id="VisibilitiesTootPrivate" onchange="styleButtonByValue($(this))" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Delay (hours:minutes:seconds)</td>
-                                <td><input id="Delay" type="text" /></td>
-                            </tr>
-                            <tr>
-                                <td>Suffix to show on Twitter (can be empty):</td>
-                                <td><input type="text" id="AppSuffixContent" /></td>
-                            </tr>
-                            <tr>
-                                <td>Hide suffix if it would add another reply:</td>
-                                <td>
-                                    <label for="AppSuffixHideIfBreaks" class="button">Hide</label>
-                                    <input type="checkbox" id="AppSuffixHideIfBreaks" onchange="styleButtonByValue($(this))" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Prefix in thread:</td>
-                                <td><input type="text" id="LongContentThreadOptionsPrefix" /></td>
-                            </tr>
-                            <tr>
-                                <td>Suffix in thread:</td>
-                                <td><input type="text" id="LongContentThreadOptionsSuffix" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <a class="button button-primary">Save</a>
-                </form>
-            
+
+            <form>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>What to publish to Twitter: <br /><sub>These will <b>always be public</b> on Twitter</sub></td>
+                            <td>
+                                <label id="lblVisibilitiesTootPublic" for="VisibilitiesTootPublic" class="button">Public</label>
+                                <input type="checkbox" class="button" value="Public" id="VisibilitiesTootPublic" onchange="styleButtonByValue($(this))" />
+                                <label id="lblVisibilitiesTootUnlisted" for="VisibilitiesTootUnlisted" class="button">Unlisted</label>
+                                <input type="checkbox" value="Unlisted" id="VisibilitiesTootUnlisted" onchange="styleButtonByValue($(this))" />
+                                <label id="lblVisibilitiesTootPrivate" for="VisibilitiesTootPrivate" class="button">Private</label>
+                                <input type="checkbox" value="Private" id="VisibilitiesTootPrivate" onchange="styleButtonByValue($(this))" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Delay (hours:minutes:seconds)</td>
+                            <td><input id="Delay" type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td>Suffix to show on Twitter (can be empty):</td>
+                            <td><input type="text" id="AppSuffixContent" /></td>
+                        </tr>
+                        <tr>
+                            <td>Hide suffix if it would add another reply:</td>
+                            <td>
+                                <label for="AppSuffixHideIfBreaks" class="button">Hide</label>
+                                <input type="checkbox" id="AppSuffixHideIfBreaks" onchange="styleButtonByValue($(this))" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Prefix in thread:</td>
+                            <td><input type="text" id="LongContentThreadOptionsPrefix" /></td>
+                        </tr>
+                        <tr>
+                            <td>Suffix in thread:</td>
+                            <td><input type="text" id="LongContentThreadOptionsSuffix" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <a class="button button-primary" onclick="saveSettings(); return false;">Save</a>
+            </form>
+
+        </div>
+        <div class="section" id="savestatus" >
+            <div class="container">
+                <h5 id="savestatuscontent">Loading data</h5>
+            </div>
         </div>
     </div>
 </body>

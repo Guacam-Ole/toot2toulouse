@@ -32,5 +32,10 @@ namespace Toot2Toulouse.Backend
             _logger.LogDebug("Exported userdata for {user}", expoortUserData.Id);
             return expoortUserData;
         }
+
+        public void UpdateUser(UserData user)
+        {
+            _database.UpsertUser(user);
+        }
     }
 }

@@ -6,5 +6,7 @@ namespace Toot2Toulouse.Backend.Interfaces
     {
         UserData? GetUser(Guid id, string hash);
         UserData? ExportUserData(UserData userData);
+
+        void UpdateUser(UserData user);
     }
 }

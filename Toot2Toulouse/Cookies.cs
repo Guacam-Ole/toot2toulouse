@@ -1,6 +1,7 @@
 ﻿using Mastonet.Entities;
 
 using System.Text.Json;
+
 using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Backend
@@ -18,7 +19,8 @@ namespace Toot2Toulouse.Backend
                 Secure = true,
                 IsEssential = true,
                 HttpOnly = true,
-                SameSite = SameSiteMode.Strict
+                SameSite = SameSiteMode.Strict,
+                Path = "/"
             };
         }
 
@@ -67,14 +69,14 @@ namespace Toot2Toulouse.Backend
         private void SetCookieValue<T>(string name, T value)
         {
             var context = _httpContextAccessor.HttpContext;
-            context.Response.Cookies.Append(name, JsonSerializer.Serialize(value));
+            context.Response.Cookies.Append(name, JsonSerializer.Serialize(value), _cookieOptions);
         }
 
         private T GetCookieValue<T>(string name)
         {
             var context = _httpContextAccessor.HttpContext;
             var cookieValue = context.Request.Cookies[name];
-            if (cookieValue ==null) return default(T);
+            if (cookieValue == null) return default(T);
             return JsonSerializer.Deserialize<T>(cookieValue);
         }
     }
