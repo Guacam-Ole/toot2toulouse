@@ -57,19 +57,19 @@ namespace Toot2Toulouse.Backend
         private void SetSessionValue<T>(string name, T value)
         {
             var context = _httpContextAccessor.HttpContext;
-            context.Session.SetString(name, JsonSerializer.Serialize(value));
+            context.Session.SetString(name, JsonSerializer.Serialize(value, ConfigReader.JsonOptions    ));
         }
 
         private T GetSessionValue<T>(string name)
         {
             var context = _httpContextAccessor.HttpContext;
-            return JsonSerializer.Deserialize<T>(context.Session.GetString(name));
+            return JsonSerializer.Deserialize<T>(context.Session.GetString(name), ConfigReader.JsonOptions);
         }
 
         private void SetCookieValue<T>(string name, T value)
         {
             var context = _httpContextAccessor.HttpContext;
-            context.Response.Cookies.Append(name, JsonSerializer.Serialize(value), _cookieOptions);
+            context.Response.Cookies.Append(name, JsonSerializer.Serialize(value, ConfigReader.JsonOptions), _cookieOptions);
         }
 
         private T GetCookieValue<T>(string name)
@@ -77,7 +77,7 @@ namespace Toot2Toulouse.Backend
             var context = _httpContextAccessor.HttpContext;
             var cookieValue = context.Request.Cookies[name];
             if (cookieValue == null) return default(T);
-            return JsonSerializer.Deserialize<T>(cookieValue);
+            return JsonSerializer.Deserialize<T>(cookieValue, ConfigReader.JsonOptions);
         }
     }
 }

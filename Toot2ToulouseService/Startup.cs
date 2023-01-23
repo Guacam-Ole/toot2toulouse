@@ -43,10 +43,10 @@ namespace Toot2ToulouseService
             //var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             using var r = new StreamReader(Path.Combine(GetPropertiesPath(), "path.json"));
             string json = r.ReadToEnd();
-            var pathConfig = JsonSerializer.Deserialize<dynamic>(json);
-            databasePath = pathConfig.database;
-            configPath = pathConfig.config;
-            logPath = pathConfig.log;
+            var pathConfig = JsonSerializer.Deserialize<Paths>(json, ConfigReader.JsonOptions);
+            databasePath = pathConfig.Database;
+            configPath = pathConfig.Config;
+            logPath = pathConfig.Log;
         }
 
         private static string GetPropertiesPath()

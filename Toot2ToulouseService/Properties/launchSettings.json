@@ -2,7 +2,6 @@
   "profiles": {
     "Toot2ToulouseService": {
       "commandName": "Project",
-      "commandLineArgs": "search guacamole@chaos.social vario",
       "Logging": {
         "LogLevel": {
           "Default": "Debug",

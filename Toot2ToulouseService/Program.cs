@@ -43,7 +43,7 @@ namespace Toot2ToulouseService
                             Console.WriteLine("missing paramters: mastodonhandle, searchstring");
                             return;
                         }
-                        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(await _publish.GetTootsContaining(args[1], args[2], 5000), new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+                        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(await _publish.GetTootsContaining(args[1], args[2], 5000), Toot2Toulouse.Backend.ConfigReader.JsonOptions));
                         break;
 
                     case "invite":

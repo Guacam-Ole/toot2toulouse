@@ -8,6 +8,7 @@ namespace Toot2Toulouse.Backend
 {
     public class ConfigReader
     {
+        public static JsonSerializerOptions JsonOptions=new JsonSerializerOptions {  PropertyNameCaseInsensitive=true, AllowTrailingCommas=true, WriteIndented=true };
         private readonly string _path;
 
         // private readonly IWebHostEnvironment _webHostEnvironment;
@@ -36,7 +37,7 @@ namespace Toot2Toulouse.Backend
             //_webHostEnvironment.ContentRootPath, "Properties", filename);
             using var r = new StreamReader(fullpath);
             string json = r.ReadToEnd();
-            return JsonSerializer.Deserialize<T>(json.StripComments());
+            return JsonSerializer.Deserialize<T>(json.StripComments(), JsonOptions);
         }
 
         private static bool SecretsAreMissing(params string[] properties)

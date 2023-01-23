@@ -14,7 +14,7 @@ namespace Toot2Toulouse.Backend
     {
         public static T Clone<T>(this T source)
         {
-            return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(source, new JsonSerializerOptions {  }));
+            return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(source, ConfigReader.JsonOptions));
         }
 
         public static string StripComments(this string json)
