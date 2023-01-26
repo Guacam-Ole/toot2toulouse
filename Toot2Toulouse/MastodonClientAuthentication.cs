@@ -16,14 +16,16 @@ namespace Toot2Toulouse
         private readonly IDatabase _database;
         private readonly ICookies _cookies;
         private readonly IMastodon _mastodon;
+        private readonly IToulouse _toulouse;
 
-        public MastodonClientAuthentication(ILogger<MastodonClientAuthentication> logger, IDatabase database, ICookies cookies, ConfigReader configReader, IMastodon mastodon)
+        public MastodonClientAuthentication(ILogger<MastodonClientAuthentication> logger, IDatabase database, ICookies cookies, ConfigReader configReader, IMastodon mastodon, IToulouse toulouse)
         {
             _configuration = configReader.Configuration;
             _logger = logger;
             _database = database;
             _cookies = cookies;
             _mastodon = mastodon;
+            _toulouse = toulouse;
         }
 
         public async Task<KeyValuePair<bool, string>> UserIsAllowedToRegister(string userInstance, string verificationCode)
@@ -33,7 +35,8 @@ namespace Toot2Toulouse
                 var authToken = await GetUserAccessTokenByCode(userInstance, verificationCode);
                 var userData = new UserData
                 {
-                    Mastodon = new Backend.Models.Mastodon { Instance = userInstance, Secret = authToken }
+                    Mastodon = new Backend.Models.Mastodon { Instance = userInstance, Secret = authToken },
+                    Twitter=new Backend.Models.Twitter ()
                 };
 
                 var userAccount = await _mastodon.GetUserAccount(userData);
@@ -46,11 +49,13 @@ namespace Toot2Toulouse
                     return new KeyValuePair<bool, string>(false, $"Only users from the following instances are allowed currently: {_configuration.App.Modes.AllowedInstances}");
                 if (!string.IsNullOrWhiteSpace(_configuration.App.Modes.BlockedInstances) && _configuration.App.Modes.BlockedInstances.Contains(userInstance, StringComparison.InvariantCultureIgnoreCase))
                     return new KeyValuePair<bool, string>(false, "Your Instance is blocked");
-                if (_configuration.App.Modes.Active == TootConfigurationAppModes.ValidModes.Closed)
+                if (_toulouse.GetServerMode() == TootConfigurationAppModes.ValidModes.Closed)
                     return new KeyValuePair<bool, string>(false, "This server isn't accepting new registrations. (I thought we already told you that?)");
                 if (_configuration.App.Modes.Active == TootConfigurationAppModes.ValidModes.Invite)
                 {
-                    // TODO: Check if Invation has been sent by Service Account
+                    var invites = await _mastodon.GetServiceTootsContaining("[INVITE]", 100, $"{userAccount.AccountName}@{userInstance}");
+                    if (invites.Count == 0)
+                        return new KeyValuePair<bool, string>(false, "Looks like you did not receive an invite or your invite has expired");
                 }
 
                 // TODO: Check maxTootsPerDay
@@ -67,7 +72,6 @@ namespace Toot2Toulouse
 
         private void StoreNewUser(UserData user, Account userAccount)
         {
-            
             var oldUserId = _database.GetUserIdByMastodonId(user.Mastodon.Instance, userAccount.Id);
             if (oldUserId != null)
             {

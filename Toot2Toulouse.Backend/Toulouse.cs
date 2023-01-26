@@ -10,6 +10,8 @@ using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
+using Tweetinvi.Parameters;
+
 namespace Toot2Toulouse.Backend
 {
     public class Toulouse : IToulouse
@@ -153,6 +155,28 @@ namespace Toot2Toulouse.Backend
                 await SendToots(user, notTooted, true);
             }
             _logger.LogInformation("tweeted {count} toots for all users", totalTootCount);
+        }
+
+        public TootConfigurationAppModes.ValidModes GetServerMode()
+        {
+            var serverMode = _config.App.Modes.Active;
+            var serverStats = _database.GetServerStats();
+
+            if (_config.App.Modes.AutoInvite > 0 && serverMode == TootConfigurationAppModes.ValidModes.Closed && _config.App.Modes.AutoInvite <= serverStats.ActiveUsers) serverMode = TootConfigurationAppModes.ValidModes.Invite;
+            if (_config.App.Modes.AutoClosed > 0 && _config.App.Modes.AutoClosed <= serverStats.ActiveUsers) serverMode = TootConfigurationAppModes.ValidModes.Closed;
+
+            return serverMode;
+        }
+
+        public void CalculateServerStats()
+        {
+            var serverstats = _database.GetServerStats();
+            var allUsers = _database.GetAllValidUsers();
+            var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.Now.AddDays(-1)));
+            serverstats.ActiveUsers = activeUsers.Count();
+            serverstats.TotalUsers = allUsers.Count();
+            _database.UpSertServerStats(serverstats);
+            _logger.LogDebug("Updated Serverstats.  {serverstats} ", serverstats);
         }
     }
 }

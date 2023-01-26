@@ -7,6 +7,8 @@ using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
+using Tweetinvi.Core.Models;
+
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
 
 namespace Toot2Toulouse.Backend
@@ -121,15 +123,29 @@ namespace Toot2Toulouse.Backend
             return statuses.OrderBy(q => q.CreatedAt).ToList();
         }
 
+        public async Task<List<Status>> GetServiceTootsContaining( string content, int limit=100, string? recipient=null)
+        {
+            return await GetTootsContaining(GetServiceClient(), content, limit, recipient);
+        }
+
+        private async Task<List<Status>> GetTootsContaining(MastodonClient client, string content, int limit = 100, string? recipient=null)
+        {
+            var statuses = await client.GetAccountStatuses((await client.GetCurrentUser()).Id, new ArrayOptions { Limit = limit }, false, true, false, true);
+            var matches = statuses.Where(q => q.Content.Contains(content, StringComparison.InvariantCultureIgnoreCase));
+            if (recipient!=null)
+            {
+                matches=matches.Where(q=>q.Mentions.Any(m=>m.AccountName == recipient));    
+            }
+            return matches.OrderBy(q => q.CreatedAt).ToList();
+        }
+
         public async Task<List<Status>> GetTootsContaining(Guid id, string content, int limit = 100)
         {
             try
             {
                 var user = _database.GetUserById(id);
                 var client = GetUserClient(user);
-                var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = limit }, false, true, false, true);
-                var matches = statuses.Where(q => q.Content.Contains(content, StringComparison.InvariantCultureIgnoreCase));
-                return matches.OrderBy(q => q.CreatedAt).ToList();
+                return await GetTootsContaining(client, content, limit);  
             }
             catch (Exception ex)
             {
@@ -166,15 +182,15 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public async Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100)
-        {
-            var mastodonClient = GetServiceClient();
-            var serviceUser = await mastodonClient.GetCurrentUser();
-            var userName = serviceUser.UserName;
-            var statuses = await mastodonClient.GetAccountStatuses(serviceUser.Id, new ArrayOptions { Limit = limit });
-            var matches = statuses.Where(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
-            _logger.LogDebug("Found {matchtes} matches when searching for '{searchString}' in service User", matches.Count(), searchString);
-            return matches;
-        }
+        //public async Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100)
+        //{
+        //    var mastodonClient = GetServiceClient();
+        //    var serviceUser = await mastodonClient.GetCurrentUser();
+        //    var userName = serviceUser.UserName;
+        //    var statuses = await mastodonClient.GetAccountStatuses(serviceUser.Id, new ArrayOptions { Limit = limit });
+        //    var matches = statuses.Where(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
+        //    _logger.LogDebug("Found {matchtes} matches when searching for '{searchString}' in service User", matches.Count(), searchString);
+        //    return matches;
+        //}
     }
 }

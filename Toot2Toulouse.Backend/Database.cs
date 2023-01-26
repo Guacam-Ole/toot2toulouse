@@ -2,7 +2,6 @@
 
 using Microsoft.Extensions.Logging;
 
-using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -24,9 +23,6 @@ namespace Toot2Toulouse.Backend
             _config = configReader.Configuration;
             _path = path;
         }
-
-
-     
 
         private string GetDatabaseFile()
         {
@@ -81,13 +77,13 @@ namespace Toot2Toulouse.Backend
             return user;
         }
 
-        public UserData GetUserByUsername(string handle,  string instance)
+        public UserData GetUserByUsername(string handle, string instance)
         {
             try
             {
                 using var db = new LiteDatabase(GetDatabaseFile());
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
-                return userCollection.Find(q=>q.Mastodon.Handle==handle && q.Mastodon.Instance==instance).FirstOrDefault();
+                return userCollection.Find(q => q.Mastodon.Handle == handle && q.Mastodon.Instance == instance).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -132,7 +128,7 @@ namespace Toot2Toulouse.Backend
             {
                 using var db = new LiteDatabase(GetDatabaseFile());
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
-                return userCollection.Find(q=>q.Mastodon.Secret!=null && q.Twitter.AccessSecret!=null).ToList();
+                return userCollection.Find(q => q.Mastodon.Secret != null && q.Twitter.AccessSecret != null).ToList();
             }
             catch (Exception ex)
             {
@@ -147,7 +143,7 @@ namespace Toot2Toulouse.Backend
             {
                 using var db = new LiteDatabase(GetDatabaseFile());
                 var statsCollection = db.GetCollection<Stats>(nameof(Stats));
-             //   statsCollection.DeleteAll();
+
                 return statsCollection.FindAll().FirstOrDefault() ?? new Stats();
             }
             catch (Exception ex)
@@ -173,13 +169,13 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public Guid? GetUserIdByMastodonId(string instance,string mastodonId)
+        public Guid? GetUserIdByMastodonId(string instance, string mastodonId)
         {
             try
             {
                 using var db = new LiteDatabase(GetDatabaseFile());
-                var userCollection= db.GetCollection<UserData>(nameof(UserData));
-                var user=userCollection.FindOne(q => q.Mastodon.Id == mastodonId && q.Mastodon.Instance==instance);
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                var user = userCollection.FindOne(q => q.Mastodon.Id == mastodonId && q.Mastodon.Instance == instance);
                 return user?.Id;
             }
             catch (Exception ex)
@@ -187,7 +183,6 @@ namespace Toot2Toulouse.Backend
                 _logger.LogError(ex, "Failed updating stats");
                 throw;
             }
-
         }
     }
 }

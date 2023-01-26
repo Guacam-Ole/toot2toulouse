@@ -9,8 +9,8 @@ namespace Toot2Toulouse.Backend
 {
     public class Message : IMessage
     {
-    //    private UserConfiguration _userConfiguration;
         private readonly ILogger<Message> _logger;
+
         private readonly TootConfiguration _config;
 
         public Message(ILogger<Message> logger, ConfigReader configReader)
@@ -19,15 +19,11 @@ namespace Toot2Toulouse.Backend
             _config = configReader.Configuration;
         }
 
-
         public string StripHtml(string content)
         {
-            
             content = content.Replace("</p>", "\n\n");
             content = content.Replace("<br />", "\n");
             content = System.Net.WebUtility.HtmlDecode(content);
-            //content = content.Replace("&nbsp;", " ");
-            //content = content.Replace("&quot;", "\"");
             return Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
         }
 
@@ -38,6 +34,7 @@ namespace Toot2Toulouse.Backend
             bool addSuffix = true;
 
             string suffix = userConfiguration.AppSuffix.Content ?? string.Empty;
+            if (!string.IsNullOrEmpty(suffix)) suffix = "\n" + suffix;
 
             bool needsSplit = originalToot.Length > maxLength;
             if (!needsSplit && originalToot.Length + suffix.Length > maxLength && userConfiguration.AppSuffix.HideIfBreaks) addSuffix = false;
@@ -71,7 +68,7 @@ namespace Toot2Toulouse.Backend
             remaining = null;
             if (completeText.Length <= maxLength)
             {
-                if (!isFirst && completeText.Length+userConfiguration.LongContentThreadOptions.Prefix.Length<=maxLength  ) return userConfiguration.LongContentThreadOptions.Prefix + completeText;
+                if (!isFirst && completeText.Length + userConfiguration.LongContentThreadOptions.Prefix.Length <= maxLength) return userConfiguration.LongContentThreadOptions.Prefix + completeText;
                 return completeText;
             }
             if (!isFirst) maxLength -= userConfiguration.LongContentThreadOptions.Prefix.Length;

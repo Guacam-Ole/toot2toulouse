@@ -1,7 +1,6 @@
 ﻿using Mastonet;
 using Mastonet.Entities;
 
-
 using System.Text.Json.Serialization;
 
 using Toot2Toulouse.Backend.Models;
@@ -21,15 +20,18 @@ namespace Toot2Toulouse.Backend.Interfaces
             OnlyMentioned
         }
 
-        Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100);
+        //Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100);
 
         Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode);
 
         Task<Account?> GetUserAccount(UserData userData);
+
         Task<Account?> GetUserAccount(MastodonClient mastodonClient);
+
         Task<List<Status>> GetNonPostedToots(Guid id);
 
-        Task<List<Status>> GetTootsContaining(Guid id, string content, int limit=1000);
+        Task<List<Status>> GetTootsContaining(Guid id, string content, int limit = 100);
 
+        Task<List<Status>> GetServiceTootsContaining(string content, int limit = 100, string? recipient = null);
     }
 }

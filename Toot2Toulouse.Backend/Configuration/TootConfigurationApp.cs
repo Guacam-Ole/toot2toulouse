@@ -22,10 +22,10 @@ namespace Toot2Toulouse.Backend.Configuration
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum InterValNames
         {
-            never,
-            daily,
-            weekly,
-            monthly
+            Never,
+            Daily,
+            Weekly,
+            Monthly
         }
 
         public string Disclaimer { get; set; }  

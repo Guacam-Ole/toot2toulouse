@@ -12,6 +12,7 @@ namespace Toot2Toulouse.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class TwitterController : ControllerBase
     {
         private readonly ILogger<TwitterController> _logger;

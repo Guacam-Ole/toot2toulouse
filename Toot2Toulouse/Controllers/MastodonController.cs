@@ -7,6 +7,7 @@ namespace Toot2Toulouse.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class MastodonController : ControllerBase
     {
         private readonly IMastodonClientAuthentication _mastodon;

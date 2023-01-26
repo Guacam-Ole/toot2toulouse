@@ -13,7 +13,7 @@ namespace Toot2ToulouseService
         private readonly IToulouse _toulouse;
         private readonly TootConfiguration _config;
 
-        public Maintenance(ILogger<Maintenance> logger,  ConfigReader configReader, IDatabase database, IToulouse toulouse)
+        public Maintenance(ILogger<Maintenance> logger, ConfigReader configReader, IDatabase database, IToulouse toulouse)
         {
             _logger = logger;
             _database = database;
@@ -27,11 +27,10 @@ namespace Toot2ToulouseService
             int currentVersionInt = currentVersion.Major * 100 + currentVersion.Minor;
 
             if (currentVersionInt <= databaseVersionInt) return;
-            for (int i = databaseVersionInt+1; i <= currentVersionInt; i++)
+            for (int i = databaseVersionInt + 1; i <= currentVersionInt; i++)
             {
                 DoUpgradeFor($"{i / 100}.{i % 100}");
             }
-            
         }
 
         private void DoUpgradeFor(string version)
@@ -56,12 +55,14 @@ namespace Toot2ToulouseService
 
         public void Upgrade(Version? fromVersion)
         {
-            var serverstats=_database.GetServerStats();
-            fromVersion ??= new Version(serverstats.CurrentVersion??"0.0");
+            var serverstats = _database.GetServerStats();
+            fromVersion ??= new Version(serverstats.CurrentVersion ?? "0.0");
             if (fromVersion.ToString() == serverstats.CurrentVersion) return;
-            GetUpgradePath(fromVersion  , _config.CurrentVersion);
+            GetUpgradePath(fromVersion, _config.CurrentVersion);
             serverstats.CurrentVersion = _config.CurrentVersion.ToString();
             _database.UpSertServerStats(serverstats);
         }
+
+       
     }
 }

@@ -19,5 +19,6 @@ namespace Toot2Toulouse.Backend.Models
         public string DisplayName { get; set; }
         public DateTime? LastTweetDate { get; set; }
         public long LastTweetId { get; set; }
+        public string? TmpAuthGuid { get; set; }
     }
 }

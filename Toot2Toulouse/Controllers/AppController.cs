@@ -8,6 +8,7 @@ namespace Toot2Toulouse.Controllers
 {
     [ApiController]
     [Route("/")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class AppController : ControllerBase
     {
         private readonly IToulouse _app;
@@ -50,11 +51,7 @@ namespace Toot2Toulouse.Controllers
         }
 
 
-        [Route("config")]
-        public ActionResult Config()
-        {
-            return new RedirectResult($"config.{_config.App.DefaultLanguage}.html");
-        }
+   
 
      
 

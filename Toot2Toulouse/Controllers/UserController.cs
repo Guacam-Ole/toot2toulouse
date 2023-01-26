@@ -9,6 +9,7 @@ namespace Toot2ToulouseWeb.Controllers
 {
     [ApiController]
     [Route("user")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
@@ -31,8 +32,9 @@ namespace Toot2ToulouseWeb.Controllers
         [Route("register")]
         public ActionResult Register()
         {
-            if (_config.App.Modes.Active == TootConfigurationAppModes.ValidModes.Closed) return new RedirectResult($"closed.{_config.App.DefaultLanguage}.html");
-            return new RedirectResult($"register.{_config.App.DefaultLanguage}.html");
+            var serverMode = _app.GetServerMode();
+            if (serverMode == TootConfigurationAppModes.ValidModes.Closed) return new RedirectResult($"closed.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"/register.{_config.App.DefaultLanguage}.html");
         }
 
         [Route("export")]
@@ -62,7 +64,7 @@ namespace Toot2ToulouseWeb.Controllers
         }
 
         [Route("visibility")]
-        public ActionResult UpdateConfigVisibility( bool publicToots, bool notListedToots, bool privateToots)
+        public ActionResult UpdateConfigVisibility(bool publicToots, bool notListedToots, bool privateToots)
         {
             var user = GetUserFromCookie();
             if (user == null) return AuthErrorResult();
@@ -108,6 +110,10 @@ namespace Toot2ToulouseWeb.Controllers
             return SuccessResult();
         }
 
-
+        [Route("config")]
+        public ActionResult Config()
+        {
+            return new RedirectResult($"/config.{_config.App.DefaultLanguage}.html");
+        }
     }
 }
