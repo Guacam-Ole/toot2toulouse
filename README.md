@@ -15,6 +15,7 @@ Also what limitation you have on Twitter can be a bit random. You will have to c
 
 ## Installation
 
+commit should not work
 ### Web Application:
 Copy the config.example.json to config.json and start by entering the secrets from Twitter and Mastodon:
 ```
