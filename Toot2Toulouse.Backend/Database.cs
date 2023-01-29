@@ -137,6 +137,21 @@ namespace Toot2Toulouse.Backend
             }
         }
 
+        public UserData GetUserByTwitterTmpGuid(string guid)
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                return userCollection.FindOne(q => q.Twitter.TmpAuthGuid == guid);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed retrieving users");
+                throw;
+            }
+        }
+
         public Stats GetServerStats()
         {
             try

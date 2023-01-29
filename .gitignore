@@ -409,3 +409,7 @@ Toot2Toulouse/Properties/developmentUserCredentials.json
 Toot2Toulouse/Data/
 Toot2ToulouseService/Properties/path.json
 Toot2ToulouseService/cron.bat
+config.json
+deploy/
+Toot2ToulouseService/path.json
+**/.config/*

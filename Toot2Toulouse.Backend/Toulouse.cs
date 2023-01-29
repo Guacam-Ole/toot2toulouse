@@ -96,8 +96,10 @@ namespace Toot2Toulouse.Backend
             return toots;
         }
 
-        private async Task SendToots(UserData user, List<Status> toots, bool updateUserData)
+        private async Task SendToots(Guid userId, List<Status> toots, bool updateUserData)
         {
+            var user = _database.GetUserById(userId);
+            _logger.LogDebug("sending {tootcount} toots for {user}", toots.Count, user.Mastodon.DisplayName);
             var newLastDate = DateTime.UtcNow;
             foreach (var toot in toots)
             {
@@ -105,6 +107,7 @@ namespace Toot2Toulouse.Backend
 
                 try
                 {
+                    _logger.LogDebug("Toot: {id}|{url}", toot.Id, toot.Uri);
                     if (toot.Id == user.Mastodon.LastToot)
                     {
                         _logger.LogWarning("already tweeted");
@@ -115,7 +118,11 @@ namespace Toot2Toulouse.Backend
                         _logger.LogWarning("already tweeted this");
                         continue;
                     }
-                    if (toot.InReplyToId != null) continue;
+                    if (toot.InReplyToId != null)
+                    {
+                        _logger.LogDebug("is a reply. Wont tweet");
+                        continue;
+                    }
 
                     var twitterIds = await _twitter.PublishAsync(user, toot);
                     user.Crossposts.Add(new Crosspost { TootId = toot.Id, TwitterIds = twitterIds });
@@ -152,7 +159,7 @@ namespace Toot2Toulouse.Backend
             foreach (var user in users)
             {
                 var notTooted = await _mastodon.GetNonPostedToots(user.Id);
-                await SendToots(user, notTooted, true);
+                await SendToots(user.Id, notTooted, true);
             }
             _logger.LogInformation("tweeted {count} toots for all users", totalTootCount);
         }

@@ -42,10 +42,8 @@ namespace Toot2Toulouse
             var userCredentials = await GetAppClient().Auth.RequestCredentialsAsync(requestParameters);
             var queryContents=HttpUtility.ParseQueryString(query);
             var tmpGuid = queryContents["tweetinvi_auth_request_id"];
-
-            var t2tUser = _database.GetAllValidUsers().SingleOrDefault(q => q.Twitter.TmpAuthGuid == tmpGuid);
-            
-           
+            var t2tUser = _database.GetUserByTwitterTmpGuid(tmpGuid);
+            if (t2tUser == null) throw new Exception("Guid invalid");
 
             var userClient = new TwitterClient(userCredentials);
             var user = await userClient.Users.GetAuthenticatedUserAsync();
@@ -88,6 +86,7 @@ namespace Toot2Toulouse
                 var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, t2tUser.Twitter.TmpAuthGuid);
                 var authTokenRequest = await GetAppClient().Auth.RequestAuthenticationUrlAsync(redirectUrl);
                 await _twitterRequestStore.AddAuthenticationTokenAsync(t2tUser.Twitter.TmpAuthGuid, authTokenRequest);
+                _database.UpsertUser(t2tUser);
                 return authTokenRequest.AuthorizationURL;
             }
             catch (Exception ex)

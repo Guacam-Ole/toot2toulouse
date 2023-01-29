@@ -20,7 +20,6 @@ namespace Toot2Toulouse.Backend.Interfaces
             OnlyMentioned
         }
 
-        //Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100);
 
         Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode);
 
@@ -33,5 +32,6 @@ namespace Toot2Toulouse.Backend.Interfaces
         Task<List<Status>> GetTootsContaining(Guid id, string content, int limit = 100);
 
         Task<List<Status>> GetServiceTootsContaining(string content, int limit = 100, string? recipient = null);
+        Task AssignLastTweetedIfMissing(Guid id);
     }
 }

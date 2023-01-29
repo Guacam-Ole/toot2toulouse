@@ -61,6 +61,7 @@ namespace Toot2Toulouse
                 // TODO: Check maxTootsPerDay
 
                 StoreNewUser(userData, userAccount);
+                await _mastodon.AssignLastTweetedIfMissing(userData.Id);
 
                 return new KeyValuePair<bool, string>(true, "success");
             }
@@ -87,7 +88,7 @@ namespace Toot2Toulouse
             user.Mastodon.Id = userAccount.Id;
             user.Mastodon.DisplayName = userAccount.DisplayName;
             user.Mastodon.Handle = userAccount.AccountName;
-
+         
             _database.UpsertUser(user);
             string hash = _database.CalculateHashForUser(user);
 

@@ -4,6 +4,6 @@
 
 {
   "databasepath": "D:\\git\\private\\t2t\\Toot2Toulouse\\Data",
-  "configpath": "D:\\git\\private\\t2t\\Toot2Toulouse\\Properties",
+  "configpath": "D:\\git\\private\\t2t\\Toot2Toulouse",
   "log": "service.log"
 }

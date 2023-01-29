@@ -18,6 +18,7 @@ namespace Toot2ToulouseService
         public void Inject(ServiceCollection services)
         {
             ReadBasicPaths(out string databasePath, out string configPath, out string logPath);
+            
             services.AddScoped(cr => new ConfigReader(configPath));
             services.AddScoped<ITwitter, Twitter>();
             services.AddScoped<IMastodon, Mastodon>();
@@ -34,6 +35,7 @@ namespace Toot2ToulouseService
                 //logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
                 logging.ClearProviders();
                 logging.AddConsole();
+                logging.SetMinimumLevel(LogLevel.Debug);
                 logging.AddFile(Path.Combine(logPath, "t2t.service.log"), append: true);
             });
         }
@@ -51,8 +53,8 @@ namespace Toot2ToulouseService
 
         private static string GetPropertiesPath()
         {
-            var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            return Path.Combine(path, "Properties");
+            var path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            return path;
         }
     }
 }

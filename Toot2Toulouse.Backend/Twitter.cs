@@ -119,8 +119,9 @@ namespace Toot2Toulouse.Backend
                 }
                 return tweetIds;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "error tweeting");
                 //_notification.Error(_mastonUser.Id, TootConfigurationApp.MessageCodes.TwitterDown, "Sorry. Could not send your tweet. Will NOT try again");
                 // TODO: Retry
                 throw;

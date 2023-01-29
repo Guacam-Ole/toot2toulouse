@@ -63,6 +63,9 @@ namespace Toot2ToulouseService
             _database.UpSertServerStats(serverstats);
         }
 
-       
+        public string GetVersion()
+        {
+            return _database.GetServerStats().CurrentVersion;
+        }
     }
 }

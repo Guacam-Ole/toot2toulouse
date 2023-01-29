@@ -14,9 +14,6 @@
     <None Remove="Backend\Data\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Properties\messages.en.json" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="web\.vs\VSWorkspaceState.json" />
@@ -30,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
+    <Folder Include="data\" />
     <Folder Include="web\.vs\Frontend\v17\" />
   </ItemGroup>
 
@@ -43,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="Properties\config.json">
+    <Content Update="config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -53,6 +50,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="web\config.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\custom.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="web\css\fonts\raleway-v28-latin-regular.eot">
@@ -68,6 +68,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="web\css\fonts\raleway-v28-latin-regular.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\normalize.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\raleway.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\skeleton.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="web\index.en.html">

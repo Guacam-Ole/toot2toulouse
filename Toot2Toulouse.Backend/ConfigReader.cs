@@ -34,7 +34,6 @@ namespace Toot2Toulouse.Backend
         public T ReadJsonFile<T>(string filename)
         {
             string fullpath = Path.Combine(_path, filename);
-            //_webHostEnvironment.ContentRootPath, "Properties", filename);
             using var r = new StreamReader(fullpath);
             string json = r.ReadToEnd();
             return JsonSerializer.Deserialize<T>(json.StripComments(), JsonOptions);

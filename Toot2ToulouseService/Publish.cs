@@ -26,7 +26,8 @@ namespace Toot2ToulouseService
             do
             {
                 await _toulouse.SendTootsForAllUsers();
-                if (loop) Thread.Sleep((int)_config.App.Intervals.Sending.TotalMilliseconds);
+              
+               if (loop) Thread.Sleep((int)_config.App.Intervals.Sending.TotalMilliseconds);
             } while (loop);
         }
 

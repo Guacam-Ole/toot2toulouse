@@ -22,13 +22,13 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
-builder.Services.AddScoped<ConfigReader>(cr => new ConfigReader(builder.Environment.ContentRootPath + "\\Properties"));
+builder.Services.AddScoped(cr => new ConfigReader(builder.Environment.ContentRootPath));
 builder.Services.AddScoped<ITwitter, Twitter>();
 builder.Services.AddScoped<IMastodon, Mastodon>();
 builder.Services.AddScoped<IToulouse, Toulouse>();
 builder.Services.AddScoped<INotification, Notification>();
 builder.Services.AddScoped<IMessage, Message>();
-builder.Services.AddScoped<IDatabase, Database>(db => new Database(db.GetService<ILogger<Database>>(), db.GetService<ConfigReader>(), Path.Combine(builder.Environment.ContentRootPath, "Data")));
+builder.Services.AddScoped<IDatabase, Database>(db => new Database(db.GetService<ILogger<Database>>(), db.GetService<ConfigReader>(), Path.Combine(builder.Environment.ContentRootPath, "data")));
 builder.Services.AddScoped<IUser, User>();
 
 builder.Services.AddScoped<ICookies, Cookies>();

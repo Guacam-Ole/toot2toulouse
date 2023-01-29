@@ -36,6 +36,9 @@ namespace Toot2ToulouseService
                             _maintenance.Upgrade(null);
                         }
                         break;
+                    case "version":
+                        Console.WriteLine(_maintenance.GetVersion());
+                        break;
 
                     case "search":
                         if (args.Length < 3)
