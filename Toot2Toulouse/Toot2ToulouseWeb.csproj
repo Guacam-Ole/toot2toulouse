@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="web\.vs\VSWorkspaceState.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Mastonet" Version="2.2.1" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.5" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />
@@ -27,10 +31,66 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
+    <Folder Include="web\.vs\Frontend\v17\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="web\.vs\slnx.sqlite" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Toot2Toulouse.Backend\Toot2Toulouse.Backend.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Properties\config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="web\closed.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\config.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\fonts\raleway-v28-latin-regular.eot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\fonts\raleway-v28-latin-regular.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\fonts\raleway-v28-latin-regular.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\fonts\raleway-v28-latin-regular.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\css\fonts\raleway-v28-latin-regular.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\index.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\js\app.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\js\jquery-3.6.3.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\js\js.cookie.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\regfinished.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\register.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="web\unknown.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

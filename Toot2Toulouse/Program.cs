@@ -5,9 +5,12 @@ using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Interfaces;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args)    ;
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+   .AddEnvironmentVariables();
 
 // Add services to the container.
+
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
