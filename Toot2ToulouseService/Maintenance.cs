@@ -72,10 +72,10 @@ namespace Toot2ToulouseService
 
         public void ListIds()
         {
-            _database.GetActiveUsers().ForEach(user =>
+            Console.WriteLine("id\tblockreason\tblockdate\tmastodon\ttwitter");
+            _database.GetAllUsers().ForEach(user =>
             {
-                Console.WriteLine($"{user.Id}->{user.Mastodon?.Handle}@{user.Mastodon?.Instance}->{user.Twitter?.Handle}");
-
+                Console.WriteLine($"{user.Id}\t{user.BlockReason}\t{user.BlockDate}\t{user.Mastodon?.Handle}@{user.Mastodon?.Instance}\t{user.Twitter?.Handle}");
             });
         }
 
@@ -85,7 +85,8 @@ namespace Toot2ToulouseService
             Console.WriteLine("User blocked");
         }
 
-        public void UnblockUser(Guid userId) {
+        public void UnblockUser(Guid userId)
+        {
             _user.Unblock(userId);
             Console.WriteLine("User unblocked");
         }

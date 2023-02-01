@@ -59,6 +59,11 @@ namespace Toot2Toulouse
                 Handle = user.ScreenName,
                 TmpAuthGuid=null
             };
+            if (t2tUser.BlockReason==  Backend.Models.UserData.BlockReasons.AuthTwitter)
+            {
+                t2tUser.BlockDate = null;
+                t2tUser.BlockReason = null;
+            }
             _database.UpsertUser(t2tUser);
             _toulouse.CalculateServerStats();
 

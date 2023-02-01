@@ -33,13 +33,13 @@ namespace Toot2Toulouse
             try
             {
                 var authToken = await GetUserAccessTokenByCode(userInstance, verificationCode);
-                var userData = new UserData
-                {
-                    Mastodon = new Backend.Models.Mastodon { Instance = userInstance, Secret = authToken },
-                    Twitter=new Backend.Models.Twitter ()
-                };
 
-                var userAccount = await _mastodon.GetUserAccount(userData);
+                var userAccount = await _mastodon.GetUserAccount(
+                    new UserData
+                    {
+                        Mastodon = new Backend.Models.Mastodon { Instance = userInstance, Secret = authToken }
+                    }
+                    );
                 if (userAccount == null)
                     return new KeyValuePair<bool, string>(false, "authorization failed");
 
@@ -60,8 +60,8 @@ namespace Toot2Toulouse
 
                 // TODO: Check maxTootsPerDay
 
-                StoreNewUser(userData, userAccount);
-                await _mastodon.AssignLastTweetedIfMissing(userData.Id);
+                StoreNewUser(userInstance, authToken, userAccount);
+                //    await _mastodon.AssignLastTweetedIfMissing(userData.Id);
 
                 return new KeyValuePair<bool, string>(true, "success");
             }
@@ -71,24 +71,35 @@ namespace Toot2Toulouse
             }
         }
 
-        private void StoreNewUser(UserData user, Account userAccount)
+        private void StoreNewUser(string instance, string secret, Account userAccount)
         {
-            var oldUserId = _database.GetUserIdByMastodonId(user.Mastodon.Instance, userAccount.Id);
-            if (oldUserId != null)
+            UserData user = null;
+            var existiungUserId = _database.GetUserIdByMastodonId(instance, userAccount.Id);
+            if (existiungUserId != null)
             {
-                var secret = user.Mastodon.Secret;
-                user = _database.GetUserById(oldUserId.Value);
-                user.Mastodon.Secret = secret;
+                user = _database.GetUserById(existiungUserId.Value);
             }
             else
             {
-                user.Config = _configuration.Defaults;
-                user.Mastodon.LastTootDate = userAccount.LastStatusAt;
+                user = new UserData
+                {
+                    Config = _configuration.Defaults
+                };
             }
+
+            user.Mastodon.Secret = secret;
+            user.Mastodon.Instance= instance;
+            user.Mastodon.LastTootDate = userAccount.LastStatusAt;
             user.Mastodon.Id = userAccount.Id;
             user.Mastodon.DisplayName = userAccount.DisplayName;
             user.Mastodon.Handle = userAccount.AccountName;
-         
+
+            if (user.BlockReason == UserData.BlockReasons.AuthMastodon)
+            {
+                user.BlockReason = null;
+                user.BlockDate = null;
+            }
+
             _database.UpsertUser(user);
             string hash = _database.CalculateHashForUser(user);
 

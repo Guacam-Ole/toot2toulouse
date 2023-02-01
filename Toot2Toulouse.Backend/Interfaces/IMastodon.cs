@@ -20,7 +20,7 @@ namespace Toot2Toulouse.Backend.Interfaces
             OnlyMentioned
         }
 
-        Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode);
+        Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode, string? additionalInfo);
 
         Task<Account?> GetUserAccount(UserData userData);
 

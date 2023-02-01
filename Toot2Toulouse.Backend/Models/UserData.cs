@@ -13,8 +13,8 @@ namespace Toot2Toulouse.Backend.Models
 
         public UserConfiguration Config { get; set; }
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Twitter Twitter { get; set; }
-        public Mastodon Mastodon { get; set; }
+        public Twitter Twitter { get; set; } = new Twitter();
+        public Mastodon Mastodon { get; set; } = new Mastodon();
         public List<Crosspost> Crossposts { get; set; } = new List<Crosspost>();
         public DateTime? BlockDate { get; set; }
         public BlockReasons? BlockReason { get; set; }

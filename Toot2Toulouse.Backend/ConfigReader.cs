@@ -16,13 +16,22 @@ namespace Toot2Toulouse.Backend
 
         public ConfigReader(string path)
         {
-            _path = path;
-            //   _webHostEnvironment = webHostEnvironment;
-            Configuration = GetApplicationConfig();
-            Configuration.CurrentVersion = GetType().Assembly.GetName().Version;
-            if (SecretsAreMissing())
+
+            try
             {
-                throw new Exception("Not all Secrets are configured");
+                _path = path;
+                Configuration = GetApplicationConfig();
+                Configuration.CurrentVersion = GetType().Assembly.GetName().Version;
+                if (SecretsAreMissing())
+                {
+                    throw new Exception("Not all Secrets are configured");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed reading config");
+                Console.WriteLine(ex);
+                throw;
             }
         }
 

@@ -17,5 +17,6 @@ namespace Toot2Toulouse.Backend.Interfaces
         void UpSertServerStats(Stats stats);
         UserData GetUserByUsername(string handle, string instance);
         UserData GetUserByTwitterTmpGuid(string guid);
+        List<UserData> GetAllUsers();
     }
 }

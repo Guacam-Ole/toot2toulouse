@@ -122,6 +122,21 @@ namespace Toot2Toulouse.Backend
             }
         }
 
+        public List<UserData> GetAllUsers()
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                return userCollection.Find(q => q.Id != Guid.Empty).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed retrieving users");
+                throw;
+            }
+        }
+
         public List<UserData> GetActiveUsers()
         {
             try

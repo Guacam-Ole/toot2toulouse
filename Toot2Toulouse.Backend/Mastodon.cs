@@ -3,6 +3,8 @@ using Mastonet.Entities;
 
 using Microsoft.Extensions.Logging;
 
+using System.Security.Cryptography;
+
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
@@ -28,11 +30,15 @@ namespace Toot2Toulouse.Backend
             _messages = configuration.GetMessagesForLanguage(_configuration.App.DefaultLanguage);   // TODO: Allow per-user Language setting
         }
 
-        public async Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode)
+        public async Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode, string? additionalInfo)
         {
-            var user = _database.GetUserById(id);
-            string recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
-            string message = $"{recipient}\n{prefix}{_messages[messageCode]}{_configuration.App.ServiceAppSuffix}";
+            string recipient = null;
+            if (id != Guid.Empty)
+            {
+                var user = _database.GetUserById(id);
+                recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
+            }
+            string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.ServiceAppSuffix}";
             ReplaceServiceTokens(ref message);
             await ServiceToot(message, Visibility.Direct);
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
@@ -138,9 +144,18 @@ namespace Toot2Toulouse.Backend
 
         public async Task<Status> GetSingleTootAsync(Guid userId, string tootId)
         {
-            var user = _database.GetUserById(userId);
-            var client = GetUserClient(user);
-            return await client.GetStatus(tootId);
+            try
+            {
+                var user = _database.GetUserById(userId);
+                var client = GetUserClient(user);
+                return await client.GetStatus(tootId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,"failed retrieving single toot with id {tid} for {uid}", tootId, userId);
+                throw;
+            }
+       
         }
 
         public async Task<List<Status>> GetTootsContaining(Guid id, string content, int limit = 100)
@@ -154,7 +169,7 @@ namespace Toot2Toulouse.Backend
             catch (Exception ex)
             {
                 _logger.LogError(ex, "failed searching for toots");
-                return new List<Status>();
+                throw;
             }
         }
 
