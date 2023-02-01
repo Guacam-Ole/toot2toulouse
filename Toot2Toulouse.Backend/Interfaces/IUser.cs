@@ -8,5 +8,7 @@ namespace Toot2Toulouse.Backend.Interfaces
         UserData? ExportUserData(UserData userData);
 
         void UpdateUser(UserData user);
+        void Block(Guid userId, UserData.BlockReasons reason);
+        void Unblock(Guid userId);
     }
 }

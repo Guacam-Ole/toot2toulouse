@@ -149,6 +149,8 @@ namespace Toot2Toulouse.Backend
             await _mastodon.SendStatusMessageTo(user.Id, "[INVITE] ", TootConfigurationApp.MessageCodes.Invite);
         }
 
+
+
         public async Task SendSingleToot(Guid userId, string tootId)
         {
             var toot = await _mastodon.GetSingleTootAsync(userId, tootId);
@@ -164,11 +166,12 @@ namespace Toot2Toulouse.Backend
 
         public async Task SendTootsForAllUsers()
         {
-            var users = _database.GetAllValidUsers().ToList();
+            var users = _database.GetActiveUsers().ToList();
             _logger.LogInformation("Sending toots for {count} users", users.Count());
             int totalTootCount = 0;
             foreach (var user in users)
             {
+                
                 var notTooted = await _mastodon.GetNonPostedToots(user.Id);
                 await SendToots(user.Id, notTooted, true);
             }
@@ -189,7 +192,7 @@ namespace Toot2Toulouse.Backend
         public void CalculateServerStats()
         {
             var serverstats = _database.GetServerStats();
-            var allUsers = _database.GetAllValidUsers();
+            var allUsers = _database.GetActiveUsers();
             var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.Now.AddDays(-1)));
             serverstats.ActiveUsers = activeUsers.Count();
             serverstats.TotalUsers = allUsers.Count();

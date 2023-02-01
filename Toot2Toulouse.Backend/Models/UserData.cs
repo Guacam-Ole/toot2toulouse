@@ -4,11 +4,21 @@ namespace Toot2Toulouse.Backend.Models
 {
     public class UserData
     {
+        public enum BlockReasons
+        {
+            Manual,
+            AuthTwitter,
+            AuthMastodon
+        }
+
         public UserConfiguration Config { get; set; }
         public Guid Id { get; set; } = Guid.NewGuid();
         public Twitter Twitter { get; set; }
         public Mastodon Mastodon { get; set; }
-        public List<Crosspost> Crossposts { get; set; }  =new List<Crosspost>();
+        public List<Crosspost> Crossposts { get; set; } = new List<Crosspost>();
+        public DateTime? BlockDate { get; set; }
+        public BlockReasons? BlockReason { get; set; }
+
 
         public override string ToString()
         {

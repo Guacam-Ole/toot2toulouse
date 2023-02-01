@@ -12,7 +12,7 @@ namespace Toot2Toulouse.Backend.Interfaces
         void UpsertUser(UserData user);
         void RemoveUser(Guid id);
         string CalculateHashForUser(UserData user);
-        List<UserData> GetAllValidUsers();
+        List<UserData> GetActiveUsers();
         Stats GetServerStats();
         void UpSertServerStats(Stats stats);
         UserData GetUserByUsername(string handle, string instance);
