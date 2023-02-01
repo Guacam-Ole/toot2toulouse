@@ -16,7 +16,8 @@ namespace Toot2Toulouse.Backend.Configuration
             UpAndRunning,
             BackAgain,
             RegistrationFinished,
-            Invite
+            Invite,
+            RateLimit
         }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -108,5 +109,6 @@ namespace Toot2Toulouse.Backend.Configuration
 
         [OverviewCategory("Intervals", "Maximum Delay", Suffix = " (hh:mm:ss)")]
         public TimeSpan MaxDelay { get; set; } // Maximum delay before tweeting a toot
+        public int AuthFailureDeleteDays { get; set; } = 14;
     }
 }

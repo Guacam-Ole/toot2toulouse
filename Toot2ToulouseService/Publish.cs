@@ -31,6 +31,11 @@ namespace Toot2ToulouseService
             } while (loop);
         }
 
+        public async Task PublishSingleToot(Guid userId, string tootId)
+        {
+            await _toulouse.SendSingleToot(userId, tootId);
+        }
+
         public async Task<List<Status>> GetTootsContaining(string mastodonHandle, string contents, int searchLimit)
         {
             return await _toulouse.GetTootsContaining(mastodonHandle, contents, searchLimit);

@@ -7,7 +7,6 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
-using Tweetinvi.Core.Models;
 using Tweetinvi.Exceptions;
 using Tweetinvi.Logic.QueryParameters;
 using Tweetinvi.Models;
@@ -62,7 +61,7 @@ namespace Toot2Toulouse.Backend
 
         private async Task<List<long>> PublishFromToot(UserData userData, Status toot)
         {
-            var tweetIds=new    List<long>();
+            var tweetIds = new List<long>();
             try
             {
                 if (!string.IsNullOrWhiteSpace(toot.SpoilerText))
@@ -81,14 +80,14 @@ namespace Toot2Toulouse.Backend
                     switch (userData.Config.LongContent)
                     {
                         case ITwitter.LongContent.DontPublish:
-                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser, content.Length);
+                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser.Id, content.Length);
                             break;
 
                         case ITwitter.LongContent.Cut:
-                            var cuttweet= await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                            var cuttweet = await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
                             tweetIds.Add(cuttweet.Id);
 
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser, content.Length, mainTweet.Length);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser.Id, content.Length, mainTweet.Length);
                             break;
 
                         case ITwitter.LongContent.Thread:
@@ -100,11 +99,11 @@ namespace Toot2Toulouse.Backend
                                 foreach (var reply in replies)
                                 {
                                     tweet = await TweetAsync(userData, reply, isSensitive, tweet.Id);
-                                    if (tweet == null);
+                                    if (tweet == null) ;
                                     tweetIds.Add(tweet.Id);
                                 }
                             }
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser, content.Length, replies.Count);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser.Id, content.Length, replies.Count);
                             break;
 
                         default:
@@ -113,7 +112,7 @@ namespace Toot2Toulouse.Backend
                 }
                 else
                 {
-                    var singletweet= await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                    var singletweet = await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
                     tweetIds.Add(singletweet.Id);
                     _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser, content.Length);
                 }
@@ -144,11 +143,10 @@ namespace Toot2Toulouse.Backend
                     case ".jpeg":
                     case ".webp":
                         fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
-                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents );
-                      
+                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
 
                         break;
-                        //return mediafile;
+                    //return mediafile;
 
                     case ".gif":
                         fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
@@ -159,12 +157,12 @@ namespace Toot2Toulouse.Backend
                         fileContents = await DownloadFile(attachment.Url, null, _config.App.MaxVideoSize);
                         mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
                         break;
-                        //return mediafile;
+                    //return mediafile;
 
                     default:
                         throw new NotImplementedException(); // TODO: Own exceptiontype
                 }
-                if (mediafile != null && attachment.Description!=null)
+                if (mediafile != null && attachment.Description != null)
                 {
                     await userClient.Upload.AddMediaMetadataAsync(new MediaMetadata(mediafile)
                     {
@@ -172,7 +170,6 @@ namespace Toot2Toulouse.Backend
                     });
                 }
                 return mediafile;
-
             }
             catch (Exception ex)
             {
@@ -193,7 +190,7 @@ namespace Toot2Toulouse.Backend
             return await TweetAsync(userData, new PublishTweetParameters
             {
                 Text = content,
-                PossiblySensitive = isSensitive, 
+                PossiblySensitive = isSensitive,
                 Medias = mediaFiles
             });
         }
@@ -243,11 +240,9 @@ namespace Toot2Toulouse.Backend
             {
                 return await GetUserClient(userData).Tweets.PublishTweetAsync(tweetParameters);
             }
-            catch (TwitterException tex) when (tex.StatusCode==403)
+            catch (TwitterException tex) // when (tex.StatusCode==403)
             {
                 _logger.LogWarning(tex, "Tweet-error {text} to {reply} ", tweetParameters.Text, tweetParameters.InReplyToTweet);
-
-                
                 throw;
             }
             catch (Exception ex)
