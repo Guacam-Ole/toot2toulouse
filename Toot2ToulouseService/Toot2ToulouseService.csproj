@@ -19,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="path.example.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="path.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

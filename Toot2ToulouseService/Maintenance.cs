@@ -67,5 +67,14 @@ namespace Toot2ToulouseService
         {
             return _database.GetServerStats().CurrentVersion;
         }
+
+        public void ListIds()
+        {
+            _database.GetAllValidUsers().ForEach(user =>
+            {
+                Console.WriteLine($"{user.Id}->{user.Mastodon?.Handle}@{user.Mastodon?.Instance}->{user.Twitter?.Handle}");
+
+            });
+        }
     }
 }

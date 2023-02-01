@@ -7,8 +7,6 @@ using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
-using Tweetinvi.Core.Models;
-
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
 
 namespace Toot2Toulouse.Backend
@@ -65,8 +63,6 @@ namespace Toot2Toulouse.Backend
 
                 if (propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType.Namespace.StartsWith("Toot2Toulouse"))
                 {
-                    //string subPrefix = prefix;
-                    //if (!string.IsNullOrEmpty(subPrefix)) subPrefix += ".";
                     GetConfigValues(value, prefix + propertyInfo.Name + ".", displayProperties);
                 }
                 var stringValue = string.Empty;
@@ -112,7 +108,6 @@ namespace Toot2Toulouse.Backend
             var lastTweeted = lastStatuses.OrderBy(q => q.CreatedAt).FirstOrDefault();
             user.Mastodon.LastToot = lastTweeted.Id;
             _database.UpsertUser(user);
-           
         }
 
         public async Task<List<Status>> GetNonPostedToots(Guid id)
@@ -125,20 +120,27 @@ namespace Toot2Toulouse.Backend
             return statuses.OrderBy(q => q.CreatedAt).ToList();
         }
 
-        public async Task<List<Status>> GetServiceTootsContaining( string content, int limit=100, string? recipient=null)
+        public async Task<List<Status>> GetServiceTootsContaining(string content, int limit = 100, string? recipient = null)
         {
             return await GetTootsContaining(GetServiceClient(), content, limit, recipient);
         }
 
-        private async Task<List<Status>> GetTootsContaining(MastodonClient client, string content, int limit = 100, string? recipient=null)
+        private async Task<List<Status>> GetTootsContaining(MastodonClient client, string content, int limit = 100, string? recipient = null)
         {
             var statuses = await client.GetAccountStatuses((await client.GetCurrentUser()).Id, new ArrayOptions { Limit = limit }, false, true, false, true);
             var matches = statuses.Where(q => q.Content.Contains(content, StringComparison.InvariantCultureIgnoreCase));
-            if (recipient!=null)
+            if (recipient != null)
             {
-                matches=matches.Where(q=>q.Mentions.Any(m=>m.AccountName == recipient));    
+                matches = matches.Where(q => q.Mentions.Any(m => m.AccountName == recipient));
             }
             return matches.OrderBy(q => q.CreatedAt).ToList();
+        }
+
+        public async Task<Status> GetSingleTootAsync(Guid userId, string tootId)
+        {
+            var user = _database.GetUserById(userId);
+            var client = GetUserClient(user);
+            return await client.GetStatus(tootId);
         }
 
         public async Task<List<Status>> GetTootsContaining(Guid id, string content, int limit = 100)
@@ -147,7 +149,7 @@ namespace Toot2Toulouse.Backend
             {
                 var user = _database.GetUserById(id);
                 var client = GetUserClient(user);
-                return await GetTootsContaining(client, content, limit);  
+                return await GetTootsContaining(client, content, limit);
             }
             catch (Exception ex)
             {

@@ -10,8 +10,6 @@ using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
-using Tweetinvi.Parameters;
-
 namespace Toot2Toulouse.Backend
 {
     public class Toulouse : IToulouse
@@ -149,6 +147,19 @@ namespace Toot2Toulouse.Backend
             }
 
             await _mastodon.SendStatusMessageTo(user.Id, "[INVITE] ", TootConfigurationApp.MessageCodes.Invite);
+        }
+
+        public async Task SendSingleToot(Guid userId, string tootId)
+        {
+            var toot = await _mastodon.GetSingleTootAsync(userId, tootId);
+            if (toot == null)
+            {
+                _logger.LogError("toot {tootid} not found for user {userid}", tootId, userId);
+                return;
+            }
+
+            await SendToots(userId, new List<Status> { toot }, false);
+            _logger.LogDebug("sent single toot {tootid}", tootId);
         }
 
         public async Task SendTootsForAllUsers()
