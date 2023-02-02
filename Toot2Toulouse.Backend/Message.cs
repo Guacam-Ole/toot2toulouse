@@ -23,8 +23,10 @@ namespace Toot2Toulouse.Backend
         {
             content = content.Replace("</p>", "\n\n");
             content = content.Replace("<br />", "\n");
-            content = System.Net.WebUtility.HtmlDecode(content);
-            return Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
+            content= Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
+            content  =System.Net.WebUtility.HtmlDecode(content);
+            return content;
+         
         }
 
         public List<string>? GetReplies(UserConfiguration userConfiguration, string originalToot, out string mainTweet)
