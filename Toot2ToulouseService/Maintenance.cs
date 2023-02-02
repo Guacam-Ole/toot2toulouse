@@ -50,9 +50,9 @@ namespace Toot2ToulouseService
             }
         }
 
-        public async Task Invite(string mastodonHandle)
+        public async Task InviteAsync(string mastodonHandle)
         {
-            await _toulouse.Invite(mastodonHandle);
+            await _toulouse.InviteAsync(mastodonHandle);
         }
 
         public void Upgrade(Version? fromVersion)

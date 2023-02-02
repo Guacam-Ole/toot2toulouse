@@ -28,13 +28,13 @@ namespace Toot2Toulouse
             _toulouse = toulouse;
         }
 
-        public async Task<KeyValuePair<bool, string>> UserIsAllowedToRegister(string userInstance, string verificationCode)
+        public async Task<KeyValuePair<bool, string>> UserIsAllowedToRegisterAsync(string userInstance, string verificationCode)
         {
             try
             {
-                var authToken = await GetUserAccessTokenByCode(userInstance, verificationCode);
+                var authToken = await GetUserAccessTokenByCodeAsync(userInstance, verificationCode);
 
-                var userAccount = await _mastodon.GetUserAccount(
+                var userAccount = await _mastodon.GetUserAccountAsync(
                     new UserData
                     {
                         Mastodon = new Backend.Models.Mastodon { Instance = userInstance, Secret = authToken }
@@ -53,7 +53,7 @@ namespace Toot2Toulouse
                     return new KeyValuePair<bool, string>(false, "This server isn't accepting new registrations. (I thought we already told you that?)");
                 if (_configuration.App.Modes.Active == TootConfigurationAppModes.ValidModes.Invite)
                 {
-                    var invites = await _mastodon.GetServiceTootsContaining("[INVITE]", 100, $"{userAccount.AccountName}@{userInstance}");
+                    var invites = await _mastodon.GetServiceTootsContainingAsync("[INVITE]", 100, $"{userAccount.AccountName}@{userInstance}");
                     if (invites.Count == 0)
                         return new KeyValuePair<bool, string>(false, "Looks like you did not receive an invite or your invite has expired");
                 }
@@ -107,7 +107,7 @@ namespace Toot2Toulouse
             _cookies.UserHashSetCookie(hash);
         }
 
-        public async Task<AuthenticationClient> GetAuthenticationClient(string userInstance, bool createApp)
+        public async Task<AuthenticationClient> GetAuthenticationClientAsync(string userInstance, bool createApp)
         {
             var authClient = new AuthenticationClient(userInstance);
             if (createApp)
@@ -123,18 +123,18 @@ namespace Toot2Toulouse
             return authClient;
         }
 
-        public async Task<string> GetAuthenticationUrl(string requestHost, string userInstance)
+        public async Task<string> GetAuthenticationUrlAsync(string requestHost, string userInstance)
         {
-            var serviceClient = await GetAuthenticationClient(userInstance, true);
+            var serviceClient = await GetAuthenticationClientAsync(userInstance, true);
             var url = serviceClient.OAuthUrl();
             return url;
         }
 
-        private async Task<string> GetUserAccessTokenByCode(string instance, string code)
+        private async Task<string> GetUserAccessTokenByCodeAsync(string instance, string code)
         {
             try
             {
-                var authClient = await GetAuthenticationClient(instance, false);
+                var authClient = await GetAuthenticationClientAsync(instance, false);
                 var auth = await authClient.ConnectWithCode(code);
                 return auth.AccessToken;
             }

@@ -24,12 +24,12 @@ namespace Toot2Toulouse.Controllers
 
         [Route("auth")]
         [HttpGet]
-        public async Task<ActionResult> AuthStart(string instance)
+        public async Task<ActionResult> AuthStartAsync(string instance)
         {
             string redirectUrl;
             try
             {
-                redirectUrl = await _mastodon.GetAuthenticationUrl(GetRequestHost(), instance);
+                redirectUrl = await _mastodon.GetAuthenticationUrlAsync(GetRequestHost(), instance);
             }
             catch (HttpRequestException hex)
             {
@@ -44,9 +44,9 @@ namespace Toot2Toulouse.Controllers
 
         [Route("code")]
         [HttpGet]
-        public async Task<ActionResult> AuthFinish(string instance, string code)
+        public async Task<ActionResult> AuthFinishAsync(string instance, string code)
         {
-            return new JsonResult(await _mastodon.UserIsAllowedToRegister(instance, code));
+            return new JsonResult(await _mastodon.UserIsAllowedToRegisterAsync(instance, code));
         }
     }
 }

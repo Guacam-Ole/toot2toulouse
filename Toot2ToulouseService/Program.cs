@@ -22,18 +22,18 @@ namespace Toot2ToulouseService
         }
 
 
-        private static async Task Checkparameters(string[] args)
+        private static async Task CheckparametersAsync(string[] args)
         {
             if (args.Length == 0)
             {
-                await _publish.PublishToots(false);
+                await _publish.PublishTootsAsync(false);
             }
             else
             {
                 switch (args[0])
                 {
                     case "loop":
-                        await _publish.PublishToots(true);
+                        await _publish.PublishTootsAsync(true);
                         break;
 
                     case "upgrade":
@@ -53,17 +53,17 @@ namespace Toot2ToulouseService
 
                     case "search":
                         ArgsCheck(args, 3, "missing paramters: mastodonhandle, searchstring");
-                        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(await _publish.GetTootsContaining(args[1], args[2], 5000), Toot2Toulouse.Backend.ConfigReader.JsonOptions));
+                        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(await _publish.GetTootsContainingAsync(args[1], args[2], 5000), Toot2Toulouse.Backend.ConfigReader.JsonOptions));
                         break;
 
                     case "invite":
                         ArgsCheck(args,2,"Recipient required");
-                        await _maintenance.Invite(args[1]);
+                        await _maintenance.InviteAsync(args[1]);
                         break;
 
                     case "single":
                         ArgsCheck(args,3,"UserId and TootId required");
-                        await _publish.PublishSingleToot(new Guid(args[1]), args[2]);
+                        await _publish.PublishSingleTootAsync(new Guid(args[1]), args[2]);
                         break;
 
                     case "listids":
@@ -95,7 +95,7 @@ namespace Toot2ToulouseService
             _publish = serviceProvider.GetService<Publish>();
             _maintenance = serviceProvider.GetService<Maintenance>();
 
-            await Checkparameters(args);
+            await CheckparametersAsync(args);
 
             serviceProvider.Dispose();
         }
