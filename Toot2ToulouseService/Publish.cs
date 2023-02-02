@@ -26,8 +26,8 @@ namespace Toot2ToulouseService
             do
             {
                 await _toulouse.SendTootsForAllUsersAsync();
-              
-               if (loop) Thread.Sleep((int)_config.App.Intervals.Sending.TotalMilliseconds);
+
+                if (loop) Thread.Sleep((int)_config.App.Intervals.Sending.TotalMilliseconds);
             } while (loop);
         }
 
@@ -40,7 +40,5 @@ namespace Toot2ToulouseService
         {
             return await _toulouse.GetTootsContainingAsync(mastodonHandle, contents, searchLimit);
         }
-
-     
     }
 }

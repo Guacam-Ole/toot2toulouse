@@ -113,30 +113,32 @@ namespace Toot2Toulouse.Backend
 
                 try
                 {
-                    _logger.LogDebug("Toot: {id}|{url}", toot.Id, toot.Uri);
-                    if (toot.Id == user.Mastodon.LastToot)
-                    {
-                        sentToots.Add(new Crosspost { Result = "AlreadyTweeted", TootId = toot.Id });
-                        _logger.LogWarning("already tweeted");
-                        continue; // already tweeted
-                    }
+                    _logger.LogTrace("Toot: {id}|{url}", toot.Id, toot.Uri);
                     if (user.Crossposts.FirstOrDefault(q => q.TootId == toot.Id) != null)
                     {
                         sentToots.Add(new Crosspost { Result = "AlreadyTweeted", TootId = toot.Id });
                         _logger.LogWarning("already tweeted this");
                         continue;
                     }
-                    if (toot.InReplyToId != null)
-                    {
-                        sentToots.Add(new Crosspost { Result = "IsReply", TootId = toot.Id });
-                        _logger.LogDebug("is a reply. Wont tweet");
-                        continue;
-                    }
 
-                    var twitterIds = await _twitter.PublishAsync(user, toot);
-                    var crossPost = new Crosspost { Result = "Tweeted", TootId = toot.Id, TwitterIds = twitterIds };
-                    user.Crossposts.Add(crossPost);
-                    sentToots.Add(crossPost);
+                    Crosspost crosspost;
+                    if (toot.Id == user.Mastodon.LastToot)
+                    {
+                        crosspost = new Crosspost { Result = "AlreadyTweeted", TootId = toot.Id };
+                        _logger.LogWarning("already tweeted");
+                    }
+                    else if (toot.InReplyToId != null)
+                    {
+                        crosspost = new Crosspost { Result = "IsReply", TootId = toot.Id };
+                        _logger.LogDebug("is a reply. Wont tweet");
+                    }
+                    else
+                    {
+                        var twitterIds = await _twitter.PublishAsync(user, toot);
+                        crosspost = new Crosspost { Result = "Tweeted", TootId = toot.Id, TwitterIds = twitterIds };
+                    }
+                    user.Crossposts.Add(crosspost);
+                    sentToots.Add(crosspost);
                 }
                 catch (TwitterException twitterException)
                 {
