@@ -71,18 +71,18 @@ The Service can be installed onto any location on your server. But it will need 
 
 The service can be used in two ways. If you start it without any parameter it only checks for toots to crosspost *once*. This is meant to be used when you want to run it as cronjob (recommened):
 ```
-dotnet ./toot2toulouseservice.dll
+dotnet toot2toulouseservice.dll
 ```
 
 The application should start sending toots within a few seconds and stop once it is finished.
 
 You can also start it with the loop parameter:
 ```
-dotnet .\toot2toulouseservice.dll loop
+dotnet toot2toulouseservice.dll loop
 ```
 
 
-Call this if you don't want to use a cronjob. The application will loop infinitely until it is aborted. It is recommened to only use this to test on a local dev machine and always use the cron-option if possible.
+Call this if you don't want to use a cronjob. The application will loop infinitely until it is aborted. It is recommened to only use this to test on a local machine and always use the cron-option if possible.
 
 You're done. Toot something and wait for it to appear on Twitter.
 
@@ -91,7 +91,7 @@ You're done. Toot something and wait for it to appear on Twitter.
 #### Service Commands
 The service can not only crosspost to Twitter but also allows additional maintenance tasks:
 
-upgrade [version?]` - Upgrades the database to the mentioned version. If version is missing to the most current version. Call this if you install a new version but have a database running at a previous version.
+`upgrade [version?]` - Upgrades the database to the mentioned version. If version is missing to the most current version. Call this if you install a new version but have a database running at a previous version.
 
 `version` - Display application version
 
