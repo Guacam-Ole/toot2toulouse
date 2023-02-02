@@ -109,9 +109,9 @@ The service can not only crosspost to Twitter but also allows additional mainten
 
 
 ## Blocking and Error handling
-You can always block a user manually. In addition, automatich blocks will be set if the authentication from Twitter or Mastodon fails (the user has removed the app permission). Because Mastodon has no fixed autherrorcode and the errormessage varies by instance, ANY Mastodon-Error is treated as an auth error.
+You can always block a user manually. In addition, automatic blocks will be set if the authentication from Twitter or Mastodon fails (the user has removed the app permission). Because Mastodon has no fixed autherrorcode and the errormessage varies by instance, ANY Mastodon-Error is treated as an auth error.
 
-Both auth-errors will cause a message to be sent to the user. If the user reauthenticates using /user/register, these blocks will automatically removed. Manuall blocks can only be removed manually.
+Both auth-errors will cause a message to be sent to the user. If the user reauthenticates using `/user/register`, these blocks will automatically removed. Manual blocks can also only be removed manually.
 
 
 
