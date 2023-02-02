@@ -175,14 +175,14 @@ namespace Toot2Toulouse.Backend
 
         public async Task Invite(string mastodonHandle)
         {
-            var user = GetUserByMastodonHandle(mastodonHandle);
-            if (user == null)
-            {
-                _logger.LogWarning("user not found");
-                return;
-            }
+            //var user = GetUserByMastodonHandle(mastodonHandle);
+            //if (user == null)
+            //{
+            //    _logger.LogWarning("user not found");
+            //    return;
+            //}
 
-            await _mastodon.SendStatusMessageTo(user.Id, "[INVITE] ", TootConfigurationApp.MessageCodes.Invite, null);
+            await _mastodon.SendStatusMessageTo(Guid.Empty, $"{mastodonHandle} [INVITE] ", TootConfigurationApp.MessageCodes.Invite, null);
         }
 
 
