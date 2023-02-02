@@ -10,7 +10,7 @@ Toot2Toulouse is a .net 6 application and so runs on Windows and current Linux d
 This document describes what to do on Twitter, on Mastodon and how to confgure and run the application.
 
 ## Preparation
-You need to register your app to the [Twitter api](https://developer.twitter.com/en/docs/twitter-api). You also need to register an app to Mastodon(Settings/Development). Twitter can be a bit cumbersome as it will be validated so better start with this step because this will be the main pitfall. 
+You need to register your app to the [Twitter api](https://developer.twitter.com/en/docs/twitter-api). You also need to register an app to Mastodon(Settings/Development). Twitter can be a bit cumbersome as it will be validated by human beings (and Twitter changing its policies at random) so better start with this step because this will be the main pitfall. 
 Also what limitation you have on Twitter can be a bit random. You will have to configure accordingly to not run into the limitations.
 
 ## Installation
