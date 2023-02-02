@@ -37,7 +37,7 @@ namespace Toot2Toulouse.Backend
             return new TwitterClient(userData.Twitter.ConsumerKey, userData.Twitter.ConsumerSecret, userData.Twitter.AccessToken, userData.Twitter.AccessSecret);
         }
 
-        private async Task<IAuthenticatedUser> GetTwitterUser(UserData userData)
+        private async Task<IAuthenticatedUser> GetTwitterUserAsync(UserData userData)
         {
             return await GetUserClient(userData).Users.GetAuthenticatedUserAsync();
         }
@@ -56,10 +56,10 @@ namespace Toot2Toulouse.Backend
                 _logger.LogDebug("Didn't tweet toot {id} ", toot.Id);
                 return new List<long>();
             }
-            return await PublishFromToot(userData, toot);
+            return await PublishFromTootAsync(userData, toot);
         }
 
-        private async Task<List<long>> PublishFromToot(UserData userData, Status toot)
+        private async Task<List<long>> PublishFromTootAsync(UserData userData, Status toot)
         {
             var tweetIds = new List<long>();
             try
@@ -72,7 +72,7 @@ namespace Toot2Toulouse.Backend
                 bool isSensitive = toot.Sensitive ?? false;
 
                 string content = _toot.StripHtml(toot.Content);
-                var twitterUser = await GetTwitterUser(userData);
+                var twitterUser = await GetTwitterUserAsync(userData);
 
                 var replies = _toot.GetReplies(userData.Config, content, out string mainTweet);
                 if (replies != null)
@@ -142,19 +142,19 @@ namespace Toot2Toulouse.Backend
                     case ".jpg":
                     case ".jpeg":
                     case ".webp":
-                        fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
                         mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
 
                         break;
                     //return mediafile;
 
                     case ".gif":
-                        fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
                         mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
                         break;
 
                     case ".mp4":
-                        fileContents = await DownloadFile(attachment.Url, null, _config.App.MaxVideoSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, null, _config.App.MaxVideoSize);
                         mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
                         break;
                     //return mediafile;
@@ -195,7 +195,7 @@ namespace Toot2Toulouse.Backend
             });
         }
 
-        private async Task<Stream> DownloadFile(string url)
+        private async Task<Stream> DownloadFileAsync(string url)
         {
             var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(url);
@@ -203,9 +203,9 @@ namespace Toot2Toulouse.Backend
             return await response.Content.ReadAsStreamAsync();
         }
 
-        private async Task<Byte[]> DownloadFile(string url, string? alternativeUrl, long maxSizeMegaBytes)
+        private async Task<byte[]> DownloadFileAsync(string url, string? alternativeUrl, long maxSizeMegaBytes)
         {
-            var urlStream = await DownloadFile(url);
+            var urlStream = await DownloadFileAsync(url);
 
             var sizeInMb = urlStream.Length / 1024d / 1024d;
             if (sizeInMb > maxSizeMegaBytes)
@@ -214,7 +214,7 @@ namespace Toot2Toulouse.Backend
                 if (alternativeUrl != null)
                 {
                     _logger.LogInformation("Will use previewurl instead");
-                    urlStream = await DownloadFile(alternativeUrl);
+                    urlStream = await DownloadFileAsync(alternativeUrl);
                 }
                 else throw new IndexOutOfRangeException("File too big");     // TODO: Own exception type
             }

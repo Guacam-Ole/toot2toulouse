@@ -8,14 +8,14 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Configuration.TootConfigurationAppModes.ValidModes GetServerMode();
 
-        Task SendTootsForAllUsers();
+        Task SendTootsForAllUsersAsync();
 
-        Task<List<Status>> GetTootsContaining(string mastodonHandle, string searchstring, int limit);
+        Task<List<Status>> GetTootsContainingAsync(string mastodonHandle, string searchstring, int limit);
 
-        Task Invite(string mastodonHandle);
+        Task InviteAsync(string mastodonHandle);
 
         void CalculateServerStats();
 
-        Task SendSingleToot(Guid userId, string tootId);
+        Task SendSingleTootAsync(Guid userId, string tootId);
     }
 }

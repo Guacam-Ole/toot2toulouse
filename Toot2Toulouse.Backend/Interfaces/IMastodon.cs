@@ -20,19 +20,19 @@ namespace Toot2Toulouse.Backend.Interfaces
             OnlyMentioned
         }
 
-        Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode, string? additionalInfo);
+        Task SendStatusMessageToAsync(Guid id, string? prefix, MessageCodes messageCode, string? additionalInfo);
 
-        Task<Account?> GetUserAccount(UserData userData);
+        Task<Account?> GetUserAccountAsync(UserData userData);
 
-        Task<Account?> GetUserAccount(MastodonClient mastodonClient);
+        Task<Account?> GetUserAccountAsync(MastodonClient mastodonClient);
 
-        Task<List<Status>> GetNonPostedToots(Guid id);
+        Task<List<Status>> GetNonPostedTootsAsync(Guid id);
 
-        Task<List<Status>> GetTootsContaining(Guid id, string? content, int limit = 100);
+        Task<List<Status>> GetTootsContainingAsync(Guid id, string? content, int limit = 100);
 
-        Task<List<Status>> GetServiceTootsContaining(string content, int limit = 100, string? recipient = null);
+        Task<List<Status>> GetServiceTootsContainingAsync(string content, int limit = 100, string? recipient = null);
 
-        Task AssignLastTweetedIfMissing(Guid id);
+        Task AssignLastTweetedIfMissingAsync(Guid id);
 
         Task<Status> GetSingleTootAsync(Guid userId, string tootId);
     }
