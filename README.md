@@ -101,14 +101,14 @@ The service can not only crosspost to Twitter but also allows additional mainten
 
 `listids` - List all Ids and corresponding Usernames as well as any block that might be set
 
-`single`[userid] [tootid]` - sends a single toot. Is meant for admin-tests and NOT for regular users as updates will not be saved
+`single [userid] [tootid]` - sends a single toot. Is meant for admin-tests and NOT for regular users as updates will not be saved
 
 `block [userid]` - block a single user
 
 `unblock [userid]` - remove block from a single user
 
 
-## Blocking and errorhandling
+## Blocking and Error handling
 You can always block a user manually. In addition, automatich blocks will be set if the authentication from Twitter or Mastodon fails (the user has removed the app permission). Because Mastodon has no fixed autherrorcode and the errormessage varies by instance, ANY Mastodon-Error is treated as an auth error.
 
 Both auth-errors will cause a message to be sent to the user. If the user reauthenticates using /user/register, these blocks will automatically removed. Manuall blocks can only be removed manually.
