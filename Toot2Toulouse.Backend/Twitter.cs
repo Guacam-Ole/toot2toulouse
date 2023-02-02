@@ -72,7 +72,7 @@ namespace Toot2Toulouse.Backend
                 bool isSensitive = toot.Sensitive ?? false;
 
                 string content = _toot.StripHtml(toot.Content);
-                var twitterUser = GetTwitterUser(userData);
+                var twitterUser = await GetTwitterUser(userData);
 
                 var replies = _toot.GetReplies(userData.Config, content, out string mainTweet);
                 if (replies != null)
@@ -80,14 +80,14 @@ namespace Toot2Toulouse.Backend
                     switch (userData.Config.LongContent)
                     {
                         case ITwitter.LongContent.DontPublish:
-                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser.Id, content.Length);
+                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser.Name, content.Length);
                             break;
 
                         case ITwitter.LongContent.Cut:
                             var cuttweet = await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
                             tweetIds.Add(cuttweet.Id);
 
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser.Id, content.Length, mainTweet.Length);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser.Name, content.Length, mainTweet.Length);
                             break;
 
                         case ITwitter.LongContent.Thread:
@@ -103,7 +103,7 @@ namespace Toot2Toulouse.Backend
                                     tweetIds.Add(tweet.Id);
                                 }
                             }
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser.Id, content.Length, replies.Count);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser.Name, content.Length, replies.Count);
                             break;
 
                         default:
@@ -114,7 +114,7 @@ namespace Toot2Toulouse.Backend
                 {
                     var singletweet = await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
                     tweetIds.Add(singletweet.Id);
-                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser, content.Length);
+                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser.Name, content.Length);
                 }
                 return tweetIds;
             }

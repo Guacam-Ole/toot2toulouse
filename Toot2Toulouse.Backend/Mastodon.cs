@@ -122,7 +122,7 @@ namespace Toot2Toulouse.Backend
             var user = _database.GetUserById(id);
             var client = GetUserClient(user);
             var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
-            _logger.LogDebug("retrieved {count} statuses since {sinceid}", statuses.Count, user.Mastodon.LastToot);
+       //     _logger.LogDebug("retrieved {count} statuses since {sinceid}", statuses.Count, user.Mastodon.LastToot);
             return statuses.OrderBy(q => q.CreatedAt).ToList();
         }
 
