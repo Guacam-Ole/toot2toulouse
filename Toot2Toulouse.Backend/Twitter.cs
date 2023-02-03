@@ -59,6 +59,16 @@ namespace Toot2Toulouse.Backend
             return await PublishFromTootAsync(userData, toot);
         }
 
+        private void ReplaceRecipients(IEnumerable<Mention> mentions, ref string content)
+        {
+            if (mentions == null) return;
+
+            foreach (var mention in mentions)
+            {
+              content=  content.Replace($"@{mention.UserName}", $"🐘{mention.UserName}");
+            }
+        }
+
         private async Task<List<long>> PublishFromTootAsync(UserData userData, Status toot)
         {
             var tweetIds = new List<long>();
@@ -71,7 +81,11 @@ namespace Toot2Toulouse.Backend
                 }
                 bool isSensitive = toot.Sensitive ?? false;
 
+
+
                 string content = _toot.StripHtml(toot.Content);
+                ReplaceRecipients(toot.Mentions, ref content);
+
                 var twitterUser = await GetTwitterUserAsync(userData);
 
                 var replies = _toot.GetReplies(userData.Config, content, out string mainTweet);

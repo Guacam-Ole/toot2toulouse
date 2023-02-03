@@ -182,8 +182,10 @@ namespace Toot2Toulouse.Backend
             }
             user.Mastodon.LastTootDate = newLastDate;
             if (updateUserData) _database.UpsertUser(user);
+            var sentCount = sentToots.Count(q => q.TwitterIds.Count > 0);
 
-            _logger.LogDebug("Sent {sentcount} from {count} toots to twitter for {user}@{instance}", sentToots.Count(q => q.TwitterIds.Count > 0), toots.Count, user.Mastodon.Handle, user.Mastodon.Instance);
+            _logger.LogDebug($"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}");
+
             return sentToots;
         }
 
@@ -255,8 +257,9 @@ namespace Toot2Toulouse.Backend
 
                 if (userToots?.Count > 0) toots.AddRange(await SendTootsAsync(user.Id, userToots, true));
             }
-
-            _logger.LogInformation("Sent {tootcount} toots for {count} users", toots.Count(q => q.TwitterIds.Count > 0), users.Count());
+            var tootCount = toots.Count(q => q.TwitterIds.Count > 0);
+            if (tootCount > 0)
+                _logger.LogInformation("Sent {tootCount} toots for {count} users", tootCount, users.Count());
         }
 
         public TootConfigurationAppModes.ValidModes GetServerMode()
