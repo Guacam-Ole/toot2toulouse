@@ -101,6 +101,25 @@ namespace Toot2Toulouse.Backend
             return toots;
         }
 
+        private long? GetTwitterReplyToIdFromTootId(string tootId)
+        {
+                var allUsers=_database.GetAllUsers();
+                foreach (var user in allUsers)
+                {
+                    if (user.Crossposts.Any(q=>q.TootId==tootId))
+                    {
+                        return user.Crossposts.FirstOrDefault(q => q.TootId == tootId).TwitterIds.Max();
+                    }
+
+                }
+                return null;        }
+
+        private long? GetTwitterReplyId(Status toot)
+        {
+            if (toot.InReplyToId==null) return null;
+            return GetTwitterReplyToIdFromTootId(toot.InReplyToId);
+        }
+
         private async Task<List<Crosspost>> SendTootsAsync(Guid userId, List<Status> toots, bool updateUserData)
         {
             var sentToots = new List<Crosspost>();
@@ -113,6 +132,7 @@ namespace Toot2Toulouse.Backend
 
                 try
                 {
+                    long? twitterReplyToId=GetTwitterReplyId(toot);
                     _logger.LogTrace("Toot: {id}|{url}", toot.Id, toot.Uri);
                     if (user.Crossposts.FirstOrDefault(q => q.TootId == toot.Id) != null)
                     {
@@ -127,14 +147,14 @@ namespace Toot2Toulouse.Backend
                         crosspost = new Crosspost { Result = "AlreadyTweeted", TootId = toot.Id };
                         _logger.LogWarning("already tweeted");
                     }
-                    else if (toot.InReplyToId != null)
+                    else if (toot.InReplyToId != null  && twitterReplyToId==null)
                     {
                         crosspost = new Crosspost { Result = "IsReply", TootId = toot.Id };
-                        _logger.LogDebug("is a reply. Wont tweet");
+                        _logger.LogDebug("is a reply to an unknwon toot. Wont tweet");
                     }
                     else
                     {
-                        var twitterIds = await _twitter.PublishAsync(user, toot);
+                        var twitterIds = await _twitter.PublishAsync(user, toot, twitterReplyToId);
                         crosspost = new Crosspost { Result = "Tweeted", TootId = toot.Id, TwitterIds = twitterIds };
                     }
                     user.Crossposts.Add(crosspost);
@@ -196,7 +216,6 @@ namespace Toot2Toulouse.Backend
 
         public async Task SendSingleTootAsync(Guid userId, string tootId)
         {
-            bool blockUser = false;
             try
             {
                 var toot = await _mastodon.GetSingleTootAsync(userId, tootId);
@@ -206,27 +225,23 @@ namespace Toot2Toulouse.Backend
                     return;
                 }
 
-                await SendTootsAsync(userId, new List<Status> { toot }, false);
+                await SendTootsAsync(userId, new List<Status> { toot }, true);
                 _logger.LogDebug("sent single toot {tootid}", tootId);
             }
             catch (Mastonet.ServerErrorException mastodonException)
             {
                 _notification.Error(userId, TootConfigurationApp.MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
-                blockUser = true;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Failed sending single toot");
-            }
-            if (blockUser)
-            {
+                _logger.LogError(ex, "Failed sending single toot");
             }
         }
 
         public async Task SendTootsForAllUsersAsync()
         {
             var users = _database.GetActiveUsers().ToList();
-            List<Crosspost> toots = new List<Crosspost>();
+            var toots = new List<Crosspost>();
 
             foreach (var user in users)
             {
