@@ -3,6 +3,7 @@
 using Mastonet.Entities;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Internal;
 
 using System.Reflection;
 
@@ -182,8 +183,16 @@ namespace Toot2Toulouse.Backend
             }
             user.Mastodon.LastTootDate = newLastDate;
             if (updateUserData) _database.UpsertUser(user);
+            var sentCount=sentToots.Count(q=>q.TwitterIds.Count > 0);
+            var logEntry = $"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}";
 
-            _logger.LogDebug("Sent {sentcount} from {count} toots to twitter for {user}@{instance}", sentToots.Count(q => q.TwitterIds.Count > 0), toots.Count, user.Mastodon.Handle, user.Mastodon.Instance);
+            if (sentCount > 0)
+            {
+                _logger.LogInformation(logEntry.ToString());
+            } else
+            {
+                _logger.LogTrace(logEntry.ToString());
+            }
             return sentToots;
         }
 
