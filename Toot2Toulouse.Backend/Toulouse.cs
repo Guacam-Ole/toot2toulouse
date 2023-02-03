@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Internal;
 
 using System.Reflection;
+using System.Runtime.Intrinsics.X86;
 
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
@@ -184,15 +185,10 @@ namespace Toot2Toulouse.Backend
             user.Mastodon.LastTootDate = newLastDate;
             if (updateUserData) _database.UpsertUser(user);
             var sentCount=sentToots.Count(q=>q.TwitterIds.Count > 0);
-            var logEntry = $"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}";
 
-            if (sentCount > 0)
-            {
-                _logger.LogInformation(logEntry.ToString());
-            } else
-            {
-                _logger.LogTrace(logEntry.ToString());
-            }
+            _logger.LogDebug($"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}");
+
+           
             return sentToots;
         }
 
@@ -264,8 +260,15 @@ namespace Toot2Toulouse.Backend
 
                 if (userToots?.Count > 0) toots.AddRange(await SendTootsAsync(user.Id, userToots, true));
             }
-
-            _logger.LogInformation("Sent {tootcount} toots for {count} users", toots.Count(q => q.TwitterIds.Count > 0), users.Count());
+            var tootCount = toots.Count(q => q.TwitterIds.Count > 0);
+            var logEntry = $"Sent {tootCount} toots for {users.Count()} users";
+            if (tootCount==0)
+            {
+                _logger.LogTrace(logEntry);
+            } else
+            {
+                _logger.LogInformation(logEntry);
+            }
         }
 
         public TootConfigurationAppModes.ValidModes GetServerMode()
