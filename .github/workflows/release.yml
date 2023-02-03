@@ -28,8 +28,12 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Release
-      run: dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -c Release -o "t2tservice"
+      run: dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -c Release -o "/home/runner/work/out/t2tservice"
     - name: ZipWin
       run:
            7z a -tzip "t2tservice.zip" "./t2tservice/*"
            tar czvf "t2tservice.tar.gz" "t2tservice"
+    - uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact
+        path: /home/runner/out/*
