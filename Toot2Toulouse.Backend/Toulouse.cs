@@ -199,9 +199,10 @@ namespace Toot2Toulouse.Backend
                     sentToots.Add(new Crosspost { Result = "Exception", TootId = toot.Id });
                 }
                 user.Mastodon.LastToot = toot.Id;
+                user.Mastodon.LastTootDate = newLastDate;
+                if (updateUserData) _database.UpsertUser(user);
             }
-            user.Mastodon.LastTootDate = newLastDate;
-            if (updateUserData) _database.UpsertUser(user);
+           
             var sentCount = sentToots.Count(q => q.TwitterIds.Count > 0);
 
             _logger.LogDebug($"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}");
