@@ -44,6 +44,8 @@ namespace Toot2Toulouse.Backend
             }
         }
 
+      
+
         private string GetHashString(string inputString)
         {
             using HashAlgorithm algorithm = SHA256.Create();
@@ -143,7 +145,7 @@ namespace Toot2Toulouse.Backend
             {
                 using var db = new LiteDatabase(GetDatabaseFile());
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
-                return userCollection.Find(q => q.Mastodon.Secret != null && q.Twitter.AccessSecret != null && q.BlockReason==null).ToList();
+                return userCollection.Find(q => q.Mastodon.Secret != null && q.Twitter.AccessSecret != null && q.BlockReason == null).ToList();
             }
             catch (Exception ex)
             {
@@ -151,7 +153,6 @@ namespace Toot2Toulouse.Backend
                 throw;
             }
         }
-
 
         public UserData GetUserByTwitterTmpGuid(string guid)
         {
