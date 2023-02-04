@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3    
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -27,8 +27,12 @@ jobs:
 #      run: dotnet build --no-restore --output ./output -p:Version=1.2.3.4
 #    - name: Test
 #      run: dotnet test --no-build --verbosity normal
+
     - name: Release
-      run: dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=1.2.3.4 -c Release -o "/home/runner/work/out/t2tservice"
+      run: 
+        echo publishing as ${{  github.ref_name }}
+        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/t2tservice"
+        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2Toulouse/Toot2ToulouseWeb.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/t2tweb"
 #    - name: ZipWin
 #      run:
 #           7z a -tzip "t2tservice.zip" "./t2tservice/*"
