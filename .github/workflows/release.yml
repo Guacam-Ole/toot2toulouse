@@ -32,15 +32,15 @@ jobs:
       run: 
         echo publishing as ${{  github.ref_name }}
         
-        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/t2tservice"
+        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/bin/t2tservice"
         
-        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2Toulouse/Toot2ToulouseWeb.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/t2tweb"
+        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2Toulouse/Toot2ToulouseWeb.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/bin/t2tweb"
     - name: Zip
       run:
-           7z a -tzip "/home/runner/work/out/t2t-${{  github.ref_name }}.zip" "/home/runner/work/out/*"
+           7z a -tzip "/home/runner/work/out/zip/t2t-${{  github.ref_name }}.zip" "/home/runner/work/out/bin/*"
     - name: Tar  
       run:
-           tar czvf "/home/runner/work/out/t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/"
+           tar czvf "/home/runner/work/out/zip/t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/bin/"
     - uses: actions/upload-artifact@v3
       with:
         name: t2t-${{  github.ref_name }}
