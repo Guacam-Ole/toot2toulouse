@@ -37,11 +37,11 @@ jobs:
         dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2Toulouse/Toot2ToulouseWeb.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/t2tweb"
     - name: Zip
       run:
-           7z a -tzip "t2t-${{  github.ref_name }}.zip" "/home/runner/work/out/*"
+           7z a -tzip "/home/runner/work/out/t2t-${{  github.ref_name }}.zip" "/home/runner/work/out/*"
     - name: Tar  
       run:
-           tar czvf "t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/"
+           tar czvf "/home/runner/work/out/t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/"
     - uses: actions/upload-artifact@v3
       with:
-        name: my-artifact
+        name: t2t-${{  github.ref_name }}
         path: /home/runner/work/out/*
