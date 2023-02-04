@@ -40,7 +40,7 @@ jobs:
            7z a -tzip "t2t-${{  github.ref_name }}.zip" "/home/runner/work/out/*"
     - name: Tar  
       run:
-           tar czvf "t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/*"
+           tar czvf "t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/"
     - uses: actions/upload-artifact@v3
       with:
         name: my-artifact
