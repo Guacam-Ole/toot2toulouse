@@ -131,9 +131,9 @@ namespace Toot2Toulouse.Backend
 
                 var timeToTweet = toot.CreatedAt.Add(user.Config.Delay);
 
-                if (timeToTweet> DateTime.Now)
+                if (timeToTweet> DateTime.UtcNow)
                 {
-                    _logger.LogDebug("Won't twwet until {startdate}", timeToTweet);
+                    _logger.LogDebug("Won't twwet until {startdate} (utc)", timeToTweet);
                     continue;
                 }
 
@@ -187,7 +187,7 @@ namespace Toot2Toulouse.Backend
 
                             case 89:
                                 _notification.Error(userId, TootConfigurationApp.MessageCodes.TwitterAuthError);
-                                user.BlockDate = DateTime.Now;
+                                user.BlockDate = DateTime.UtcNow;
                                 user.BlockReason = UserData.BlockReasons.AuthTwitter;
                                 sentToots.Add(new Crosspost { Result = "TwitterAuth", TootId = toot.Id });
                                 _logger.LogWarning("User {id} has been blocked because twitter auth was revoked", userId);
@@ -273,7 +273,7 @@ namespace Toot2Toulouse.Backend
                 }
                 if (blockUser)
                 {
-                    user.BlockDate = DateTime.Now;
+                    user.BlockDate = DateTime.UtcNow;
                     user.BlockReason = UserData.BlockReasons.AuthMastodon;
                     _database.UpsertUser(user);
                 }
@@ -300,7 +300,7 @@ namespace Toot2Toulouse.Backend
         {
             var serverstats = _database.GetServerStats();
             var allUsers = _database.GetActiveUsers();
-            var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.Now.AddDays(-1)));
+            var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.UtcNow.AddDays(-1)));
             serverstats.ActiveUsers = activeUsers.Count();
             serverstats.TotalUsers = allUsers.Count();
             _database.UpSertServerStats(serverstats);
