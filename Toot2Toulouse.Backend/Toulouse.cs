@@ -133,7 +133,7 @@ namespace Toot2Toulouse.Backend
 
                 if (timeToTweet> DateTime.UtcNow)
                 {
-                    _logger.LogDebug("Won't twwet until {startdate} (utc)", timeToTweet);
+                    _logger.LogDebug("Won't tweet until {startdate} (utc)", timeToTweet);
                     continue;
                 }
 
