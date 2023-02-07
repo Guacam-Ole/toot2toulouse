@@ -128,7 +128,14 @@ namespace Toot2Toulouse.Backend
             var newLastDate = DateTime.UtcNow;
             foreach (var toot in toots)
             {
-                // TODO: DELAY
+
+                var timeToTweet = toot.CreatedAt.Add(user.Config.Delay);
+
+                if (timeToTweet> DateTime.Now)
+                {
+                    _logger.LogDebug("Won't twwet until {startdate}", timeToTweet);
+                    continue;
+                }
 
                 try
                 {
