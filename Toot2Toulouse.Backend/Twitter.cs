@@ -46,6 +46,7 @@ namespace Toot2Toulouse.Backend
         {
             if (string.IsNullOrWhiteSpace(toot.Content)) return false;
             if (!user.Config.VisibilitiesToPost.Contains(toot.Visibility.ToT2t())) return false;
+            if (user.Config.DontTweet.Any(q=>toot.Content.Contains(q))) return false;   
             return true;
         }
 

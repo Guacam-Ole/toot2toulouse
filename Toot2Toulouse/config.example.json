@@ -79,6 +79,7 @@
       "Prefix": "...",
       "Suffix": "..."
     },
+    "DontTweet": ["🐘"],
     "Replacements": {
       "Toot": "Tweet",
       "Boost": "Retweet",
