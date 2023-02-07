@@ -67,7 +67,7 @@ namespace Toot2ToulouseService
 
         public string GetVersion()
         {
-            return _database.GetServerStats().CurrentVersion;
+            return _config.CurrentVersion.ToString();
         }
 
         public void ListIds()
