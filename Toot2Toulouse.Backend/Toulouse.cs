@@ -173,7 +173,7 @@ namespace Toot2Toulouse.Backend
                     var firstTwitterException = twitterException.TwitterExceptionInfos.FirstOrDefault();
                     if (firstTwitterException == null)
                     {
-                        _logger.LogError(twitterException, "Unknown Twitter Exception when trying to tweet toot nr {id} from {user}. Will not retry", toot.Id, userId);
+                        _logger.LogError(twitterException, "Unknown Twitter Exception when trying to tweet toot nr {id} from {user}. Will not retry\n", toot.Id, userId);
                         sentToots.Add(new Crosspost { Result = "TwitterException", TootId = toot.Id });
                     }
                     else
@@ -203,7 +203,7 @@ namespace Toot2Toulouse.Backend
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Publishing tweet failed. Will NOT retry");
+                    _logger.LogWarning(ex, "Publishing tweet failed. tootid: {tootid} Will NOT retry\n", toot.Id);
                     sentToots.Add(new Crosspost { Result = "Exception", TootId = toot.Id });
                 }
                 user.Mastodon.LastToot = toot.Id;
