@@ -54,7 +54,7 @@ namespace Toot2Toulouse.Backend
         {
             if (!ShouldITweetThis(userData, toot))
             {
-                _logger.LogDebug("Didn't tweet toot {id} ", toot.Id);
+                _logger.LogTrace("Didn't tweet toot {id} ", toot.Id);
                 return new List<long>();
             }
             return await PublishFromTootAsync(userData, toot, replyTo);

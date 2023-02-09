@@ -125,7 +125,7 @@ namespace Toot2Toulouse.Backend
         {
             var sentToots = new List<Crosspost>();
             var user = _database.GetUserById(userId);
-            _logger.LogDebug("sending {tootcount} toots for {user}", toots.Count, user.Mastodon.DisplayName);
+            _logger.LogTrace("sending {tootcount} toots for {user}@{instance}", toots.Count, user.Mastodon.Handle, user.Mastodon.Instance);
             var newLastDate = DateTime.UtcNow;
             foreach (var toot in toots)
             {
@@ -134,7 +134,7 @@ namespace Toot2Toulouse.Backend
 
                 if (timeToTweet > DateTime.UtcNow)
                 {
-                    _logger.LogDebug("Won't tweet until {startdate} (utc)", timeToTweet);
+                    _logger.LogTrace("Won't tweet until {startdate} (utc)", timeToTweet);
                     continue;
                 }
 
@@ -212,8 +212,10 @@ namespace Toot2Toulouse.Backend
             }
 
             var sentCount = sentToots.Count(q => q.TwitterIds.Count > 0);
-
-            _logger.LogDebug($"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}");
+            if (sentCount > 0)
+            {
+                _logger.LogDebug($"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}");
+            }
 
             return sentToots;
         }
