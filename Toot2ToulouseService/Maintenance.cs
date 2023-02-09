@@ -77,6 +77,7 @@ namespace Toot2ToulouseService
             {
                 Console.WriteLine($"{user.Id}\t{user.BlockReason}\t{user.BlockDate}\t{user.Mastodon?.Handle}@{user.Mastodon?.Instance}\t{user.Twitter?.Handle}");
             });
+            _logger.LogInformation("Retrieved all userIds");
         }
 
         public void BlockUser(Guid userId)

@@ -103,20 +103,21 @@ namespace Toot2Toulouse.Backend
 
         private long? GetTwitterReplyToIdFromTootId(string tootId)
         {
-                var allUsers=_database.GetAllUsers();
-                foreach (var user in allUsers)
+            var allUsers = _database.GetAllUsers();
+            foreach (var user in allUsers)
+            {
+                if (user.Crossposts.Any(q => q.TootId == tootId))
                 {
-                    if (user.Crossposts.Any(q=>q.TootId==tootId))
-                    {
-                        return user.Crossposts.FirstOrDefault(q => q.TootId == tootId).TwitterIds.Max();
-                    }
-
+                    var twitterIds = user.Crossposts.FirstOrDefault(q => q.TootId == tootId)?.TwitterIds;
+                    if (twitterIds != null) return twitterIds.Max();
                 }
-                return null;        }
+            }
+            return null;
+        }
 
         private long? GetTwitterReplyId(Status toot)
         {
-            if (toot.InReplyToId==null) return null;
+            if (toot.InReplyToId == null) return null;
             return GetTwitterReplyToIdFromTootId(toot.InReplyToId);
         }
 
@@ -131,7 +132,7 @@ namespace Toot2Toulouse.Backend
 
                 var timeToTweet = toot.CreatedAt.Add(user.Config.Delay);
 
-                if (timeToTweet> DateTime.UtcNow)
+                if (timeToTweet > DateTime.UtcNow)
                 {
                     _logger.LogDebug("Won't tweet until {startdate} (utc)", timeToTweet);
                     continue;
@@ -139,7 +140,7 @@ namespace Toot2Toulouse.Backend
 
                 try
                 {
-                    long? twitterReplyToId=GetTwitterReplyId(toot);
+                    long? twitterReplyToId = GetTwitterReplyId(toot);
                     _logger.LogTrace("Toot: {id}|{url}", toot.Id, toot.Uri);
                     if (user.Crossposts.FirstOrDefault(q => q.TootId == toot.Id) != null)
                     {
@@ -154,7 +155,7 @@ namespace Toot2Toulouse.Backend
                         crosspost = new Crosspost { Result = "AlreadyTweeted", TootId = toot.Id };
                         _logger.LogWarning("already tweeted");
                     }
-                    else if (toot.InReplyToId != null  && twitterReplyToId==null)
+                    else if (toot.InReplyToId != null && twitterReplyToId == null)
                     {
                         crosspost = new Crosspost { Result = "IsReply", TootId = toot.Id };
                         _logger.LogDebug("is a reply to an unknwon toot. Wont tweet");
@@ -172,7 +173,7 @@ namespace Toot2Toulouse.Backend
                     var firstTwitterException = twitterException.TwitterExceptionInfos.FirstOrDefault();
                     if (firstTwitterException == null)
                     {
-                        _logger.LogError(twitterException, "Unknown Twitter Exception when trying to tweet toot nr {id} from {user}. Will not retry", toot.Id, userId);
+                        _logger.LogError(twitterException, "Unknown Twitter Exception when trying to tweet toot nr {id} from {user}. Will not retry\n", toot.Id, userId);
                         sentToots.Add(new Crosspost { Result = "TwitterException", TootId = toot.Id });
                     }
                     else
@@ -202,14 +203,14 @@ namespace Toot2Toulouse.Backend
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Publishing tweet failed. Will NOT retry");
+                    _logger.LogWarning(ex, "Publishing tweet failed. tootid: {tootid} Will NOT retry\n", toot.Id);
                     sentToots.Add(new Crosspost { Result = "Exception", TootId = toot.Id });
                 }
                 user.Mastodon.LastToot = toot.Id;
                 user.Mastodon.LastTootDate = newLastDate;
                 if (updateUserData) _database.UpsertUser(user);
             }
-           
+
             var sentCount = sentToots.Count(q => q.TwitterIds.Count > 0);
 
             _logger.LogDebug($"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}");
