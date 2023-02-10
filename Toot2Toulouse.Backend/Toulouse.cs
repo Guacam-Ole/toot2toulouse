@@ -271,7 +271,7 @@ namespace Toot2Toulouse.Backend
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed sending single toot");
+                    _logger.LogError(ex, "Failed sending single toot. user: {username}. \n",user.Mastodon.CompleteName);
                     userToots = new List<Status>();
                 }
                 if (blockUser)
