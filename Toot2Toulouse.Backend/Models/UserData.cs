@@ -18,6 +18,7 @@ namespace Toot2Toulouse.Backend.Models
         public List<Crosspost> Crossposts { get; set; } = new List<Crosspost>();
         public DateTime? BlockDate { get; set; }
         public BlockReasons? BlockReason { get; set; }
+        
 
 
         public override string ToString()

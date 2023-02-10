@@ -109,7 +109,7 @@ namespace Toot2Toulouse.Backend
                 if (user.Crossposts.Any(q => q.TootId == tootId))
                 {
                     var twitterIds = user.Crossposts.FirstOrDefault(q => q.TootId == tootId)?.TwitterIds;
-                    if (twitterIds != null) return twitterIds.Max();
+                    if (twitterIds != null && twitterIds.Count>0) return twitterIds.Max();
                 }
             }
             return null;
@@ -203,7 +203,7 @@ namespace Toot2Toulouse.Backend
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Publishing tweet failed. tootid: {tootid} Will NOT retry\n", toot.Id);
+                    _logger.LogWarning(ex, "Publishing tweet failed. tootid: {tootid} user:{userid} Will NOT retry\n", toot.Id, user.Mastodon.CompleteName);
                     sentToots.Add(new Crosspost { Result = "Exception", TootId = toot.Id });
                 }
                 user.Mastodon.LastToot = toot.Id;
