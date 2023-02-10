@@ -38,7 +38,7 @@ namespace Toot2ToulouseWeb.Controllers
         }
 
         [Route("export")]
-        public async Task<ActionResult> GetUserExport()
+        public ActionResult GetUserExport() 
         {
             var user = GetUserFromCookie();
             if (user == null) return AuthErrorResult();

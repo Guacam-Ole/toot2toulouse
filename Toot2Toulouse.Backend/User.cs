@@ -37,5 +37,22 @@ namespace Toot2Toulouse.Backend
         {
             _database.UpsertUser(user);
         }
+
+        public void Block(Guid userId, UserData.BlockReasons reason)
+        {
+            var user=_database.GetUserById(userId);
+            user.BlockDate = DateTime.UtcNow;
+            user.BlockReason=reason;
+            _database.UpsertUser(user);
+            _logger.LogInformation("Blocked {userid}: {reason}", userId, reason);
+        }
+
+        public void Unblock(Guid userId) {
+            var user = _database.GetUserById(userId);
+            user.BlockDate = null;
+            user.BlockReason = null;
+            _database.UpsertUser(user);
+            _logger.LogInformation("Unlocked {userid}", userId);
+        }
     }
 }

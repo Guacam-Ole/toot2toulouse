@@ -44,6 +44,8 @@ namespace Toot2Toulouse.Backend
             }
         }
 
+      
+
         private string GetHashString(string inputString)
         {
             using HashAlgorithm algorithm = SHA256.Create();
@@ -122,13 +124,28 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public List<UserData> GetAllValidUsers()
+        public List<UserData> GetAllUsers()
         {
             try
             {
                 using var db = new LiteDatabase(GetDatabaseFile());
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
-                return userCollection.Find(q => q.Mastodon.Secret != null && q.Twitter.AccessSecret != null).ToList();
+                return userCollection.Find(q => q.Id != Guid.Empty).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed retrieving users");
+                throw;
+            }
+        }
+
+        public List<UserData> GetActiveUsers()
+        {
+            try
+            {
+                using var db = new LiteDatabase(GetDatabaseFile());
+                var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                return userCollection.Find(q => q.Mastodon.Secret != null && q.Twitter.AccessSecret != null && q.BlockReason == null).ToList();
             }
             catch (Exception ex)
             {

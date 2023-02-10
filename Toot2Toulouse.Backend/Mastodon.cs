@@ -3,11 +3,11 @@ using Mastonet.Entities;
 
 using Microsoft.Extensions.Logging;
 
+using System.Security.Cryptography;
+
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
-
-using Tweetinvi.Core.Models;
 
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
 
@@ -30,13 +30,17 @@ namespace Toot2Toulouse.Backend
             _messages = configuration.GetMessagesForLanguage(_configuration.App.DefaultLanguage);   // TODO: Allow per-user Language setting
         }
 
-        public async Task SendStatusMessageTo(Guid id, string? prefix, MessageCodes messageCode)
+        public async Task SendStatusMessageToAsync(Guid id, string? prefix, MessageCodes messageCode, string? additionalInfo)
         {
-            var user = _database.GetUserById(id);
-            string recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
-            string message = $"{recipient}\n{prefix}{_messages[messageCode]}{_configuration.App.ServiceAppSuffix}";
+            string recipient = null;
+            if (id != Guid.Empty)
+            {
+                var user = _database.GetUserById(id);
+                recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
+            }
+            string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.ServiceAppSuffix}";
             ReplaceServiceTokens(ref message);
-            await ServiceToot(message, Visibility.Direct);
+            await ServiceTootAsync(message, Visibility.Direct);
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
         }
 
@@ -65,8 +69,6 @@ namespace Toot2Toulouse.Backend
 
                 if (propertyInfo.PropertyType.IsClass && propertyInfo.PropertyType.Namespace.StartsWith("Toot2Toulouse"))
                 {
-                    //string subPrefix = prefix;
-                    //if (!string.IsNullOrEmpty(subPrefix)) subPrefix += ".";
                     GetConfigValues(value, prefix + propertyInfo.Name + ".", displayProperties);
                 }
                 var stringValue = string.Empty;
@@ -85,23 +87,23 @@ namespace Toot2Toulouse.Backend
             return GetUserClientByAccessToken(userData.Mastodon.Instance, userData.Mastodon.Secret);
         }
 
-        public async Task<Account?> GetUserAccount(UserData userData)
+        public async Task<Account?> GetUserAccountAsync(UserData userData)
         {
             var userClient = GetUserClient(userData);
             return await userClient.GetCurrentUser();
         }
 
-        public async Task<Account?> GetUserAccount(MastodonClient mastodonClient)
+        public async Task<Account?> GetUserAccountAsync(MastodonClient mastodonClient)
         {
             return await mastodonClient.GetCurrentUser();
         }
 
-        public async Task<Account?> GetUserAccount(string instance, string accessToken)
+        public async Task<Account?> GetUserAccountAsync(string instance, string accessToken)
         {
-            return await GetUserAccount(new UserData { Mastodon = new Models.Mastodon { Instance = instance, Secret = accessToken } });
+            return await GetUserAccountAsync(new UserData { Mastodon = new Models.Mastodon { Instance = instance, Secret = accessToken } });
         }
 
-        public async Task AssignLastTweetedIfMissing(Guid id)
+        public async Task AssignLastTweetedIfMissingAsync(Guid id)
         {
             var user = _database.GetUserById(id);
             if (user.Mastodon.LastToot != null) return;
@@ -112,47 +114,61 @@ namespace Toot2Toulouse.Backend
             var lastTweeted = lastStatuses.OrderBy(q => q.CreatedAt).FirstOrDefault();
             user.Mastodon.LastToot = lastTweeted.Id;
             _database.UpsertUser(user);
-           
         }
 
-        public async Task<List<Status>> GetNonPostedToots(Guid id)
+        public async Task<List<Status>> GetNonPostedTootsAsync(Guid id)
         {
-            await AssignLastTweetedIfMissing(id);
+            await AssignLastTweetedIfMissingAsync(id);
             var user = _database.GetUserById(id);
             var client = GetUserClient(user);
             var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
-            _logger.LogDebug("retrieved {count} statuses since {sinceid}", statuses.Count, user.Mastodon.LastToot);
             return statuses.OrderBy(q => q.CreatedAt).ToList();
         }
 
-        public async Task<List<Status>> GetServiceTootsContaining( string content, int limit=100, string? recipient=null)
+        public async Task<List<Status>> GetServiceTootsContainingAsync(string content, int limit = 100, string? recipient = null)
         {
-            return await GetTootsContaining(GetServiceClient(), content, limit, recipient);
+            return await GetTootsContainingAsync(GetServiceClient(), content, limit, recipient);
         }
 
-        private async Task<List<Status>> GetTootsContaining(MastodonClient client, string content, int limit = 100, string? recipient=null)
+        private async Task<List<Status>> GetTootsContainingAsync(MastodonClient client, string content, int limit = 100, string? recipient = null)
         {
             var statuses = await client.GetAccountStatuses((await client.GetCurrentUser()).Id, new ArrayOptions { Limit = limit }, false, true, false, true);
             var matches = statuses.Where(q => q.Content.Contains(content, StringComparison.InvariantCultureIgnoreCase));
-            if (recipient!=null)
+            if (recipient != null)
             {
-                matches=matches.Where(q=>q.Mentions.Any(m=>m.AccountName == recipient));    
+                matches = matches.Where(q => q.Mentions.Any(m => m.AccountName == recipient));
             }
             return matches.OrderBy(q => q.CreatedAt).ToList();
         }
 
-        public async Task<List<Status>> GetTootsContaining(Guid id, string content, int limit = 100)
+        public async Task<Status> GetSingleTootAsync(Guid userId, string tootId)
+        {
+            try
+            {
+                var user = _database.GetUserById(userId);
+                var client = GetUserClient(user);
+                return await client.GetStatus(tootId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,"failed retrieving single toot with id {tid} for {uid}", tootId, userId);
+                throw;
+            }
+       
+        }
+
+        public async Task<List<Status>> GetTootsContainingAsync(Guid id, string content, int limit = 100)
         {
             try
             {
                 var user = _database.GetUserById(id);
                 var client = GetUserClient(user);
-                return await GetTootsContaining(client, content, limit);  
+                return await GetTootsContainingAsync(client, content, limit);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "failed searching for toots");
-                return new List<Status>();
+                throw;
             }
         }
 
@@ -171,7 +187,7 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public async Task ServiceToot(string content, Visibility visibility)
+        public async Task ServiceTootAsync(string content, Visibility visibility)
         {
             try
             {

@@ -14,14 +14,19 @@ namespace Toot2Toulouse.Controllers
         private readonly IToulouse _app;
         private readonly IUser _user;
         private readonly ICookies _cookies;
+        private readonly ILogger<AppController> _logger;
         private TootConfiguration _config;
 
-        public AppController(ILogger<TwitterController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon, IUser user, ICookies cookies)
+        public AppController(ILogger<AppController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon, IUser user, ICookies cookies)
         {
+            _logger = logger;
+            _logger.LogDebug("Reading config");
             _config = configReader.Configuration;
+            _logger.LogDebug("Config read");
             _app = app;
             _user = user;
             _cookies = cookies;
+            
         }
 
         [Route("/")]

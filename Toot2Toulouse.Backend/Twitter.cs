@@ -7,7 +7,6 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi;
-using Tweetinvi.Core.Models;
 using Tweetinvi.Exceptions;
 using Tweetinvi.Logic.QueryParameters;
 using Tweetinvi.Models;
@@ -38,7 +37,7 @@ namespace Toot2Toulouse.Backend
             return new TwitterClient(userData.Twitter.ConsumerKey, userData.Twitter.ConsumerSecret, userData.Twitter.AccessToken, userData.Twitter.AccessSecret);
         }
 
-        private async Task<IAuthenticatedUser> GetTwitterUser(UserData userData)
+        private async Task<IAuthenticatedUser> GetTwitterUserAsync(UserData userData)
         {
             return await GetUserClient(userData).Users.GetAuthenticatedUserAsync();
         }
@@ -47,22 +46,33 @@ namespace Toot2Toulouse.Backend
         {
             if (string.IsNullOrWhiteSpace(toot.Content)) return false;
             if (!user.Config.VisibilitiesToPost.Contains(toot.Visibility.ToT2t())) return false;
+            if (user.Config.DontTweet.Any(q=>toot.Content.Contains(q))) return false;   
             return true;
         }
 
-        public async Task<List<long>> PublishAsync(UserData userData, Status toot)
+        public async Task<List<long>> PublishAsync(UserData userData, Status toot, long? replyTo = null)
         {
             if (!ShouldITweetThis(userData, toot))
             {
                 _logger.LogDebug("Didn't tweet toot {id} ", toot.Id);
                 return new List<long>();
             }
-            return await PublishFromToot(userData, toot);
+            return await PublishFromTootAsync(userData, toot, replyTo);
         }
 
-        private async Task<List<long>> PublishFromToot(UserData userData, Status toot)
+        private void ReplaceRecipients(IEnumerable<Mention> mentions, ref string content)
         {
-            var tweetIds=new    List<long>();
+            if (mentions == null) return;
+
+            foreach (var mention in mentions)
+            {
+                content = content.Replace($"@{mention.UserName}", $"🐘{mention.UserName}");
+            }
+        }
+
+        private async Task<List<long>> PublishFromTootAsync(UserData userData, Status toot, long? replyTo)
+        {
+            var tweetIds = new List<long>();
             try
             {
                 if (!string.IsNullOrWhiteSpace(toot.SpoilerText))
@@ -73,7 +83,9 @@ namespace Toot2Toulouse.Backend
                 bool isSensitive = toot.Sensitive ?? false;
 
                 string content = _toot.StripHtml(toot.Content);
-                var twitterUser = GetTwitterUser(userData);
+                ReplaceRecipients(toot.Mentions, ref content);
+
+                var twitterUser = await GetTwitterUserAsync(userData);
 
                 var replies = _toot.GetReplies(userData.Config, content, out string mainTweet);
                 if (replies != null)
@@ -81,30 +93,30 @@ namespace Toot2Toulouse.Backend
                     switch (userData.Config.LongContent)
                     {
                         case ITwitter.LongContent.DontPublish:
-                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser, content.Length);
+                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser.Name, content.Length);
                             break;
 
                         case ITwitter.LongContent.Cut:
-                            var cuttweet= await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                            var cuttweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
                             tweetIds.Add(cuttweet.Id);
 
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser, content.Length, mainTweet.Length);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser.Name, content.Length, mainTweet.Length);
                             break;
 
                         case ITwitter.LongContent.Thread:
-                            var tweet = await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                            var tweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
 
                             if (tweet.Id != 0)
                             {
                                 tweetIds.Add(tweet.Id);
-                                foreach (var reply in replies)
+                                foreach (var replyContent in replies)
                                 {
-                                    tweet = await TweetAsync(userData, reply, isSensitive, tweet.Id);
-                                    if (tweet == null);
+                                    tweet = await TweetAsync(userData, replyContent, isSensitive, tweet.Id, null);
+                                    if (tweet == null) ;
                                     tweetIds.Add(tweet.Id);
                                 }
                             }
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser, content.Length, replies.Count);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser.Name, content.Length, replies.Count);
                             break;
 
                         default:
@@ -113,17 +125,15 @@ namespace Toot2Toulouse.Backend
                 }
                 else
                 {
-                    var singletweet= await TweetAsync(userData, mainTweet, isSensitive, toot.MediaAttachments);
+                    var singletweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
                     tweetIds.Add(singletweet.Id);
-                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser, content.Length);
+                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser.Name, content.Length);
                 }
                 return tweetIds;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "error tweeting");
-                //_notification.Error(_mastonUser.Id, TootConfigurationApp.MessageCodes.TwitterDown, "Sorry. Could not send your tweet. Will NOT try again");
-                // TODO: Retry
                 throw;
             }
         }
@@ -143,28 +153,27 @@ namespace Toot2Toulouse.Backend
                     case ".jpg":
                     case ".jpeg":
                     case ".webp":
-                        fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
-                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents );
-                      
+                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
+                        mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
 
                         break;
-                        //return mediafile;
+                    //return mediafile;
 
                     case ".gif":
-                        fileContents = await DownloadFile(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
                         mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
                         break;
 
                     case ".mp4":
-                        fileContents = await DownloadFile(attachment.Url, null, _config.App.MaxVideoSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, null, _config.App.MaxVideoSize);
                         mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
                         break;
-                        //return mediafile;
+                    //return mediafile;
 
                     default:
                         throw new NotImplementedException(); // TODO: Own exceptiontype
                 }
-                if (mediafile != null && attachment.Description!=null)
+                if (mediafile != null && attachment.Description != null)
                 {
                     await userClient.Upload.AddMediaMetadataAsync(new MediaMetadata(mediafile)
                     {
@@ -172,7 +181,6 @@ namespace Toot2Toulouse.Backend
                     });
                 }
                 return mediafile;
-
             }
             catch (Exception ex)
             {
@@ -181,24 +189,31 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        private async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, IEnumerable<Attachment> attachments)
+        private async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long? replyTo, IEnumerable<Attachment> attachments = null)
         {
-            var mediaFiles = new List<IMedia>();
-            foreach (var attachment in attachments)
-            {
-                var mediafile = await ValidateAndDownloadAttachmentAsync(userData, attachment);
-                if (mediafile != null) mediaFiles.Add(mediafile);
-            }
-
-            return await TweetAsync(userData, new PublishTweetParameters
+            var tweetParameters = new PublishTweetParameters
             {
                 Text = content,
-                PossiblySensitive = isSensitive, 
-                Medias = mediaFiles
-            });
+                PossiblySensitive = isSensitive,
+                InReplyToTweetId = replyTo, 
+                AutoPopulateReplyMetadata= true
+            };
+
+            if (attachments?.Count() > 0)
+            {
+                var mediaFiles = new List<IMedia>();
+                foreach (var attachment in attachments)
+                {
+                    var mediafile = await ValidateAndDownloadAttachmentAsync(userData, attachment);
+                    if (mediafile != null) mediaFiles.Add(mediafile);
+                }
+                tweetParameters.Medias = mediaFiles;
+            }
+
+            return await TweetAsync(userData, tweetParameters);
         }
 
-        private async Task<Stream> DownloadFile(string url)
+        private async Task<Stream> DownloadFileAsync(string url)
         {
             var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(url);
@@ -206,9 +221,9 @@ namespace Toot2Toulouse.Backend
             return await response.Content.ReadAsStreamAsync();
         }
 
-        private async Task<Byte[]> DownloadFile(string url, string? alternativeUrl, long maxSizeMegaBytes)
+        private async Task<byte[]> DownloadFileAsync(string url, string? alternativeUrl, long maxSizeMegaBytes)
         {
-            var urlStream = await DownloadFile(url);
+            var urlStream = await DownloadFileAsync(url);
 
             var sizeInMb = urlStream.Length / 1024d / 1024d;
             if (sizeInMb > maxSizeMegaBytes)
@@ -217,7 +232,7 @@ namespace Toot2Toulouse.Backend
                 if (alternativeUrl != null)
                 {
                     _logger.LogInformation("Will use previewurl instead");
-                    urlStream = await DownloadFile(alternativeUrl);
+                    urlStream = await DownloadFileAsync(alternativeUrl);
                 }
                 else throw new IndexOutOfRangeException("File too big");     // TODO: Own exception type
             }
@@ -227,27 +242,15 @@ namespace Toot2Toulouse.Backend
             return memoryStream.ToArray();
         }
 
-        private async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long replyTo)
-        {
-            return await TweetAsync(userData, new PublishTweetParameters
-            {
-                Text = content,
-                InReplyToTweetId = replyTo,
-                PossiblySensitive = isSensitive
-            });
-        }
-
         private async Task<ITweet> TweetAsync(UserData userData, PublishTweetParameters tweetParameters)
         {
             try
             {
                 return await GetUserClient(userData).Tweets.PublishTweetAsync(tweetParameters);
             }
-            catch (TwitterException tex) when (tex.StatusCode==403)
+            catch (TwitterException tex) // when (tex.StatusCode==403)
             {
                 _logger.LogWarning(tex, "Tweet-error {text} to {reply} ", tweetParameters.Text, tweetParameters.InReplyToTweet);
-
-                
                 throw;
             }
             catch (Exception ex)

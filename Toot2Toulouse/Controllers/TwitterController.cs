@@ -33,14 +33,14 @@ namespace Toot2Toulouse.Controllers
         }
 
         [Route("auth")]
-        public async Task<ActionResult> AuthStart()
+        public async Task<ActionResult> AuthStartAsync()
         {
             return new RedirectResult(await _twitterClientAuthentication.GetAuthenticationUrlAsync(GetRequestHost()));
         }
 
         [Route("code")]
         [HttpGet]
-        public async Task<ActionResult> AuthFinish()
+        public async Task<ActionResult> AuthFinishAsync()
         {
             if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return Content("query missing");
             var success=await _twitterClientAuthentication.FinishAuthenticationAsync(Request.QueryString.Value);

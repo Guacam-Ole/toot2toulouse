@@ -2,6 +2,7 @@
   "profiles": {
     "Toot2ToulouseService": {
       "commandName": "Project",
+      "commandLineArgs": "single b7b21a81-a384-4a38-ba29-eeb79860ad23 109800816903304850",
       "Logging": {
         "LogLevel": {
           "Default": "Debug",

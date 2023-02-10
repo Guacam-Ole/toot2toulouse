@@ -11,13 +11,15 @@ namespace Toot2ToulouseService
         private readonly ILogger<Maintenance> _logger;
         private readonly IDatabase _database;
         private readonly IToulouse _toulouse;
+        private readonly IUser _user;
         private readonly TootConfiguration _config;
 
-        public Maintenance(ILogger<Maintenance> logger, ConfigReader configReader, IDatabase database, IToulouse toulouse)
+        public Maintenance(ILogger<Maintenance> logger, ConfigReader configReader, IDatabase database, IToulouse toulouse, IUser user)
         {
             _logger = logger;
             _database = database;
             _toulouse = toulouse;
+            _user = user;
             _config = configReader.Configuration;
         }
 
@@ -38,7 +40,7 @@ namespace Toot2ToulouseService
             switch (version)
             {
                 case "0.9":
-                    var allUsers = _database.GetAllValidUsers();
+                    var allUsers = _database.GetActiveUsers();
                     foreach (var user in allUsers)
                     {
                         user.Config.VisibilitiesToPost = _config.Defaults.VisibilitiesToPost;
@@ -48,9 +50,9 @@ namespace Toot2ToulouseService
             }
         }
 
-        public async Task Invite(string mastodonHandle)
+        public async Task InviteAsync(string mastodonHandle)
         {
-            await _toulouse.Invite(mastodonHandle);
+            await _toulouse.InviteAsync(mastodonHandle);
         }
 
         public void Upgrade(Version? fromVersion)
@@ -65,7 +67,29 @@ namespace Toot2ToulouseService
 
         public string GetVersion()
         {
-            return _database.GetServerStats().CurrentVersion;
+            return _config.CurrentVersion.ToString();
+        }
+
+        public void ListIds()
+        {
+            Console.WriteLine("id\tblockreason\tblockdate\tmastodon\ttwitter");
+            _database.GetAllUsers().ForEach(user =>
+            {
+                Console.WriteLine($"{user.Id}\t{user.BlockReason}\t{user.BlockDate}\t{user.Mastodon?.Handle}@{user.Mastodon?.Instance}\t{user.Twitter?.Handle}");
+            });
+            _logger.LogInformation("Retrieved all userIds");
+        }
+
+        public void BlockUser(Guid userId)
+        {
+            _user.Block(userId, Toot2Toulouse.Backend.Models.UserData.BlockReasons.Manual);
+            Console.WriteLine("User blocked");
+        }
+
+        public void UnblockUser(Guid userId)
+        {
+            _user.Unblock(userId);
+            Console.WriteLine("User unblocked");
         }
     }
 }

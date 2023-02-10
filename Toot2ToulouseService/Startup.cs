@@ -17,15 +17,15 @@ namespace Toot2ToulouseService
     {
         public void Inject(ServiceCollection services)
         {
-            ReadBasicPaths(out string databasePath, out string configPath, out string logPath);
+            var config=ReadServiceConfig();
             
-            services.AddScoped(cr => new ConfigReader(configPath));
+            services.AddScoped(cr => new ConfigReader(config.Paths.Config));
             services.AddScoped<ITwitter, Twitter>();
             services.AddScoped<IMastodon, Mastodon>();
             services.AddScoped<IToulouse, Toulouse>();
             services.AddScoped<INotification, Notification>();
             services.AddScoped<IMessage, Message>();
-            services.AddScoped<IDatabase, Database>(db => new Database(db.GetService<ILogger<Database>>(), db.GetService<ConfigReader>(), databasePath));
+            services.AddScoped<IDatabase, Database>(db => new Database(db.GetService<ILogger<Database>>(), db.GetService<ConfigReader>(), config.Paths.Database));
             services.AddScoped<IUser, User>();
             services.AddScoped<Publish>();
             services.AddScoped<Maintenance>();
@@ -35,20 +35,16 @@ namespace Toot2ToulouseService
                 //logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
                 logging.ClearProviders();
                 logging.AddConsole();
-                logging.SetMinimumLevel(LogLevel.Debug);
-                logging.AddFile(Path.Combine(logPath, "t2t.service.log"), append: true);
+                logging.SetMinimumLevel(Enum.Parse<LogLevel>( config.LogLevel));
+                logging.AddFile(Path.Combine(config.Paths.Log, "t2t.service.log"), append: true);
             });
         }
 
-        private static void ReadBasicPaths(out string databasePath, out string configPath, out string logPath)
+        private static Config ReadServiceConfig()
         {
-            //var path = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            using var r = new StreamReader(Path.Combine(GetPropertiesPath(), "path.json"));
+            using var r = new StreamReader(Path.Combine(GetPropertiesPath(), "config.json"));
             string json = r.ReadToEnd();
-            var pathConfig = JsonSerializer.Deserialize<Paths>(json, ConfigReader.JsonOptions);
-            databasePath = pathConfig.Database;
-            configPath = pathConfig.Config;
-            logPath = pathConfig.Log;
+            return JsonSerializer.Deserialize<Config>(json, ConfigReader.JsonOptions);
         }
 
         private static string GetPropertiesPath()

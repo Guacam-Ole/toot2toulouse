@@ -2,8 +2,8 @@
 {
     public interface IMastodonClientAuthentication
     {
-        Task<string> GetAuthenticationUrl(string requestHost, string userInstance);
+        Task<string> GetAuthenticationUrlAsync(string requestHost, string userInstance);
 
-        Task<KeyValuePair<bool, string>> UserIsAllowedToRegister(string userInstance, string verificationCode);
+        Task<KeyValuePair<bool, string>> UserIsAllowedToRegisterAsync(string userInstance, string verificationCode);
     }
 }

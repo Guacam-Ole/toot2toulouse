@@ -1,0 +1,10 @@
+﻿// copy to config.json and fill accordingly
+
+{
+  "paths": {
+    "database": "D:\\git\\private\\t2t\\Toot2Toulouse\\Data",
+    "config": "D:\\git\\private\\t2t\\Toot2Toulouse",
+    "log": "D:\\git\\private\\t2t\\Toot2ToulouseService"
+  },
+  "loglevel": "Information"
+}

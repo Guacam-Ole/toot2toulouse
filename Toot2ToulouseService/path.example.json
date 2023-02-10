@@ -1,9 +1,0 @@
-﻿
-// copy to path.json
-// Absolute pahts do database and config. Should be the paths used by web application
-
-{
-  "databasepath": "D:\\git\\private\\t2t\\Toot2Toulouse\\Data",
-  "configpath": "D:\\git\\private\\t2t\\Toot2Toulouse",
-  "log": "service.log"
-}

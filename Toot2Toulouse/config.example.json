@@ -45,7 +45,8 @@
       "FollowerCheckApp": "01:00:00", // [NOTYETIMPLEMENTED]
       "FollowerCheckUser": "7.0:00:00", // [NOTYETIMPLEMENTED]
       "MinDelay": "00:01:00", // Minimum delay for each toot before it is sent to twitter
-      "MaxDelay": "01:00:00" // maximum delay for each toot before it is sent to twitter
+      "MaxDelay": "01:00:00", // maximum delay for each toot before it is sent to twitter
+      "AuthFailureDeleteDays": 14, // Days after which a user is delete if authentication revoced from Twitter or Mastodon
     },
     "MaxImageSize": 5, // max size in MB never go ABOVE the default values as Twitter will not allow it
     "MaxGifSize": 15, // max size in MB never go ABOVE the default values as Twitter will not allow it
@@ -78,6 +79,7 @@
       "Prefix": "...",
       "Suffix": "..."
     },
+    "DontTweet": ["🐘"],
     "Replacements": {
       "Toot": "Tweet",
       "Boost": "Retweet",

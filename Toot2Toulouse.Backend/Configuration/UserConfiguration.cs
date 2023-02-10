@@ -23,6 +23,7 @@ namespace Toot2Toulouse.Backend.Configuration
         public UserConfigurationFollowers Followers { get; set; } // followersearch settings (translate mastodon mentions to twitter mentions)
 
         public UserConfigurationAppSuffix AppSuffix { get; set; } // suffix to show on tweets
+        public List<string> DontTweet { get; set; } = new List<string>() { { "🐘"  } };
         public TimeSpan Delay { get; set; }
     
 

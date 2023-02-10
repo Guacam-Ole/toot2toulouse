@@ -21,21 +21,24 @@ namespace Toot2ToulouseService
             _config = configReader.Configuration;
         }
 
-        public async Task PublishToots(bool loop)
+        public async Task PublishTootsAsync(bool loop)
         {
             do
             {
-                await _toulouse.SendTootsForAllUsers();
-              
-               if (loop) Thread.Sleep((int)_config.App.Intervals.Sending.TotalMilliseconds);
+                await _toulouse.SendTootsForAllUsersAsync();
+
+                if (loop) Thread.Sleep((int)_config.App.Intervals.Sending.TotalMilliseconds);
             } while (loop);
         }
 
-        public async Task<List<Status>> GetTootsContaining(string mastodonHandle, string contents, int searchLimit)
+        public async Task PublishSingleTootAsync(Guid userId, string tootId)
         {
-            return await _toulouse.GetTootsContaining(mastodonHandle, contents, searchLimit);
+            await _toulouse.SendSingleTootAsync(userId, tootId);
         }
 
-     
+        public async Task<List<Status>> GetTootsContainingAsync(string mastodonHandle, string contents, int searchLimit)
+        {
+            return await _toulouse.GetTootsContainingAsync(mastodonHandle, contents, searchLimit);
+        }
     }
 }

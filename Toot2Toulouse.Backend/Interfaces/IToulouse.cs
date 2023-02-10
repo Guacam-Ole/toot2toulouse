@@ -1,7 +1,5 @@
 ﻿using Mastonet.Entities;
 
-using Toot2Toulouse.Backend.Models;
-
 namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IToulouse
@@ -10,12 +8,14 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Configuration.TootConfigurationAppModes.ValidModes GetServerMode();
 
+        Task SendTootsForAllUsersAsync();
 
-        Task SendTootsForAllUsers();
+        Task<List<Status>> GetTootsContainingAsync(string mastodonHandle, string searchstring, int limit);
 
-        Task<List<Status>> GetTootsContaining(string mastodonHandle, string searchstring, int limit);
+        Task InviteAsync(string mastodonHandle);
 
-        Task Invite(string mastodonHandle);
         void CalculateServerStats();
+
+        Task SendSingleTootAsync(Guid userId, string tootId);
     }
 }
