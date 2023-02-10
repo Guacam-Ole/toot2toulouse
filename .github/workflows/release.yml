@@ -6,9 +6,8 @@ name: release
 on:
   workflow_dispatch: 
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    tags:        
+      - '**'  
 
 jobs:
   build:
@@ -16,24 +15,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3    
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
-#    - name: Build
-#      run: dotnet build --no-restore --output ./output -p:Version=1.2.3.4
-#    - name: Test
-#      run: dotnet test --no-build --verbosity normal
-    - name: Release
-      run: dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=1.2.3.4 -c Release -o "/home/runner/work/out/t2tservice"
-#    - name: ZipWin
-#      run:
-#           7z a -tzip "t2tservice.zip" "./t2tservice/*"
-#           tar czvf "t2tservice.tar.gz" "t2tservice"
+
+    - name: Publish
+      run: 
+        echo publishing as ${{  github.ref_name }}
+        
+        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/bin/t2tservice"
+        
+        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2Toulouse/Toot2ToulouseWeb.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/bin/t2tweb"
+    - name: Zip
+      run:
+           7z a -tzip "/home/runner/work/out/zip/t2t-${{  github.ref_name }}.zip" "/home/runner/work/out/bin/*"
+    - name: Tar  
+      run:
+           tar czvf "/home/runner/work/out/zip/t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/bin/"
     - uses: actions/upload-artifact@v3
       with:
-        name: my-artifact
+        name: t2t-${{  github.ref_name }}
         path: /home/runner/work/out/*
+        
+    - name: create_release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: false
+        release_name: ${{ steps.version.outputs.version }}
+        tag_name: ${{ github.ref }}
+        body_path: /home/runner/work/toot2toulouse/.github/workflows/LATEST.md
+        body-: Release created by Tag-creation        
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+    - name: upload zip
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: /home/runner/work/out/zip/t2t-${{  github.ref_name }}.zip
+        asset_name: t2t-${{  github.ref_name }}.zip
+        asset_content_type: application/zip
+    - name: upload tar
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: /home/runner/work/out/zip/t2t-${{  github.ref_name }}.tar.gz
+        asset_name: t2t-${{  github.ref_name }}.tar.gz
+        asset_content_type: application/gzip        
