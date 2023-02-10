@@ -49,7 +49,7 @@ jobs:
         prerelease: false
         release_name: ${{ steps.version.outputs.version }}
         tag_name: ${{ github.ref }}
-        body_path: /home/runner/work/toot2toulouse/.github/workflows/LATEST.md
+        body_path: /home/runner/work/toot2toulouse/toot2toulouse/.github/workflows/LATEST.md
         body-: Release created by Tag-creation        
       env:
         GITHUB_TOKEN: ${{ github.token }}
