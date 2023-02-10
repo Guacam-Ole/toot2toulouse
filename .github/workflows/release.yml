@@ -7,7 +7,7 @@ on:
   workflow_dispatch: 
   push:
     tags:        
-    - '^\d*\.\d*\.\d*(?:\.\d*(?:\-\w*)?)?$'
+    - '[0-9]+.[0-9]+.[0-9]+.*'
 
 jobs:
   build:
@@ -36,11 +36,7 @@ jobs:
     - name: Tar  
       run:
            tar czvf "/home/runner/work/out/zip/t2t-${{  github.ref_name }}.tar.gz" "/home/runner/work/out/bin/"
-    - uses: actions/upload-artifact@v3
-      with:
-        name: t2t-${{  github.ref_name }}
-        path: /home/runner/work/out/*
-        
+       
     - name: create_release
       uses: actions/create-release@v1
       id: create_release
