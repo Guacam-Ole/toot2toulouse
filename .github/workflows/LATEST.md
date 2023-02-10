@@ -1,5 +1,7 @@
 # Release notes
 
+first stable release
+
 ## New Features
 Replies to your own toots are now tweeted
 You can now mark your toots with an "🐘" to disable tweeting
