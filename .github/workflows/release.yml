@@ -23,12 +23,8 @@ jobs:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       run: dotnet restore
-#    - name: Build
-#      run: dotnet build --no-restore --output ./output -p:Version=1.2.3.4
-#    - name: Test
-#      run: dotnet test --no-build --verbosity normal
 
-    - name: Release
+    - name: Publish
       run: 
         echo publishing as ${{  github.ref_name }}
         
@@ -45,3 +41,33 @@ jobs:
       with:
         name: t2t-${{  github.ref_name }}
         path: /home/runner/work/out/*
+        
+    - name: create_release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: false
+        release_name: ${{ steps.version.outputs.version }}
+        tag_name: ${{ github.ref }}
+        body_path: CHANGELOG.md
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+    - name: upload zip
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: /home/runner/work/out/zip
+        asset_name: t2t-${{  github.ref_name }}.zip
+        asset_content_type: application/zip
+    - name: upload tar
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: /home/runner/work/out/zip
+        asset_name: t2t-${{  github.ref_name }}.tar.gz
+        asset_content_type: application/gzip        
