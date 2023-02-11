@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
@@ -39,105 +38,83 @@ namespace Toot2ToulouseWeb.Controllers
         }
 
         [Route("export")]
-        public ActionResult GetUserExport() 
+        public ActionResult GetUserExport()
         {
             var user = GetUserFromCookie();
-            if (user == null) return AuthErrorResult();
             return new JsonResult(_user.ExportUserData(user));
         }
 
-        private UserData? GetUserFromCookie()
+        private UserData GetUserFromCookie()
         {
             var id = _cookies.UserIdGetCookie();
             var hash = _cookies.UserHashGetCookie();
-            if (id == Guid.Empty || hash == null) return null;
-            return _user.GetUser(id, hash);
-        }
-
-        private JsonResult ErrorResult(string error)
-        {
-            return new JsonResult(new { Error=error, Success=false});
-        }
-
-        private JsonResult AuthErrorResult()
-        {
-            return ErrorResult("auth");
-        }
-
-        private JsonResult SuccessResult()
-        {
-            return new JsonResult(new { Success = true });
+            if (id == Guid.Empty || hash == null) throw new ApiException(ApiException.ErrorTypes.Auth);
+            var user = _user.GetUser(id, hash);
+            if (user == null) throw new ApiException(ApiException.ErrorTypes.Auth);
+            return user;
         }
 
         [Route("visibility")]
         public ActionResult UpdateConfigVisibility(bool publicToots, bool notListedToots, bool privateToots)
         {
             var user = GetUserFromCookie();
-            if (user == null) return AuthErrorResult();
             user.Config.VisibilitiesToPost = new List<UserConfiguration.Visibilities>();
             if (publicToots) user.Config.VisibilitiesToPost.Add(UserConfiguration.Visibilities.Public);
             if (notListedToots) user.Config.VisibilitiesToPost.Add(UserConfiguration.Visibilities.Unlisted);
             if (privateToots) user.Config.VisibilitiesToPost.Add(UserConfiguration.Visibilities.Private);
             _user.UpdateUser(user);
-            return SuccessResult();
+            return JsonResults.Success();
         }
 
         [Route("donttweet")]
         public ActionResult UpdateDontTweet(List<string> badwords)
         {
             var user = GetUserFromCookie();
-            if (user == null) return AuthErrorResult();
 
-            var nonEmptyBadwords=badwords.Where(q=>!string.IsNullOrWhiteSpace(q)).ToList();
+            var nonEmptyBadwords = badwords.Where(q => !string.IsNullOrWhiteSpace(q)).ToList();
             user.Config.DontTweet = nonEmptyBadwords;
-            return SuccessResult();
+            return JsonResults.Success();
         }
 
-        [Route("translations")] 
+        [Route("translations")]
         public ActionResult UpdateTranslations(Dictionary<string, string> translations)
         {
             var user = GetUserFromCookie();
-            if (user == null) return AuthErrorResult();
-            var nonEmptyTranslations=translations.Where(q=>!string.IsNullOrWhiteSpace(q.Key)).ToDictionary(t => t.Key, t => t.Value);
+            var nonEmptyTranslations = translations.Where(q => !string.IsNullOrWhiteSpace(q.Key)).ToDictionary(t => t.Key, t => t.Value);
             user.Config.Replacements = nonEmptyTranslations;
             _user.UpdateUser(user);
-            return SuccessResult();
+            return JsonResults.Success();
         }
-
-
 
         [Route("delay")]
         public ActionResult UpdateConfigDelay(TimeSpan delay)
         {
             var user = GetUserFromCookie();
-            if (user == null) return AuthErrorResult();
             user.Config.Delay = delay.SetLimits(_config.App.Intervals.MinDelay, _config.App.Intervals.MaxDelay);
             _user.UpdateUser(user);
-            return SuccessResult();
+            return JsonResults.Success();
         }
 
         [Route("suffix")]
         public ActionResult UpdateConfigAppSuffix(string content, bool hideIfBreaks)
         {
             var user = GetUserFromCookie();
-            if (user == null) return AuthErrorResult();
             user.Config.AppSuffix.Content = content.Shorten(10);
             user.Config.AppSuffix.HideIfBreaks = hideIfBreaks;
 
             _user.UpdateUser(user);
-            return SuccessResult();
+            return JsonResults.Success();
         }
 
         [Route("thread")]
         public ActionResult UpdateConfigLongContent(string prefix, string suffix)
         {
             var user = GetUserFromCookie();
-            if (user == null) return AuthErrorResult();
             user.Config.LongContentThreadOptions.Prefix = prefix.Shorten(10);
             user.Config.LongContentThreadOptions.Suffix = suffix.Shorten(10);
 
             _user.UpdateUser(user);
-            return SuccessResult();
+            return JsonResults.Success();
         }
 
         [Route("config")]

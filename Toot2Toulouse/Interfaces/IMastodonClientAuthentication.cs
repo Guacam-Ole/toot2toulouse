@@ -4,6 +4,6 @@
     {
         Task<string> GetAuthenticationUrlAsync(string requestHost, string userInstance);
 
-        Task<KeyValuePair<bool, string>> UserIsAllowedToRegisterAsync(string userInstance, string verificationCode);
+        Task UserIsAllowedToRegisterAsync(string userInstance, string verificationCode);
     }
 }

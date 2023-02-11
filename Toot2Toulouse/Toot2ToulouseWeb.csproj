@@ -46,6 +46,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="web\error.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="web\closed.en.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -97,7 +100,7 @@
     <None Update="web\register.en.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="web\unknown.en.html">
+    <None Update="web\auth.en.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

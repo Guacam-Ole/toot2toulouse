@@ -7,6 +7,8 @@ using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 using Toot2Toulouse.Interfaces;
 
+using Toot2ToulouseWeb;
+
 namespace Toot2Toulouse
 {
     public class MastodonClientAuthentication : IMastodonClientAuthentication
@@ -28,7 +30,7 @@ namespace Toot2Toulouse
             _toulouse = toulouse;
         }
 
-        public async Task<KeyValuePair<bool, string>> UserIsAllowedToRegisterAsync(string userInstance, string verificationCode)
+        public async Task UserIsAllowedToRegisterAsync(string userInstance, string verificationCode)
         {
             try
             {
@@ -41,33 +43,33 @@ namespace Toot2Toulouse
                     }
                     );
                 if (userAccount == null)
-                    return new KeyValuePair<bool, string>(false, "authorization failed");
-
+                    throw new ApiException(ApiException.ErrorTypes.Auth);
                 if (!_configuration.App.Modes.AllowBots && (userAccount.Bot ?? false))
-                    return new KeyValuePair<bool, string>(false, "Bots are not allowed on this server");
+                    throw new ApiException(ApiException.ErrorTypes.RegistrationNoBots, "Bots are not allowed on this server", 403);
                 if (!string.IsNullOrWhiteSpace(_configuration.App.Modes.AllowedInstances) && !_configuration.App.Modes.AllowedInstances.Contains(userInstance, StringComparison.InvariantCultureIgnoreCase))
-                    return new KeyValuePair<bool, string>(false, $"Only users from the following instances are allowed currently: {_configuration.App.Modes.AllowedInstances}");
+                    throw new ApiException(ApiException.ErrorTypes.RegistrationWrongInstance, $"Only users from the following instances are allowed currently: {_configuration.App.Modes.AllowedInstances}", 403);
                 if (!string.IsNullOrWhiteSpace(_configuration.App.Modes.BlockedInstances) && _configuration.App.Modes.BlockedInstances.Contains(userInstance, StringComparison.InvariantCultureIgnoreCase))
-                    return new KeyValuePair<bool, string>(false, "Your Instance is blocked");
+                    throw new ApiException(ApiException.ErrorTypes.RegistrationWrongInstance, "Your Instance is blocked", 403);
                 if (_toulouse.GetServerMode() == TootConfigurationAppModes.ValidModes.Closed)
-                    return new KeyValuePair<bool, string>(false, "This server isn't accepting new registrations. (I thought we already told you that?)");
+                    throw new ApiException(ApiException.ErrorTypes.RegistrationClosed, "This server isn't accepting new registrations. (I thought we already told you that?)", 403);
                 if (_configuration.App.Modes.Active == TootConfigurationAppModes.ValidModes.Invite)
                 {
                     var invites = await _mastodon.GetServiceTootsContainingAsync("[INVITE]", 100, $"{userAccount.AccountName}@{userInstance}");
                     if (invites.Count == 0)
-                        return new KeyValuePair<bool, string>(false, "Looks like you did not receive an invite or your invite has expired");
+                        throw new ApiException(ApiException.ErrorTypes.RegistrationInvite, "Looks like you did not receive an invite or your invite has expired", 403);
                 }
 
                 // TODO: Check maxTootsPerDay
 
                 StoreNewUser(userInstance, authToken, userAccount);
-                //    await _mastodon.AssignLastTweetedIfMissing(userData.Id);
-
-                return new KeyValuePair<bool, string>(true, "success");
+            }
+            catch (ApiException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                return new KeyValuePair<bool, string>(false, $"Server Error: {ex}");
+                throw new ApiException(ApiException.ErrorTypes.Exception, ex.Message);
             }
         }
 
@@ -88,7 +90,7 @@ namespace Toot2Toulouse
             }
 
             user.Mastodon.Secret = secret;
-            user.Mastodon.Instance= instance;
+            user.Mastodon.Instance = instance;
             user.Mastodon.LastTootDate = userAccount.LastStatusAt;
             user.Mastodon.Id = userAccount.Id;
             user.Mastodon.DisplayName = userAccount.DisplayName;
