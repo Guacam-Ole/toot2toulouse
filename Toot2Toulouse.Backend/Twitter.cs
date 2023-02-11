@@ -89,20 +89,21 @@ namespace Toot2Toulouse.Backend
             content = $" {content} ";
             if (mentions == null) return;
             var personalUserReplacements = userdata.Config.Replacements.Where(q => q.Key.StartsWith("@"));
-            var personalNonUserReplacements= userdata.Config.Replacements.Where(q => !q.Key.StartsWith("@"));
-            var globalUserReplacements=new Dictionary<string, string>();    
-            if (userdata.Config.UseGlobalMentions && _globalReplacements!=null) globalUserReplacements= _globalReplacements;
+            var personalNonUserReplacements = userdata.Config.Replacements.Where(q => !q.Key.StartsWith("@"));
+            var globalUserReplacements = new Dictionary<string, string>();
+            if (userdata.Config.UseGlobalMentions && _globalReplacements != null) globalUserReplacements = _globalReplacements;
 
             foreach (var mention in mentions)
             {
                 var userReplacement = personalUserReplacements.ReplacementForUser(mention);
-                var globalUserReplacement= globalUserReplacements.ReplacementForUser(mention);
+                var globalUserReplacement = globalUserReplacements.ReplacementForUser(mention);
 
                 if (userReplacement != null)
                 {
                     content = content.Replace(mention, userReplacement);
                     continue;
-                } else if (globalUserReplacement    !=null)
+                }
+                else if (globalUserReplacement != null)
                 {
                     content = content.Replace(mention, globalUserReplacement);
                     continue;
@@ -111,9 +112,9 @@ namespace Toot2Toulouse.Backend
                 content = content.Replace(mention, $"🐘{mention.UserName}");
             }
 
-            foreach (var nonUserReplacements in personalNonUserReplacements)
+            foreach (var nonUserReplacement in personalNonUserReplacements)
             {
-                content = content.Replace($" {nonUserReplacements.Key} ", $" {nonUserReplacements.Value} ", StringComparison.CurrentCultureIgnoreCase);
+                content = content.Replace(nonUserReplacement);
             }
             content = content.Trim();
         }
@@ -130,7 +131,7 @@ namespace Toot2Toulouse.Backend
                 }
                 bool isSensitive = toot.Sensitive ?? false;
 
-                string content = _toot.StripHtml(toot.Content);
+                string content = toot.Content.StripHtml();
                 if (userData.Config.UseGlobalMentions) await FillGlobalReplacements();
                 ReplaceContent(toot.Mentions, userData, ref content);
 
@@ -206,7 +207,6 @@ namespace Toot2Toulouse.Backend
                         mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
 
                         break;
-                    //return mediafile;
 
                     case ".gif":
                         fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
@@ -217,7 +217,6 @@ namespace Toot2Toulouse.Backend
                         fileContents = await DownloadFileAsync(attachment.Url, null, _config.App.MaxVideoSize);
                         mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
                         break;
-                    //return mediafile;
 
                     default:
                         throw new NotImplementedException(); // TODO: Own exceptiontype
@@ -233,7 +232,7 @@ namespace Toot2Toulouse.Backend
             }
             catch (Exception ex)
             {
-                _logger.LogError("oops", ex);
+                _logger.LogError("Downloading attachment failed. Will tweet without attachment", ex);
                 return null;
             }
         }

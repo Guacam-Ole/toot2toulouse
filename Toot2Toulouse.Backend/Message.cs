@@ -19,16 +19,7 @@ namespace Toot2Toulouse.Backend
             _config = configReader.Configuration;
         }
 
-        public string StripHtml(string content)
-        {
-            content = content.Replace("</p>", "\n\n");
-            content = content.Replace("<br />", "\n");
-            content= Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
-            content  =System.Net.WebUtility.HtmlDecode(content);
-            return content;
-         
-        }
-
+    
         public List<string>? GetReplies(UserConfiguration userConfiguration, string originalToot, out string mainTweet)
         {
             DoReplacements(userConfiguration, ref originalToot);
