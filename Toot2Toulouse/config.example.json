@@ -3,7 +3,7 @@
 {
   "Secrets": {
     "Salt": "Use your own Salt here. Can be any combination of characters",
-    "Twitter": {  // These values can be found in the twitter api - settings
+    "Twitter": { // These values can be found in the twitter api - settings
       "Consumer": {
         "ApiKey": "",
         "ApiKeySecret": ""
@@ -68,22 +68,17 @@
       "Content": " 🐘🦆",
       "HideIfBreaks": true
     },
-    "Followers": {
-      "FollowerText": {
-        "Prefix": "🐘",
-        "HideInstance": true
-      }
-    },
     "LongContent": "Thread",
     "LongContentThreadOptions": {
       "Prefix": "...",
       "Suffix": "..."
     },
-    "DontTweet": ["🐘"],
+    "DontTweet": [ "🐘" ],
     "Replacements": {
       "Toot": "Tweet",
       "Boost": "Retweet",
       "Tröt": "Tweet"
-    }
+    },
+    "UseGlobalMentions": true
   }
 }

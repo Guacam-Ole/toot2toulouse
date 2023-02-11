@@ -22,6 +22,7 @@ namespace Toot2Toulouse.Backend
         private readonly Interfaces.IMessage _toot;
         private readonly INotification _notification;
         private readonly IDatabase _database;
+        private Dictionary<string, string> _globalReplacements = null;
 
         public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot, INotification notification, IDatabase database)
         {
@@ -46,7 +47,7 @@ namespace Toot2Toulouse.Backend
         {
             if (string.IsNullOrWhiteSpace(toot.Content)) return false;
             if (!user.Config.VisibilitiesToPost.Contains(toot.Visibility.ToT2t())) return false;
-            if (user.Config.DontTweet.Any(q=>toot.Content.Contains(q))) return false;   
+            if (user.Config.DontTweet.Any(q => toot.Content.Contains(q))) return false;
             return true;
         }
 
@@ -60,26 +61,61 @@ namespace Toot2Toulouse.Backend
             return await PublishFromTootAsync(userData, toot, replyTo);
         }
 
-        private void ReplaceContent(IEnumerable<Mention> mentions, Dictionary<string,string> replacements, ref string content)
+        private async Task FillGlobalReplacements()
         {
+            if (_globalReplacements == null)
+            {
+                _globalReplacements = new Dictionary<string, string>();
+                var allusers = await _database.GetAllUsers();
+
+                foreach (var user in allusers)
+                {
+                    if (user.Config.Replacements == null) continue;
+                    var userReplacements = user.Config.Replacements.Where(q => q.Key.StartsWith("@"));
+                    if (userReplacements.Any())
+                    {
+                        foreach (var replacement in userReplacements)
+                        {
+                            if (_globalReplacements.ContainsKey(replacement.Key)) continue;
+                            _globalReplacements.Add(replacement.Key, replacement.Value);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ReplaceContent(IEnumerable<Mention> mentions, UserData userdata, ref string content)
+        {
+            content = $" {content} ";
             if (mentions == null) return;
-            var userReplacements = replacements.Where(q => q.Key.StartsWith("@"));
+            var personalUserReplacements = userdata.Config.Replacements.Where(q => q.Key.StartsWith("@"));
+            var personalNonUserReplacements= userdata.Config.Replacements.Where(q => !q.Key.StartsWith("@"));
+            var globalUserReplacements=new Dictionary<string, string>();    
+            if (userdata.Config.UseGlobalMentions && _globalReplacements!=null) globalUserReplacements= _globalReplacements;
 
             foreach (var mention in mentions)
             {
-                var userReplacement = userReplacements.FirstOrDefault(q => q.Key.ToLower() == "@"+mention.AccountName.ToLower());
-                if (userReplacement.Key!=null)
+                var userReplacement = personalUserReplacements.ReplacementForUser(mention);
+                var globalUserReplacement= globalUserReplacements.ReplacementForUser(mention);
+
+                if (userReplacement != null)
                 {
-                    content = content.Replace("@"+mention.UserName, userReplacement.Value, StringComparison.CurrentCultureIgnoreCase);
+                    content = content.Replace(mention, userReplacement);
+                    continue;
+                } else if (globalUserReplacement    !=null)
+                {
+                    content = content.Replace(mention, globalUserReplacement);
                     continue;
                 }
 
-                content = content.Replace($"@{mention.UserName}", $"🐘{mention.UserName}");
+                content = content.Replace(mention, $"🐘{mention.UserName}");
             }
 
-            foreach (var nonUserReplacements in replacements.Where(q => !q.Key.StartsWith("@"))) {
-                content = content.Replace(nonUserReplacements.Key, nonUserReplacements.Value, StringComparison.CurrentCultureIgnoreCase);
+            foreach (var nonUserReplacements in personalNonUserReplacements)
+            {
+                content = content.Replace($" {nonUserReplacements.Key} ", $" {nonUserReplacements.Value} ", StringComparison.CurrentCultureIgnoreCase);
             }
+            content = content.Trim();
         }
 
         private async Task<List<long>> PublishFromTootAsync(UserData userData, Status toot, long? replyTo)
@@ -95,7 +131,8 @@ namespace Toot2Toulouse.Backend
                 bool isSensitive = toot.Sensitive ?? false;
 
                 string content = _toot.StripHtml(toot.Content);
-                ReplaceContent(toot.Mentions, userData.Config.Replacements, ref content);
+                if (userData.Config.UseGlobalMentions) await FillGlobalReplacements();
+                ReplaceContent(toot.Mentions, userData, ref content);
 
                 var twitterUser = await GetTwitterUserAsync(userData);
 
@@ -207,8 +244,8 @@ namespace Toot2Toulouse.Backend
             {
                 Text = content,
                 PossiblySensitive = isSensitive,
-                InReplyToTweetId = replyTo, 
-                AutoPopulateReplyMetadata= true
+                InReplyToTweetId = replyTo,
+                AutoPopulateReplyMetadata = true
             };
 
             if (attachments?.Count() > 0)

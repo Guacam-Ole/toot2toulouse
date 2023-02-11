@@ -1,5 +1,8 @@
 ﻿
+using Mastonet.Entities;
+
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -40,6 +43,18 @@ namespace Toot2Toulouse.Backend
                     value?.RemoveSecrets();
                 }
             }
+        }
+
+        public static string? ReplacementForUser(this IEnumerable<KeyValuePair<string,string>> replacements, Mention mention)
+        {
+            if (replacements == null) return null; 
+            var replacement=replacements.FirstOrDefault(q => q.Key.ToLower() == "@" + mention.AccountName.ToLower());
+            return replacement.Value;
+        }
+
+        public static string Replace(this string content, Mention mention, string replacement)
+        {
+            return content.Replace($" @{mention.UserName} ", $" {replacement} ", StringComparison.CurrentCultureIgnoreCase);
         }
 
         public static Mastonet.Visibility ToMastonet(this Visibilities visibility )
