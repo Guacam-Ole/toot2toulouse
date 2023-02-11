@@ -6,6 +6,9 @@ using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Backend
 {
+
+
+
     public class Cookies : ICookies
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -20,7 +23,8 @@ namespace Toot2Toulouse.Backend
                 IsEssential = true,
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
-                Path = "/"
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddMonths(6)
             };
         }
 
@@ -34,30 +38,26 @@ namespace Toot2Toulouse.Backend
             return GetSessionValue<AppRegistration>(nameof(AppRegistration));
         }
 
-        public Guid UserIdGetCookie()
+        public CookiePair GetUserCookie()
         {
-            return GetCookieValue<Guid>("id");
+            return new CookiePair
+            {
+                Hash = GetCookieValue<string>("hash"),
+                Userid = GetCookieValue<Guid>("id")
+            };
         }
 
-        public string UserHashGetCookie()
+        public void SetUserCookie(CookiePair cookiePair)
         {
-            return GetCookieValue<string>("hash");
+            SetCookieValue("id", cookiePair.Userid);
+            SetCookieValue("hash", cookiePair.Hash);
         }
-
-        public void UserIdSetCookie(Guid userId)
-        {
-            SetCookieValue("id", userId);
-        }
-
-        public void UserHashSetCookie(string hash)
-        {
-            SetCookieValue("hash", hash);
-        }
+      
 
         private void SetSessionValue<T>(string name, T value)
         {
             var context = _httpContextAccessor.HttpContext;
-            context.Session.SetString(name, JsonSerializer.Serialize(value, ConfigReader.JsonOptions    ));
+            context.Session.SetString(name, JsonSerializer.Serialize(value, ConfigReader.JsonOptions));
         }
 
         private T GetSessionValue<T>(string name)

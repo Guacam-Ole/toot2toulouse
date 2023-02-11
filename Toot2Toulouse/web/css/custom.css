@@ -29,3 +29,21 @@ th.right, td.right {
     -ms-user-select: none; /* IE10+/Edge */
     user-select: none; /* Standard */
 }
+
+.button-red {
+    border-color:red;
+    color:darkred;
+}
+
+.button-green {
+    border-color: green;
+    color:darkgreen;
+}
+
+.button-icon {
+    font-size:large;
+}
+
+.noborder td {
+    border-bottom: 0px;
+}

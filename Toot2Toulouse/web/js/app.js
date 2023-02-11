@@ -96,6 +96,16 @@ function loadUserSettings() {
     });
 }
 
+function loadListSettings() {
+    $.getJSON("/user/export", function (data) {
+        if (data.error != undefined) {
+            errorHandling(data);
+        } else {
+            displayListSettings(data);
+        }
+    });
+}
+
 function styleButtonByValue(chkBox) {
     var button = chkBox.prev();
     value = chkBox.prop("checked");
@@ -104,6 +114,19 @@ function styleButtonByValue(chkBox) {
     } else {
         button.attr("class", "button");
     }
+}
+
+function displayListSettings(user) {
+    badwords = user.config.dontTweet;
+    replacements = user.config.replacements;
+
+    Object.entries(replacements).forEach(([key, value]) => {
+        addTranslation(key, value);
+    });
+
+    Object.entries(badwords).forEach(([, value]) => {
+        addBadword(value);
+    })
 }
 
 function displayUserSettings(user) {
@@ -151,7 +174,6 @@ function saveDelay() {
     });
 }
 
-
 function saveSuffix() {
     $.getJSON("/user/suffix", {
         content: $("#AppSuffixContent").val(),
@@ -164,7 +186,6 @@ function saveSuffix() {
     });
 }
 
-
 function saveThread() {
     $.getJSON("/user/thread", {
         prefix: $("#LongContentThreadOptionsPrefix").val(),
@@ -176,7 +197,6 @@ function saveThread() {
         saveError(error);
     });
 }
-
 
 function finishSave() {
     $("#savestatuscontent").text("Data Saved");
@@ -193,6 +213,69 @@ function saveSettings() {
     saveVisibility();
 }
 
+/* Lists: */
+
+function GetTranslationRow(from = "", to = "") {
+    return "<tr class='translation'>" + $("#addTranslation").html().replace("[FROM]", from).replace("[TO]", to) + "</tr>";
+}
+
+function GetBadwordRow(value = "") {
+    return "<tr class='badword'>" + $("#addBadword").html().replace("[VALUE]", value) + "</tr>";
+}
+
+function addTranslation(from = "", to = "") {
+    $('#tblTrans tr:first').after(GetTranslationRow(from, to));
+}
+
+function addBadword(value = "") {
+    $('#tblBadword tr:first').after(GetBadwordRow(value));
+}
+
+function delRow(element) {
+    $(element).closest("tr").remove();
+}
+
+function saveTranslations() {
+    var trans = [];
+    $(".translation").each(function () {
+        var inputs = $(this).find("input");
+        trans.push({ "Key": inputs[0].value, "Value": inputs[1].value });
+    });
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: "/user/translations",
+        data: JSON.stringify(trans),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: function (response) {
+            if (!response.success) saveError(data);
+            else finishSave();
+        }
+    });
+}
+
+function saveBadwords() {
+    var badwords = [];
+    $(".badword").each(function () {
+        var inputs = $(this).find("input");
+        badwords.push(inputs[0].value);
+    });
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: "/user/donttweet",
+        data: JSON.stringify(badwords),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: function (response) {
+            if (!response.success) saveError(data);
+            else finishSave();
+        }
+    });
+}
 /* Global ErrorHandling: */
 
 function hideError() {

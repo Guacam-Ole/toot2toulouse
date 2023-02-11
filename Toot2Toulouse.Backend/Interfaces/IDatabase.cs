@@ -4,29 +4,29 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IDatabase
     {
-        UserData? GetUserById(Guid id);
+        Task<UserData?> GetUserById(Guid id);
 
-        Guid? GetUserIdByMastodonId(string instance, string mastodonId);
+        Task<Guid?> GetUserIdByMastodonId(string instance, string mastodonId);
 
-        UserData? GetUserByIdAndHash(Guid id, string hash);
+        Task< UserData?> GetUserByIdAndHash(Guid id, string hash);
 
-        void UpsertUser(UserData user);
+        Task UpsertUser(UserData user);
 
-        void RemoveUser(Guid id);
+        Task RemoveUser(Guid id);
 
         string CalculateHashForUser(UserData user);
 
-        List<UserData> GetActiveUsers();
+        Task<List<UserData>> GetActiveUsers();
 
-        Stats GetServerStats();
+        Task<Stats >GetServerStats();
 
-        void UpSertServerStats(Stats stats);
+        Task UpSertServerStats(Stats stats);
 
-        UserData GetUserByUsername(string handle, string instance);
+        Task<UserData> GetUserByUsername(string handle, string instance);
 
-        UserData GetUserByTwitterTmpGuid(string guid);
+        Task<UserData> GetUserByTwitterTmpGuid(string guid);
 
-        List<UserData> GetAllUsers();
+        Task<List<UserData>> GetAllUsers();
 
 
     }

@@ -50,7 +50,7 @@ namespace Toot2Toulouse
                     throw new ApiException(ApiException.ErrorTypes.RegistrationWrongInstance, $"Only users from the following instances are allowed currently: {_configuration.App.Modes.AllowedInstances}", 403);
                 if (!string.IsNullOrWhiteSpace(_configuration.App.Modes.BlockedInstances) && _configuration.App.Modes.BlockedInstances.Contains(userInstance, StringComparison.InvariantCultureIgnoreCase))
                     throw new ApiException(ApiException.ErrorTypes.RegistrationWrongInstance, "Your Instance is blocked", 403);
-                if (_toulouse.GetServerMode() == TootConfigurationAppModes.ValidModes.Closed)
+                if ((await _toulouse.GetServerMode()) == TootConfigurationAppModes.ValidModes.Closed)
                     throw new ApiException(ApiException.ErrorTypes.RegistrationClosed, "This server isn't accepting new registrations. (I thought we already told you that?)", 403);
                 if (_configuration.App.Modes.Active == TootConfigurationAppModes.ValidModes.Invite)
                 {
@@ -73,13 +73,13 @@ namespace Toot2Toulouse
             }
         }
 
-        private void StoreNewUser(string instance, string secret, Account userAccount)
+        private async Task StoreNewUser(string instance, string secret, Account userAccount)
         {
             UserData user = null;
-            var existiungUserId = _database.GetUserIdByMastodonId(instance, userAccount.Id);
+            var existiungUserId = await _database.GetUserIdByMastodonId(instance, userAccount.Id);
             if (existiungUserId != null)
             {
-                user = _database.GetUserById(existiungUserId.Value);
+                user =await _database.GetUserById(existiungUserId.Value);
             }
             else
             {
@@ -105,8 +105,7 @@ namespace Toot2Toulouse
             _database.UpsertUser(user);
             string hash = _database.CalculateHashForUser(user);
 
-            _cookies.UserIdSetCookie(user.Id);
-            _cookies.UserHashSetCookie(hash);
+            _cookies.SetUserCookie(new CookiePair { Userid= user.Id, Hash = hash });    
         }
 
         public async Task<AuthenticationClient> GetAuthenticationClientAsync(string userInstance, bool createApp)

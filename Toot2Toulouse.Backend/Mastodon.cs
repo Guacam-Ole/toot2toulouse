@@ -35,7 +35,7 @@ namespace Toot2Toulouse.Backend
             string recipient = null;
             if (id != Guid.Empty)
             {
-                var user = _database.GetUserById(id);
+                var user =await _database.GetUserById(id);
                 recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
             }
             string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.ServiceAppSuffix}";
@@ -105,7 +105,7 @@ namespace Toot2Toulouse.Backend
 
         public async Task AssignLastTweetedIfMissingAsync(Guid id)
         {
-            var user = _database.GetUserById(id);
+            var user = await _database.GetUserById(id);
             if (user.Mastodon.LastToot != null) return;
 
             var client = GetUserClient(user);
@@ -119,7 +119,7 @@ namespace Toot2Toulouse.Backend
         public async Task<List<Status>> GetNonPostedTootsAsync(Guid id)
         {
             await AssignLastTweetedIfMissingAsync(id);
-            var user = _database.GetUserById(id);
+            var user = await _database.GetUserById(id);
             var client = GetUserClient(user);
             var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
             return statuses.OrderBy(q => q.CreatedAt).ToList();
@@ -145,8 +145,8 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var user = _database.GetUserById(userId);
-                var client = GetUserClient(user);
+                var user = await _database.GetUserById(userId);
+                var client =  GetUserClient(user);
                 return await client.GetStatus(tootId);
             }
             catch (Exception ex)
@@ -161,7 +161,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var user = _database.GetUserById(id);
+                var user = await _database.GetUserById(id);
                 var client = GetUserClient(user);
                 return await GetTootsContainingAsync(client, content, limit);
             }

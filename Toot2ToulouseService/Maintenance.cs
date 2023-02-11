@@ -35,12 +35,12 @@ namespace Toot2ToulouseService
             }
         }
 
-        private void DoUpgradeFor(string version)
+        private async Task DoUpgradeFor(string version)
         {
             switch (version)
             {
                 case "0.9":
-                    var allUsers = _database.GetActiveUsers();
+                    var allUsers =  await _database.GetActiveUsers();
                     foreach (var user in allUsers)
                     {
                         user.Config.VisibilitiesToPost = _config.Defaults.VisibilitiesToPost;
@@ -55,9 +55,9 @@ namespace Toot2ToulouseService
             await _toulouse.InviteAsync(mastodonHandle);
         }
 
-        public void Upgrade(Version? fromVersion)
+        public async Task    Upgrade(Version? fromVersion)
         {
-            var serverstats = _database.GetServerStats();
+            var serverstats = await _database.GetServerStats();
             fromVersion ??= new Version(serverstats.CurrentVersion ?? "0.0");
             if (fromVersion.ToString() == serverstats.CurrentVersion) return;
             GetUpgradePath(fromVersion, _config.CurrentVersion);
@@ -70,10 +70,11 @@ namespace Toot2ToulouseService
             return _config.CurrentVersion.ToString();
         }
 
-        public void ListIds()
+        public async void ListIds()
         {
             Console.WriteLine("id\tblockreason\tblockdate\tmastodon\ttwitter");
-            _database.GetAllUsers().ForEach(user =>
+            var allUsers=await _database.GetAllUsers();
+            allUsers.ForEach(user =>
             {
                 Console.WriteLine($"{user.Id}\t{user.BlockReason}\t{user.BlockDate}\t{user.Mastodon?.Handle}@{user.Mastodon?.Instance}\t{user.Twitter?.Handle}");
             });

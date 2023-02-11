@@ -60,13 +60,24 @@ namespace Toot2Toulouse.Backend
             return await PublishFromTootAsync(userData, toot, replyTo);
         }
 
-        private void ReplaceRecipients(IEnumerable<Mention> mentions, ref string content)
+        private void ReplaceContent(IEnumerable<Mention> mentions, Dictionary<string,string> replacements, ref string content)
         {
             if (mentions == null) return;
 
             foreach (var mention in mentions)
             {
+                var userReplacement = replacements.FirstOrDefault(q => q.Key == "@"+mention.AccountName);
+                if (userReplacement.Key!=null)
+                {
+                    content = content.Replace("@"+mention.UserName, userReplacement.Value);
+                    continue;
+                }
+
                 content = content.Replace($"@{mention.UserName}", $"🐘{mention.UserName}");
+            }
+
+            foreach (var nonUserReplacements in replacements.Where(q => !q.Key.StartsWith("@"))) {
+                content = content.Replace(nonUserReplacements.Key, nonUserReplacements.Value);
             }
         }
 
@@ -83,7 +94,7 @@ namespace Toot2Toulouse.Backend
                 bool isSensitive = toot.Sensitive ?? false;
 
                 string content = _toot.StripHtml(toot.Content);
-                ReplaceRecipients(toot.Mentions, ref content);
+                ReplaceContent(toot.Mentions, userData.Config.Replacements, ref content);
 
                 var twitterUser = await GetTwitterUserAsync(userData);
 

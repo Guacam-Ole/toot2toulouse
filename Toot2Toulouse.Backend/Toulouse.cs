@@ -87,23 +87,23 @@ namespace Toot2Toulouse.Backend
             return displaySettings.OrderBy(q => q.Category).ThenBy(q => q.DisplayName).ToList();
         }
 
-        private UserData GetUserByMastodonHandle(string mastodonHandle)
+        private async Task<UserData >GetUserByMastodonHandle(string mastodonHandle)
         {
             // TODO: Error handling
             var parts = mastodonHandle.Split('@');
-            return _database.GetUserByUsername(parts[0], parts[1]);
+            return await _database.GetUserByUsername(parts[0], parts[1]);
         }
 
         public async Task<List<Status>> GetTootsContainingAsync(string mastodonHandle, string searchstring, int limit)
         {
-            var user = GetUserByMastodonHandle(mastodonHandle);
+            var user = await GetUserByMastodonHandle(mastodonHandle);
             var toots = await _mastodon.GetTootsContainingAsync(user.Id, searchstring, limit);
             return toots;
         }
 
-        private long? GetTwitterReplyToIdFromTootId(string tootId)
+        private async Task< long?> GetTwitterReplyToIdFromTootId(string tootId)
         {
-            var allUsers = _database.GetAllUsers();
+            var allUsers = await _database.GetAllUsers();
             foreach (var user in allUsers)
             {
                 if (user.Crossposts.Any(q => q.TootId == tootId))
@@ -115,16 +115,16 @@ namespace Toot2Toulouse.Backend
             return null;
         }
 
-        private long? GetTwitterReplyId(Status toot)
+        private async Task< long?> GetTwitterReplyId(Status toot)
         {
             if (toot.InReplyToId == null) return null;
-            return GetTwitterReplyToIdFromTootId(toot.InReplyToId);
+            return await GetTwitterReplyToIdFromTootId(toot.InReplyToId);
         }
 
         private async Task<List<Crosspost>> SendTootsAsync(Guid userId, List<Status> toots, bool updateUserData)
         {
             var sentToots = new List<Crosspost>();
-            var user = _database.GetUserById(userId);
+            var user = await _database.GetUserById(userId);
             _logger.LogTrace("sending {tootcount} toots for {user}@{instance}", toots.Count, user.Mastodon.Handle, user.Mastodon.Instance);
             var newLastDate = DateTime.UtcNow;
             foreach (var toot in toots)
@@ -140,7 +140,7 @@ namespace Toot2Toulouse.Backend
 
                 try
                 {
-                    long? twitterReplyToId = GetTwitterReplyId(toot);
+                    long? twitterReplyToId = await GetTwitterReplyId(toot);
                     _logger.LogTrace("Toot: {id}|{url}", toot.Id, toot.Uri);
                     if (user.Crossposts.FirstOrDefault(q => q.TootId == toot.Id) != null)
                     {
@@ -251,7 +251,7 @@ namespace Toot2Toulouse.Backend
 
         public async Task SendTootsForAllUsersAsync()
         {
-            var users = _database.GetActiveUsers().ToList();
+            var users = (await _database.GetActiveUsers()).ToList();
             var toots = new List<Crosspost>();
 
             foreach (var user in users)
@@ -288,10 +288,10 @@ namespace Toot2Toulouse.Backend
                 _logger.LogInformation("Sent {tootCount} toots for {count} users", tootCount, users.Count());
         }
 
-        public TootConfigurationAppModes.ValidModes GetServerMode()
+        public async Task<TootConfigurationAppModes.ValidModes> GetServerMode()
         {
             var serverMode = _config.App.Modes.Active;
-            var serverStats = _database.GetServerStats();
+            var serverStats = await _database.GetServerStats();
 
             if (_config.App.Modes.AutoInvite > 0 && serverMode == TootConfigurationAppModes.ValidModes.Closed && _config.App.Modes.AutoInvite <= serverStats.ActiveUsers) serverMode = TootConfigurationAppModes.ValidModes.Invite;
             if (_config.App.Modes.AutoClosed > 0 && _config.App.Modes.AutoClosed <= serverStats.ActiveUsers) serverMode = TootConfigurationAppModes.ValidModes.Closed;
@@ -299,10 +299,10 @@ namespace Toot2Toulouse.Backend
             return serverMode;
         }
 
-        public void CalculateServerStats()
+        public async Task CalculateServerStats()
         {
-            var serverstats = _database.GetServerStats();
-            var allUsers = _database.GetActiveUsers();
+            var serverstats = await _database.GetServerStats();
+            var allUsers = await _database.GetActiveUsers();
             var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.UtcNow.AddDays(-1)));
             serverstats.ActiveUsers = activeUsers.Count();
             serverstats.TotalUsers = allUsers.Count();

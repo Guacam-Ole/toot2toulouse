@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <base href="./web" target="_blank">
+    <title>🐘🦆 Toot2Toulouse: Lists</title>
+    <meta name="author" content="Ole Albers - https://github.com/Guacam-Ole">
+    <link rel="stylesheet" href="./css/raleway.css">
+    <link rel="stylesheet" href="./css/normalize.css">
+    <link rel="stylesheet" href="./css/skeleton.css">
+    <link rel="stylesheet" href="./css/custom.css">
+    <script src="js/jquery-3.6.3.min.js"></script>
+    <script src="js/js.cookie.min.js"></script>
+    <script src="js/app.js?v=110"></script>
+</head>
+
+<body onload="loadListSettings();">
+    <div class="container">
+        <section class="header">
+            <h2 class="title">🐘🦆 Toot2Toulouse: Configure Lists</h2>
+        </section>
+    </div>
+
+    <div class="section" id="about">
+        <div class="container">
+            <p class="section-description">You can modify your lists on this page</p>
+        </div>
+    </div>
+
+    <div class="section" id="donttweet">
+        <div class="container">
+            <h3 class="section-heading">Don't tweet</h3>
+            <p>
+                If <i>any</i> of the following words appear in your toot it will NOT be tweeted to Twitter:
+            </p>
+            <p class="lst">
+                <table id="tblBadword" class="u-full-width noborder">
+                    <thead>
+                        <tr>
+                            <th>Word to filter</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tr id="addBadword" class="addBadword" style="display:none;">
+                        <td><input type="text" style="width:100%"  value="[VALUE]"/></td>
+                        <td>
+                            <a class="button button-red button-icon" title="Remove row" onclick="delRow(this); return false;">🗑️</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><a class="button" onclick="addBadword(); return false;">Add row</a></td>
+                        <td></td>
+                        <td><a class="button  button-primary" onclick="saveBadwords(); return false;">Save</a></td>
+                    </tr>
+                </table>
+            </p>
+        </div>
+    </div>
+
+    <div class="section" id="replacements">
+        <div class="container">
+            <h3 class="section-heading">Replace words</h3>
+            <p>
+                You can define what words to automatically replace.<br />
+                <b>hint:</b> By default mentions are not transferred to twitter, because "john@mastodon.social" could be a complete different human than  @john at twitter. But you can also use the translations to fix this:<br />
+                <table>
+                    <tr><td>from</td><td>to</td><td>explanation</td></tr>
+                    <tr>
+                        <td>@guacamole</td>
+                        <td>@guacam_olee</td>
+                        <td>If user is on the SAME instance as you, DON't add the instance</td>
+                    </tr>
+                    <tr>
+                        <td>@blathering@podcasts.social</td>
+                        <td>@blatering_pod</td>
+                        <td>If user is on another instance you have to add the instance, too (podcasts.social in this case)</td>
+                    </tr>
+                    <tr>
+                        <td>@john</td>
+                        <td>@john</td>
+                        <td>Even if the handles are the same you have to enter it as a translation to work</td>
+                    </tr>
+                </table>
+            </p>
+            <p class="lst">
+                <table id="tblTrans" class="u-full-width noborder">
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tr id="addTranslation" class="addTranslation" style="display:none;">
+                        <td><input type="text" style="width:100%" value="[FROM]" /></td>
+                        <td><input type="text" style="width:100%" value="[TO]" /></td>
+                        <td>
+                            <a class="button button-red button-icon" title="Remove row" onclick="delRow(this); return false;">🗑️</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><a class="button" onclick="addTranslation(); return false;">Add row</a></td><td></td><td><a class="button  button-primary" onclick="saveTranslations(); return false;">Save</a></td>
+                    </tr>
+                </table>
+            </p>
+            <a class="button " target="_self" href="/user/config">Back to Config</a>
+        </div>
+    </div>
+
+
+
+    <div class="section" id="savestatus" style="display:none;">
+        <div class="container">
+            <h5 id="savestatuscontent">Loading data</h5>
+        </div>
+    </div>
+</body>
+</html>

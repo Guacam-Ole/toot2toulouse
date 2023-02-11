@@ -5,13 +5,17 @@ namespace Toot2Toulouse.Backend.Interfaces
     public interface ICookies
     {
         void AppRegistrationSetSession(AppRegistration appRegistration);
+
         AppRegistration AppRegistrationGetSession();
 
-        Guid UserIdGetCookie();
-        string UserHashGetCookie();
+        CookiePair GetUserCookie();
 
-        void UserIdSetCookie(Guid userId);
-        void UserHashSetCookie(string hash);
+        void SetUserCookie(CookiePair cookiePair);
+    }
 
+    public class CookiePair
+    {
+        public Guid Userid { get; set; }
+        public string Hash { get; set; }
     }
 }

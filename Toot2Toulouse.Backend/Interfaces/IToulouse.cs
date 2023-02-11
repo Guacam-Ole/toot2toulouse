@@ -6,7 +6,7 @@ namespace Toot2Toulouse.Backend.Interfaces
     {
         List<DisplaySettingsItem> GetServerSettingsForDisplay();
 
-        Configuration.TootConfigurationAppModes.ValidModes GetServerMode();
+        Task<Configuration.TootConfigurationAppModes.ValidModes> GetServerMode();
 
         Task SendTootsForAllUsersAsync();
 
@@ -14,7 +14,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task InviteAsync(string mastodonHandle);
 
-        void CalculateServerStats();
+        Task CalculateServerStats();
 
         Task SendSingleTootAsync(Guid userId, string tootId);
     }
