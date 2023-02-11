@@ -94,6 +94,9 @@
     <None Update="web\js\js.cookie.min.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="web\lists.en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="web\regfinished.en.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

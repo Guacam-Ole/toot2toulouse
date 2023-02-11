@@ -63,13 +63,14 @@ namespace Toot2Toulouse.Backend
         private void ReplaceContent(IEnumerable<Mention> mentions, Dictionary<string,string> replacements, ref string content)
         {
             if (mentions == null) return;
+            var userReplacements = replacements.Where(q => q.Key.StartsWith("@"));
 
             foreach (var mention in mentions)
             {
-                var userReplacement = replacements.FirstOrDefault(q => q.Key == "@"+mention.AccountName);
+                var userReplacement = userReplacements.FirstOrDefault(q => q.Key.ToLower() == "@"+mention.AccountName.ToLower());
                 if (userReplacement.Key!=null)
                 {
-                    content = content.Replace("@"+mention.UserName, userReplacement.Value);
+                    content = content.Replace("@"+mention.UserName, userReplacement.Value, StringComparison.CurrentCultureIgnoreCase);
                     continue;
                 }
 
@@ -77,7 +78,7 @@ namespace Toot2Toulouse.Backend
             }
 
             foreach (var nonUserReplacements in replacements.Where(q => !q.Key.StartsWith("@"))) {
-                content = content.Replace(nonUserReplacements.Key, nonUserReplacements.Value);
+                content = content.Replace(nonUserReplacements.Key, nonUserReplacements.Value, StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
