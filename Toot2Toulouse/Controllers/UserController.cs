@@ -76,6 +76,20 @@ namespace Toot2ToulouseWeb.Controllers
             return SuccessResult();
         }
 
+        [Route("donttweet")]
+        public ActionResult UpdateDontTweet(List<string> badwords)
+        {
+            return SuccessResult();
+        }
+
+        [Route("translations")] 
+        public ActionResult UpdateTranslations(Dictionary<string, string> translations)
+        {
+            return SuccessResult();
+        }
+
+
+
         [Route("delay")]
         public ActionResult UpdateConfigDelay(TimeSpan delay)
         {
