@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Mvc;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
@@ -53,9 +54,14 @@ namespace Toot2ToulouseWeb.Controllers
             return _user.GetUser(id, hash);
         }
 
+        private JsonResult ErrorResult(string error)
+        {
+            return new JsonResult(new { Error=error, Success=false});
+        }
+
         private JsonResult AuthErrorResult()
         {
-            return new JsonResult(new { Error = "auth", Success = false });
+            return ErrorResult("auth");
         }
 
         private JsonResult SuccessResult()
@@ -79,12 +85,22 @@ namespace Toot2ToulouseWeb.Controllers
         [Route("donttweet")]
         public ActionResult UpdateDontTweet(List<string> badwords)
         {
+            var user = GetUserFromCookie();
+            if (user == null) return AuthErrorResult();
+
+            var nonEmptyBadwords=badwords.Where(q=>!string.IsNullOrWhiteSpace(q)).ToList();
+            user.Config.DontTweet = nonEmptyBadwords;
             return SuccessResult();
         }
 
         [Route("translations")] 
         public ActionResult UpdateTranslations(Dictionary<string, string> translations)
         {
+            var user = GetUserFromCookie();
+            if (user == null) return AuthErrorResult();
+            var nonEmptyTranslations=translations.Where(q=>!string.IsNullOrWhiteSpace(q.Key)).ToDictionary(t => t.Key, t => t.Value);
+            user.Config.Replacements = nonEmptyTranslations;
+            _user.UpdateUser(user);
             return SuccessResult();
         }
 
