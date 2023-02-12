@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using System.Runtime.CompilerServices;
+
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
@@ -70,7 +72,7 @@ namespace Toot2ToulouseService
             return _config.CurrentVersion.ToString();
         }
 
-        public async void ListIds()
+        public async Task ListIds()
         {
             Console.WriteLine("id\tblockreason\tblockdate\tmastodon\ttwitter");
             var allUsers=await _database.GetAllUsers();
@@ -81,15 +83,15 @@ namespace Toot2ToulouseService
             _logger.LogInformation("Retrieved all userIds");
         }
 
-        public void BlockUser(Guid userId)
+        public async Task  BlockUser(Guid userId)
         {
-            _user.Block(userId, Toot2Toulouse.Backend.Models.UserData.BlockReasons.Manual);
+            await _user.Block(userId, Toot2Toulouse.Backend.Models.UserData.BlockReasons.Manual);
             Console.WriteLine("User blocked");
         }
 
-        public void UnblockUser(Guid userId)
+        public async Task UnblockUser(Guid userId)
         {
-            _user.Unblock(userId);
+          await  _user.Unblock(userId);
             Console.WriteLine("User unblocked");
         }
     }

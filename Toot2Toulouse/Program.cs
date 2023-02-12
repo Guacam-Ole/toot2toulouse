@@ -1,6 +1,3 @@
-using Autofac.Core;
-
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
 using Toot2Toulouse;
@@ -15,7 +12,6 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 
 // Add services to the container.
 
-
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -25,7 +21,6 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-
 
 builder.Services.AddScoped(cr => new ConfigReader(builder.Environment.ContentRootPath));
 builder.Services.AddScoped<ITwitter, Twitter>();
@@ -51,7 +46,6 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ApiExceptionFilter>();
 });
-
 
 var app = builder.Build();
 

@@ -1,26 +1,21 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Extensions.DependencyInjection;
 
-using Toot2Toulouse.Backend.Interfaces;
-
 namespace Toot2ToulouseService
 {
-
-
     public class Program
 
     {
         private static Publish? _publish;
         private static Maintenance? _maintenance;
 
-        private static void ArgsCheck( string[] args, int requiredLength, string message)
+        private static void ArgsCheck(string[] args, int requiredLength, string message)
         {
             if (args.Length < requiredLength)
             {
                 throw new ArgumentException(message);
             }
         }
-
 
         private static async Task CheckparametersAsync(string[] args)
         {
@@ -39,11 +34,11 @@ namespace Toot2ToulouseService
                     case "upgrade":
                         if (args.Length > 1)
                         {
-                            _maintenance.Upgrade(new Version(args[1]));
+                            await _maintenance.Upgrade(new Version(args[1]));
                         }
                         else
                         {
-                            _maintenance.Upgrade(null);
+                            await _maintenance.Upgrade(null);
                         }
                         break;
 
@@ -57,25 +52,27 @@ namespace Toot2ToulouseService
                         break;
 
                     case "invite":
-                        ArgsCheck(args,2,"Recipient required");
+                        ArgsCheck(args, 2, "Recipient required");
                         await _maintenance.InviteAsync(args[1]);
                         break;
 
                     case "single":
-                        ArgsCheck(args,3,"UserId and TootId required");
+                        ArgsCheck(args, 3, "UserId and TootId required");
                         await _publish.PublishSingleTootAsync(new Guid(args[1]), args[2]);
                         break;
 
                     case "listids":
-                        _maintenance.ListIds();
+                        await _maintenance.ListIds();
                         break;
+
                     case "block":
                         ArgsCheck(args, 2, "userId required");
-                        _maintenance.BlockUser(new Guid(args[1]));
+                        await _maintenance.BlockUser(new Guid(args[1]));
                         break;
+
                     case "unblock":
                         ArgsCheck(args, 2, "userId required");
-                        _maintenance.UnblockUser(new Guid(args[1]));
+                        await _maintenance.UnblockUser(new Guid(args[1]));
                         break;
 
                     default:

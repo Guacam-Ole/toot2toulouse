@@ -6,9 +6,6 @@ using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2Toulouse.Backend
 {
-
-
-
     public class Cookies : ICookies
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -52,7 +49,6 @@ namespace Toot2Toulouse.Backend
             SetCookieValue("id", cookiePair.Userid);
             SetCookieValue("hash", cookiePair.Hash);
         }
-      
 
         private void SetSessionValue<T>(string name, T value)
         {

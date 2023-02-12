@@ -3,8 +3,6 @@ using Mastonet.Entities;
 
 using Microsoft.Extensions.Logging;
 
-using System.Security.Cryptography;
-
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
@@ -28,7 +26,7 @@ namespace Toot2Toulouse.Backend
 
         public async Task SendStatusMessageToAsync(UserData? user, string? prefix, MessageCodes messageCode, string? additionalInfo)
         {
-            string? recipient = user==null?null:"@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
+            string? recipient = user == null ? null : "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
 
             string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.ServiceAppSuffix}";
             ReplaceServiceTokens(ref message);
@@ -134,15 +132,14 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var client =  GetUserClient(user);
+                var client = GetUserClient(user);
                 return await client.GetStatus(tootId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"failed retrieving single toot with id {tid} for {uid}", tootId, user.Id);
+                _logger.LogError(ex, "failed retrieving single toot with id {tid} for {uid}", tootId, user.Id);
                 throw;
             }
-       
         }
 
         public async Task<List<Status>> GetTootsContainingAsync(UserData user, string content, int limit = 100)

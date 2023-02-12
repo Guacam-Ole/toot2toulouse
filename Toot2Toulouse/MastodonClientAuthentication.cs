@@ -1,6 +1,8 @@
 ﻿using Mastonet;
 using Mastonet.Entities;
 
+using Microsoft.VisualBasic;
+
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
@@ -61,7 +63,7 @@ namespace Toot2Toulouse
 
                 // TODO: Check maxTootsPerDay
 
-                StoreNewUser(userInstance, authToken, userAccount);
+              await  StoreNewUser(userInstance, authToken, userAccount);
             }
             catch (ApiException)
             {

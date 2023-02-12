@@ -81,7 +81,7 @@ namespace Toot2Toulouse.Backend
                     continue;
                 }
 
-                content = content.Replace(mention, $"🐘{mention.UserName}");
+                content = content.Replace(mention, $"🐘{mention.AccountName}");
             }
 
             foreach (var nonUserReplacement in personalNonUserReplacements)
