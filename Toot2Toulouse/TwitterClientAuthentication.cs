@@ -67,7 +67,7 @@ namespace Toot2Toulouse
             await _database.UpsertUser(t2tUser);
             _toulouse.CalculateServerStats();
 
-            _notification.Info(t2tUser.Id, TootConfigurationApp.MessageCodes.RegistrationFinished);
+            _notification.Info(t2tUser, TootConfigurationApp.MessageCodes.RegistrationFinished);
 
             //   InitUserAsync(t2tUser);
             return true;

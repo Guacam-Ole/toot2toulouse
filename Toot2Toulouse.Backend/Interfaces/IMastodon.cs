@@ -20,7 +20,7 @@ namespace Toot2Toulouse.Backend.Interfaces
             OnlyMentioned
         }
 
-        Task SendStatusMessageToAsync(Guid id, string? prefix, MessageCodes messageCode, string? additionalInfo);
+        Task SendStatusMessageToAsync(UserData user, string? prefix, MessageCodes messageCode, string? additionalInfo);
 
         Task<Account?> GetUserAccountAsync(UserData userData);
 
@@ -28,12 +28,12 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task<List<Status>> GetNonPostedTootsAsync(UserData user);
 
-        Task<List<Status>> GetTootsContainingAsync(Guid id, string? content, int limit = 100);
+        Task<List<Status>> GetTootsContainingAsync(UserData user, string? content, int limit = 100);
 
         Task<List<Status>> GetServiceTootsContainingAsync(string content, int limit = 100, string? recipient = null);
 
         Task AssignLastTweetedIfMissingAsync(UserData user);
 
-        Task<Status> GetSingleTootAsync(Guid userId, string tootId);
+        Task<Status> GetSingleTootAsync(UserData user, string tootId);
     }
 }

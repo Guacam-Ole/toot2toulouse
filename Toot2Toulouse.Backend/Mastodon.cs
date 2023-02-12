@@ -16,28 +16,20 @@ namespace Toot2Toulouse.Backend
     public class Mastodon : IMastodon
     {
         private readonly ILogger<Mastodon> _logger;
-
-        private readonly IDatabase _database;
-
         private readonly TootConfiguration _configuration;
         private readonly Dictionary<MessageCodes, string> _messages;
 
-        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration, IDatabase database)
+        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration)
         {
             _logger = logger;
-            _database = database;
             _configuration = configuration.Configuration;
             _messages = configuration.GetMessagesForLanguage(_configuration.App.DefaultLanguage);   // TODO: Allow per-user Language setting
         }
 
-        public async Task SendStatusMessageToAsync(Guid id, string? prefix, MessageCodes messageCode, string? additionalInfo)
+        public async Task SendStatusMessageToAsync(UserData? user, string? prefix, MessageCodes messageCode, string? additionalInfo)
         {
-            string recipient = null;
-            if (id != Guid.Empty)
-            {
-                var user =await _database.GetUserById(id);
-                recipient = "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
-            }
+            string? recipient = user==null?null:"@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
+
             string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.ServiceAppSuffix}";
             ReplaceServiceTokens(ref message);
             await ServiceTootAsync(message, Visibility.Direct);
@@ -105,21 +97,18 @@ namespace Toot2Toulouse.Backend
 
         public async Task AssignLastTweetedIfMissingAsync(UserData user)
         {
-            //var user = await _database.GetUserById(id);
             if (user.Mastodon.LastToot != null) return;
-
             var client = GetUserClient(user);
 
             var lastStatuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1 }, false, true, false, true);
             var lastTweeted = lastStatuses.OrderBy(q => q.CreatedAt).FirstOrDefault();
             user.Mastodon.LastToot = lastTweeted.Id;
-            await _database.UpsertUser(user);
+            user.Update = true;
         }
 
         public async Task<List<Status>> GetNonPostedTootsAsync(UserData user)
         {
             await AssignLastTweetedIfMissingAsync(user);
-           // var user = await _database.GetUserById(id);
             var client = GetUserClient(user);
             var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
             return statuses.OrderBy(q => q.CreatedAt).ToList();
@@ -141,27 +130,25 @@ namespace Toot2Toulouse.Backend
             return matches.OrderBy(q => q.CreatedAt).ToList();
         }
 
-        public async Task<Status> GetSingleTootAsync(Guid userId, string tootId)
+        public async Task<Status> GetSingleTootAsync(UserData user, string tootId)
         {
             try
             {
-                var user = await _database.GetUserById(userId);
                 var client =  GetUserClient(user);
                 return await client.GetStatus(tootId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"failed retrieving single toot with id {tid} for {uid}", tootId, userId);
+                _logger.LogError(ex,"failed retrieving single toot with id {tid} for {uid}", tootId, user.Id);
                 throw;
             }
        
         }
 
-        public async Task<List<Status>> GetTootsContainingAsync(Guid id, string content, int limit = 100)
+        public async Task<List<Status>> GetTootsContainingAsync(UserData user, string content, int limit = 100)
         {
             try
             {
-                var user = await _database.GetUserById(id);
                 var client = GetUserClient(user);
                 return await GetTootsContainingAsync(client, content, limit);
             }

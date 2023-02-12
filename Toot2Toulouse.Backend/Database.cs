@@ -45,7 +45,7 @@ namespace Toot2Toulouse.Backend
 
       
 
-        private string GetHashString(string inputString)
+        private static string GetHashString(string inputString)
         {
             using HashAlgorithm algorithm = SHA256.Create();
             var hash = algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
@@ -99,6 +99,7 @@ namespace Toot2Toulouse.Backend
             {
                 using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
+                user.Update = false;
                 await userCollection.UpsertAsync(user);
             }
             catch (Exception ex)

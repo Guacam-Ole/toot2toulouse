@@ -20,17 +20,12 @@ namespace Toot2Toulouse.Backend
 
         private readonly ILogger<Twitter> _logger;
         private readonly Interfaces.IMessage _toot;
-        private readonly INotification _notification;
-        private readonly IDatabase _database;
-        private Dictionary<string, string> _globalReplacements = null;
 
-        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot, INotification notification, IDatabase database)
+        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot)
         {
             _config = configReader.Configuration;
             _logger = logger;
             _toot = toot;
-            _notification = notification;
-            _database = database;
         }
 
         private TwitterClient GetUserClient(UserData userData)
@@ -61,42 +56,19 @@ namespace Toot2Toulouse.Backend
             return await PublishFromTootAsync(userData, toot, replyTo);
         }
 
-        private async Task FillGlobalReplacements()
-        {
-            if (_globalReplacements == null)
-            {
-                _globalReplacements = new Dictionary<string, string>();
-                var allusers = await _database.GetAllUsers();
-
-                foreach (var user in allusers)
-                {
-                    if (user.Config.Replacements == null) continue;
-                    var userReplacements = user.Config.Replacements.Where(q => q.Key.StartsWith("@"));
-                    if (userReplacements.Any())
-                    {
-                        foreach (var replacement in userReplacements)
-                        {
-                            if (_globalReplacements.ContainsKey(replacement.Key)) continue;
-                            _globalReplacements.Add(replacement.Key, replacement.Value);
-                        }
-                    }
-                }
-            }
-        }
-
-        private void ReplaceContent(IEnumerable<Mention> mentions, UserData userdata, ref string content)
+     
+        private static void ReplaceContent(IEnumerable<Mention> mentions, UserData userdata, ref string content)
         {
             content = $" {content} ";
             if (mentions == null) return;
             var personalUserReplacements = userdata.Config.Replacements.Where(q => q.Key.StartsWith("@"));
             var personalNonUserReplacements = userdata.Config.Replacements.Where(q => !q.Key.StartsWith("@"));
-            var globalUserReplacements = new Dictionary<string, string>();
-            if (userdata.Config.UseGlobalMentions && _globalReplacements != null) globalUserReplacements = _globalReplacements;
 
             foreach (var mention in mentions)
             {
+                if (!mention.AccountName.Contains('@')) mention.AccountName += "@" + userdata.Mastodon.Instance;   
                 var userReplacement = personalUserReplacements.ReplacementForUser(mention);
-                var globalUserReplacement = globalUserReplacements.ReplacementForUser(mention);
+                var globalUserReplacement = GlobalStorage.UserReplacements.ReplacementForUser(mention);
 
                 if (userReplacement != null)
                 {
@@ -132,7 +104,6 @@ namespace Toot2Toulouse.Backend
                 bool isSensitive = toot.Sensitive ?? false;
 
                 string content = toot.Content.StripHtml();
-                if (userData.Config.UseGlobalMentions) await FillGlobalReplacements();
                 ReplaceContent(toot.Mentions, userData, ref content);
 
                 var twitterUser = await GetTwitterUserAsync(userData);
@@ -162,7 +133,7 @@ namespace Toot2Toulouse.Backend
                                 foreach (var replyContent in replies)
                                 {
                                     tweet = await TweetAsync(userData, replyContent, isSensitive, tweet.Id, null);
-                                    if (tweet == null) ;
+                                    if (tweet == null) continue;
                                     tweetIds.Add(tweet.Id);
                                 }
                             }

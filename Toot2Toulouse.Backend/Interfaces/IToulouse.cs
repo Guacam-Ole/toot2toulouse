@@ -1,5 +1,7 @@
 ﻿using Mastonet.Entities;
 
+using Toot2Toulouse.Backend.Models;
+
 namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IToulouse
@@ -16,6 +18,6 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task CalculateServerStats();
 
-        Task SendSingleTootAsync(Guid userId, string tootId);
+        Task SendSingleTootAsync(UserData user, string tootId);
     }
 }

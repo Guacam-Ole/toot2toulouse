@@ -87,7 +87,7 @@ namespace Toot2Toulouse.Backend
             return displaySettings.OrderBy(q => q.Category).ThenBy(q => q.DisplayName).ToList();
         }
 
-        private async Task<UserData >GetUserByMastodonHandle(string mastodonHandle)
+        private async Task<UserData> GetUserByMastodonHandle(string mastodonHandle)
         {
             // TODO: Error handling
             var parts = mastodonHandle.Split('@');
@@ -97,11 +97,11 @@ namespace Toot2Toulouse.Backend
         public async Task<List<Status>> GetTootsContainingAsync(string mastodonHandle, string searchstring, int limit)
         {
             var user = await GetUserByMastodonHandle(mastodonHandle);
-            var toots = await _mastodon.GetTootsContainingAsync(user.Id, searchstring, limit);
+            var toots = await _mastodon.GetTootsContainingAsync(user, searchstring, limit);
             return toots;
         }
 
-        private async Task< long?> GetTwitterReplyToIdFromTootId(string tootId)
+        private async Task<long?> GetTwitterReplyToIdFromTootId(string tootId)
         {
             var allUsers = await _database.GetAllUsers();
             foreach (var user in allUsers)
@@ -109,35 +109,33 @@ namespace Toot2Toulouse.Backend
                 if (user.Crossposts.Any(q => q.TootId == tootId))
                 {
                     var twitterIds = user.Crossposts.FirstOrDefault(q => q.TootId == tootId)?.TwitterIds;
-                    if (twitterIds != null && twitterIds.Count>0) return twitterIds.Max();
+                    if (twitterIds != null && twitterIds.Count > 0) return twitterIds.Max();
                 }
             }
             return null;
         }
 
-        private async Task< long?> GetTwitterReplyId(Status toot)
+        private async Task<long?> GetTwitterReplyId(Status toot)
         {
             if (toot.InReplyToId == null) return null;
             return await GetTwitterReplyToIdFromTootId(toot.InReplyToId);
         }
 
-        private async Task<List<Crosspost>> SendTootsAsync(Guid userId, List<Status> toots, bool updateUserData)
+        private async Task<List<Crosspost>> SendTootsAsync(UserData user, List<Status> toots)
         {
             var sentToots = new List<Crosspost>();
-            var user = await _database.GetUserById(userId);
-            _logger.LogTrace("sending {tootcount} toots for {user}@{instance}", toots.Count, user.Mastodon.Handle, user.Mastodon.Instance);
+            _logger.LogTrace("sending {tootcount} toots for {completename}", toots.Count, user.Mastodon.CompleteName);
             var newLastDate = DateTime.UtcNow;
             foreach (var toot in toots)
             {
-
                 var timeToTweet = toot.CreatedAt.Add(user.Config.Delay);
-
                 if (timeToTweet > DateTime.UtcNow)
                 {
                     _logger.LogTrace("Won't tweet until {startdate} (utc)", timeToTweet);
                     continue;
                 }
 
+                user.Update = true;
                 try
                 {
                     long? twitterReplyToId = await GetTwitterReplyId(toot);
@@ -173,7 +171,7 @@ namespace Toot2Toulouse.Backend
                     var firstTwitterException = twitterException.TwitterExceptionInfos.FirstOrDefault();
                     if (firstTwitterException == null)
                     {
-                        _logger.LogError(twitterException, "Unknown Twitter Exception when trying to tweet toot nr {id} from {user}. Will not retry\n", toot.Id, userId);
+                        _logger.LogError(twitterException, "Unknown Twitter Exception when trying to tweet toot nr {id} from {user}. Will not retry\n", toot.Id, user.Id);
                         sentToots.Add(new Crosspost { Result = "TwitterException", TootId = toot.Id });
                     }
                     else
@@ -181,17 +179,17 @@ namespace Toot2Toulouse.Backend
                         switch (firstTwitterException.Code)
                         {
                             case 88:
-                                _notification.Error(Guid.Empty, TootConfigurationApp.MessageCodes.RateLimit);
+                                _notification.Error(user, TootConfigurationApp.MessageCodes.RateLimit);
                                 sentToots.Add(new Crosspost { Result = "RateLimit", TootId = toot.Id });
                                 _logger.LogCritical("Rate Limit reached");
                                 break;
 
                             case 89:
-                                _notification.Error(userId, TootConfigurationApp.MessageCodes.TwitterAuthError);
+                                _notification.Error(user, TootConfigurationApp.MessageCodes.TwitterAuthError);
                                 user.BlockDate = DateTime.UtcNow;
                                 user.BlockReason = UserData.BlockReasons.AuthTwitter;
                                 sentToots.Add(new Crosspost { Result = "TwitterAuth", TootId = toot.Id });
-                                _logger.LogWarning("User {id} has been blocked because twitter auth was revoked", userId);
+                                _logger.LogWarning("User {id} has been blocked because twitter auth was revoked", user.Id);
                                 break;
 
                             default:
@@ -208,13 +206,12 @@ namespace Toot2Toulouse.Backend
                 }
                 user.Mastodon.LastToot = toot.Id;
                 user.Mastodon.LastTootDate = newLastDate;
-                if (updateUserData) await _database.UpsertUser(user);
             }
 
             var sentCount = sentToots.Count(q => q.TwitterIds.Count > 0);
             if (sentCount > 0)
             {
-                _logger.LogDebug($"Sent {sentCount} from {toots.Count} toots to twitter for {user.Mastodon.Handle}@{user.Mastodon.Instance}");
+                _logger.LogDebug("Sent {sentCount} from {tootsCount} toots to twitter for {completename}", sentCount, toots.Count, user.Mastodon.CompleteName);
             }
 
             return sentToots;
@@ -222,26 +219,26 @@ namespace Toot2Toulouse.Backend
 
         public async Task InviteAsync(string mastodonHandle)
         {
-            await _mastodon.SendStatusMessageToAsync(Guid.Empty, $"{mastodonHandle} [INVITE] ", TootConfigurationApp.MessageCodes.Invite, null);
+            await _mastodon.SendStatusMessageToAsync(null, $"{mastodonHandle} [INVITE] ", TootConfigurationApp.MessageCodes.Invite, null);
         }
 
-        public async Task SendSingleTootAsync(Guid userId, string tootId)
+        public async Task SendSingleTootAsync(UserData user, string tootId)
         {
             try
             {
-                var toot = await _mastodon.GetSingleTootAsync(userId, tootId);
+                var toot = await _mastodon.GetSingleTootAsync(user, tootId);
                 if (toot == null)
                 {
-                    _logger.LogError("toot {tootid} not found for user {userid}", tootId, userId);
+                    _logger.LogError("toot {tootid} not found for user {userid}", tootId, user.Id);
                     return;
                 }
 
-                await SendTootsAsync(userId, new List<Status> { toot }, true);
+                await SendTootsAsync(user, new List<Status> { toot });
                 _logger.LogDebug("sent single toot {tootid}", tootId);
             }
             catch (Mastonet.ServerErrorException mastodonException)
             {
-                _notification.Error(userId, TootConfigurationApp.MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
+                _notification.Error(user, TootConfigurationApp.MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
             }
             catch (Exception ex)
             {
@@ -252,36 +249,39 @@ namespace Toot2Toulouse.Backend
         public async Task SendTootsForAllUsersAsync()
         {
             var users = (await _database.GetActiveUsers()).ToList();
+            GlobalStorage.FillGlobalReplacements(users);
+
             var toots = new List<Crosspost>();
 
             foreach (var user in users)
             {
                 bool blockUser = false;
-                List<Status> userToots; //=null; //=new List<Status>();
+                List<Status> userToots;
                 try
                 {
                     userToots = await _mastodon.GetNonPostedTootsAsync(user);
                 }
                 catch (Mastonet.ServerErrorException mastodonException)
                 {
-                    _notification.Error(user.Id, TootConfigurationApp.MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
+                    _notification.Error(user, TootConfigurationApp.MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
                     blockUser = true;
-
                     userToots = new List<Status>();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed sending single toot. user: {username}. \n",user.Mastodon.CompleteName);
+                    _logger.LogError(ex, "Failed sending single toot. user: {username}. \n", user.Mastodon.CompleteName);
                     userToots = new List<Status>();
                 }
                 if (blockUser)
                 {
                     user.BlockDate = DateTime.UtcNow;
                     user.BlockReason = UserData.BlockReasons.AuthMastodon;
-                    await _database.UpsertUser(user);
+                    user.Update = true;
                 }
 
-                if (userToots?.Count > 0) toots.AddRange(await SendTootsAsync(user.Id, userToots, true));
+                if (userToots?.Count > 0) toots.AddRange(await SendTootsAsync(user, userToots));
+
+                if (user.Update) await _database.UpsertUser(user);
             }
             var tootCount = toots.Count(q => q.TwitterIds.Count > 0);
             if (tootCount > 0)
@@ -306,7 +306,7 @@ namespace Toot2Toulouse.Backend
             var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.UtcNow.AddDays(-1)));
             serverstats.ActiveUsers = activeUsers.Count();
             serverstats.TotalUsers = allUsers.Count();
-            _database.UpSertServerStats(serverstats);
+            await _database.UpSertServerStats(serverstats);
             _logger.LogDebug("Updated Serverstats.  {serverstats} ", serverstats);
         }
     }

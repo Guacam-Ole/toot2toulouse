@@ -12,12 +12,14 @@ namespace Toot2ToulouseService
     {
         private readonly ILogger<Publish> _logger;
         private readonly IToulouse _toulouse;
+        private readonly IDatabase _database;
         private readonly TootConfiguration _config;
 
-        public Publish(ILogger<Publish> logger, IToulouse toulouse, ConfigReader configReader)
+        public Publish(ILogger<Publish> logger, IToulouse toulouse, ConfigReader configReader, IDatabase database)
         {
             _logger = logger;
             _toulouse = toulouse;
+            _database = database;
             _config = configReader.Configuration;
         }
 
@@ -33,7 +35,8 @@ namespace Toot2ToulouseService
 
         public async Task PublishSingleTootAsync(Guid userId, string tootId)
         {
-            await _toulouse.SendSingleTootAsync(userId, tootId);
+            var user=await _database.GetUserById(userId);
+            await _toulouse.SendSingleTootAsync(user, tootId);
         }
 
         public async Task<List<Status>> GetTootsContainingAsync(string mastodonHandle, string contents, int searchLimit)
