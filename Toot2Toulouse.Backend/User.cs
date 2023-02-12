@@ -43,7 +43,7 @@ namespace Toot2Toulouse.Backend
             var user=await _database.GetUserById(userId);
             user.BlockDate = DateTime.UtcNow;
             user.BlockReason=reason;
-            _database.UpsertUser(user);
+            await _database.UpsertUser(user);
             _logger.LogInformation("Blocked {userid}: {reason}", userId, reason);
         }
 
@@ -51,7 +51,7 @@ namespace Toot2Toulouse.Backend
             var user = await _database.GetUserById(userId);
             user.BlockDate = null;
             user.BlockReason = null;
-            _database.UpsertUser(user);
+            await _database.UpsertUser(user);
             _logger.LogInformation("Unlocked {userid}", userId);
         }
     }

@@ -208,7 +208,7 @@ namespace Toot2Toulouse.Backend
                 }
                 user.Mastodon.LastToot = toot.Id;
                 user.Mastodon.LastTootDate = newLastDate;
-                if (updateUserData) _database.UpsertUser(user);
+                if (updateUserData) await _database.UpsertUser(user);
             }
 
             var sentCount = sentToots.Count(q => q.TwitterIds.Count > 0);
@@ -260,7 +260,7 @@ namespace Toot2Toulouse.Backend
                 List<Status> userToots; //=null; //=new List<Status>();
                 try
                 {
-                    userToots = await _mastodon.GetNonPostedTootsAsync(user.Id);
+                    userToots = await _mastodon.GetNonPostedTootsAsync(user);
                 }
                 catch (Mastonet.ServerErrorException mastodonException)
                 {
@@ -278,7 +278,7 @@ namespace Toot2Toulouse.Backend
                 {
                     user.BlockDate = DateTime.UtcNow;
                     user.BlockReason = UserData.BlockReasons.AuthMastodon;
-                    _database.UpsertUser(user);
+                    await _database.UpsertUser(user);
                 }
 
                 if (userToots?.Count > 0) toots.AddRange(await SendTootsAsync(user.Id, userToots, true));

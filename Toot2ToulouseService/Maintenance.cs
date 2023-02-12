@@ -44,7 +44,7 @@ namespace Toot2ToulouseService
                     foreach (var user in allUsers)
                     {
                         user.Config.VisibilitiesToPost = _config.Defaults.VisibilitiesToPost;
-                        _database.UpsertUser(user);
+                        await _database.UpsertUser(user);
                     }
                     break;
             }

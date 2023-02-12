@@ -18,7 +18,7 @@ namespace Toot2Toulouse.Backend
         private readonly ILogger<Database> _logger;
         private readonly TootConfiguration _config;
         private string _path;
-        private static ILiteDatabaseAsync _database;
+        //private static ILiteDatabaseAsync _database;
 
         public Database(ILogger<Database> logger, ConfigReader configReader, string path)
         {
@@ -27,17 +27,12 @@ namespace Toot2Toulouse.Backend
             _path = path;
         }
 
-        private ILiteDatabaseAsync GetDatabase()
-        {
-            _database ??= new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
-            return _database;
-        }
 
         public async Task<UserData?> GetUserById(Guid id)
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db")); 
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 return await userCollection.FindByIdAsync(id);
             }
@@ -87,7 +82,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 return (await userCollection.FindAsync(q => q.Mastodon.Handle == handle && q.Mastodon.Instance == instance)).FirstOrDefault();
             }
@@ -102,7 +97,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 await userCollection.UpsertAsync(user);
             }
@@ -117,7 +112,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 await userCollection.DeleteAsync(id);
             }
@@ -132,7 +127,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 return (await userCollection.FindAsync(q => q.Id != Guid.Empty)).ToList();
             }
@@ -147,7 +142,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 return (await userCollection.FindAsync(q => q.Mastodon.Secret != null && q.Twitter.AccessSecret != null && q.BlockReason == null)).ToList();
             }
@@ -162,7 +157,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 return await userCollection.FindOneAsync(q => q.Twitter.TmpAuthGuid == guid);
             }
@@ -177,7 +172,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var statsCollection = db.GetCollection<Stats>(nameof(Stats));
 
                 return (await statsCollection.FindAllAsync()).FirstOrDefault() ?? new Stats();
@@ -193,7 +188,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var statsCollection = db.GetCollection<Stats>(nameof(Stats));
                 await statsCollection.DeleteAllAsync();
                 await statsCollection.UpsertAsync(stats);
@@ -209,7 +204,7 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var db = GetDatabase();
+                using var db = new LiteDatabaseAsync(Path.Combine(_path, "t2t.db"));
                 var userCollection = db.GetCollection<UserData>(nameof(UserData));
                 var user = await userCollection.FindOneAsync(q => q.Mastodon.Id == mastodonId && q.Mastodon.Instance == instance);
                 return user?.Id;

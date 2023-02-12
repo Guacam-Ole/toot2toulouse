@@ -26,13 +26,13 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task<Account?> GetUserAccountAsync(MastodonClient mastodonClient);
 
-        Task<List<Status>> GetNonPostedTootsAsync(Guid id);
+        Task<List<Status>> GetNonPostedTootsAsync(UserData user);
 
         Task<List<Status>> GetTootsContainingAsync(Guid id, string? content, int limit = 100);
 
         Task<List<Status>> GetServiceTootsContainingAsync(string content, int limit = 100, string? recipient = null);
 
-        Task AssignLastTweetedIfMissingAsync(Guid id);
+        Task AssignLastTweetedIfMissingAsync(UserData user);
 
         Task<Status> GetSingleTootAsync(Guid userId, string tootId);
     }

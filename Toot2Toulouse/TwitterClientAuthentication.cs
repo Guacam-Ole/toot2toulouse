@@ -64,7 +64,7 @@ namespace Toot2Toulouse
                 t2tUser.BlockDate = null;
                 t2tUser.BlockReason = null;
             }
-            _database.UpsertUser(t2tUser);
+            await _database.UpsertUser(t2tUser);
             _toulouse.CalculateServerStats();
 
             _notification.Info(t2tUser.Id, TootConfigurationApp.MessageCodes.RegistrationFinished);
@@ -85,12 +85,12 @@ namespace Toot2Toulouse
                 if (t2tUser == null) throw new Exception("invalid cookie data");
 
                 t2tUser.Twitter.TmpAuthGuid= Guid.NewGuid().ToString();
-                _database.UpsertUser(t2tUser);
+                await _database.UpsertUser(t2tUser);
                 var targetUrl = baseUrl + "/twitter/code";
                 var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, t2tUser.Twitter.TmpAuthGuid);
                 var authTokenRequest = await GetAppClient().Auth.RequestAuthenticationUrlAsync(redirectUrl);
                 await _twitterRequestStore.AddAuthenticationTokenAsync(t2tUser.Twitter.TmpAuthGuid, authTokenRequest);
-                _database.UpsertUser(t2tUser);
+                await _database.UpsertUser(t2tUser);
                 return authTokenRequest.AuthorizationURL;
             }
             catch (Exception ex)

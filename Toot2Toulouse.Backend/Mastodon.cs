@@ -103,9 +103,9 @@ namespace Toot2Toulouse.Backend
             return await GetUserAccountAsync(new UserData { Mastodon = new Models.Mastodon { Instance = instance, Secret = accessToken } });
         }
 
-        public async Task AssignLastTweetedIfMissingAsync(Guid id)
+        public async Task AssignLastTweetedIfMissingAsync(UserData user)
         {
-            var user = await _database.GetUserById(id);
+            //var user = await _database.GetUserById(id);
             if (user.Mastodon.LastToot != null) return;
 
             var client = GetUserClient(user);
@@ -113,13 +113,13 @@ namespace Toot2Toulouse.Backend
             var lastStatuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1 }, false, true, false, true);
             var lastTweeted = lastStatuses.OrderBy(q => q.CreatedAt).FirstOrDefault();
             user.Mastodon.LastToot = lastTweeted.Id;
-            _database.UpsertUser(user);
+            await _database.UpsertUser(user);
         }
 
-        public async Task<List<Status>> GetNonPostedTootsAsync(Guid id)
+        public async Task<List<Status>> GetNonPostedTootsAsync(UserData user)
         {
-            await AssignLastTweetedIfMissingAsync(id);
-            var user = await _database.GetUserById(id);
+            await AssignLastTweetedIfMissingAsync(user);
+           // var user = await _database.GetUserById(id);
             var client = GetUserClient(user);
             var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
             return statuses.OrderBy(q => q.CreatedAt).ToList();

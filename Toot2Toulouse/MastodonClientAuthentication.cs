@@ -102,7 +102,7 @@ namespace Toot2Toulouse
                 user.BlockDate = null;
             }
 
-            _database.UpsertUser(user);
+            await _database.UpsertUser(user);
             string hash = _database.CalculateHashForUser(user);
 
             _cookies.SetUserCookie(new CookiePair { Userid= user.Id, Hash = hash });    
