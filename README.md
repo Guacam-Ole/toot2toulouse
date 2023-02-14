@@ -132,8 +132,8 @@ The t2t-configfile (inside the web project) is the main configuration for both t
 |Setting|Description|
 |-|-|
 |Disclaimer|The Disclaimer/AGB that is shown on the Registration page that the user has to accept|
-|Ping|Ping other instances (and tell them that this server exists|🔮
-|AvailableLanguages|Languages that your instance supports. Allows different HTML-Pages and "messages.xx.json|
+|🔮Ping|Ping other instances (and tell them that this server exists|🔮
+|🔮AvailableLanguages|Languages that your instance supports. Allows different HTML-Pages and "messages.xx.json|
 |DefaultLanguage|The language to use.|
 |ServiceAppSuffix|The Suffix that will added to all messages (e.g. invites) sent by the service|
 |Instance|The Instance the Service Account is hosted on|
@@ -147,16 +147,16 @@ The t2t-configfile (inside the web project) is the main configuration for both t
 |Modes.AllowedInstances|Comma-Seperated List of allowed Mastodon-Instances (null=all are allowed)|
 |Modes.BlockedInstances|Comma-Seperated List of forbidden Mastodon-Instances (null=none are forbidden)|
 |Modes.AllowBots|Allow Mastodon-Bot-Accounts to use this service?|
-|Modes.MaxTootsPerDay|Maximum number of daily allowed toots (at the time of registering)|🔮
+|🔮Modes.MaxTootsPerDay|Maximum number of daily allowed toots (at the time of registering)|
 |Intervals.MinDelay|Minimum delay the user can choose|
 |Intervals.MaxDelay|Maximum delay the user can choose|
-|AuthFailureDeleteDays|Number of days after which a user account is deleted once an auth-error on Mastodo or Twitter occured|🔮
+|🔮AuthFailureDeleteDays|Number of days after which a user account is deleted once an auth-error on Mastodo or Twitter occured|
 |MaxImageSize|Maximum Filesize for images in MB|
 |MaxMaxGifSize|Maximum Filesize for GIFs in MB|
 |MaxVideoSize|Maximum Filesize for videos in MB|
 |MinSplitLength|Number of characters after which a tweet is split into a thread even if no space is found|
-|DonateTarget|What the user is donating for if he so chooses. Can be `App` or `Instance`|🔮
-|Donations|Links to different Donation-Sites (e.g. Github Sponsor, Ko-Fi, etc.) that will be displayed on server page|🔮
+|🔮DonateTarget|What the user is donating for if he so chooses. Can be `App` or `Instance`|
+|🔮Donations|Links to different Donation-Sites (e.g. Github Sponsor, Ko-Fi, etc.) that will be displayed on server page|
 
 #### Usersettings (defaults)
 |Setting|Description|
