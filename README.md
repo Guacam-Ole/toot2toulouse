@@ -60,12 +60,15 @@ At this point the userdata is stored in the database. You can change your settin
 Crossposting is not done by the web application but a dedicated service:
 
 ### Service
-The Service can be installed onto any location on your server. But it will need to access the configfile and databasefile from the web application. These paths are the only things to configure on the service:
+The Service can be installed onto any location on your server. But it will need to access the configfile and databasefile from the web application. So there are only a few things to be configured for the service: ('config.json')
 ```
 {
-  "database": "<absolute path do your database dir>",
-  "config": "<absolute path to your config directory>",
-  "log": "<absolute path to the logfile>"
+  "paths": {
+      "database": "<absolute path do your database dir>",
+      "config": "<absolute path to your config directory>",
+      "log": "<absolute path to the logfile>"
+  },
+  "loglevel":"Information"
 }
 ```
 
@@ -91,7 +94,7 @@ You're done. Toot something and wait for it to appear on Twitter.
 #### Service Commands
 The service can not only crosspost to Twitter but also allows additional maintenance tasks:
 
-`upgrade [version?]` - Upgrades the database to the mentioned version. If version is missing to the most current version. Call this if you install a new version but have a database running at a previous version.
+`upgrade [version?]` - Upgrades the database to the mentioned version. If version is missing to the most current version. Call this if you install a new version but have a database running at a previous version. Only required on Database changes (major Version changes)
 
 `version` - Display application version
 
@@ -115,9 +118,54 @@ Both auth-errors will cause a message to be sent to the user. If the user reauth
 
 
 
-### (Todo): Config description
+### Config description
+The t2t-configfile (inside the web project) is the main configuration for both the web and the service. It contains the following main areas:
 
+`Secrets` : Secrets for the app to access Mastodon and Twitter (see above)
 
+`App`: Main App Settings
 
+`Defaults`: Individual user settings
+
+#### App-Settings
+|Setting|Description|
+|-|-|
+|Disclaimer|The Disclaimer/AGB that is shown on the Registration page that the user has to accept|
+|Ping|(future Use: Ping other instances (and tell them that this server exists)|
+|AvailableLanguages|Languages that your instance supports. Allows different HTML-Pages and "messages.xx.json|
+|DefaultLanguage|The language to use.|
+|ServiceAppSuffix|The Suffix that will added to all messages (e.g. invites) sent by the service|
+|Instance|The Instance the Service Account is hosted on|
+|Accountname|Accountname (including instance) of the service account|
+|ClientName|Name to be displayed on html-pages|
+|Url|The Url t2t is hosted|
+|Modes|Describes the modes and limits your server is running at|
+|Modes.Active|Current Mode. Can be `Active` (anyone can register), `Invite` (only invited users can register), `Closed` (noone can register|
+|Modes.AutoInvite|If the number of users reaches this amount the Active Mode automatically switches from `Open` to `Invite`|
+|Modes.AutoClose|if the number of users reaches this amount the Active Mode automatically switches to `Closed`|
+|Modes.AllowedInstances|Comma-Seperated List of allowed Mastodon-Instances (null=all are allowed)|
+|Modes.BlockedInstances|Comma-Seperated List of forbidden Mastodon-Instances (null=none are forbidden)|
+|Modes.AllowBots|Allow Mastodon-Bot-Accounts to use this service?|
+|Modes.MaxTootsPerDay|Maximum number of daily allowed toots (at the time of registering)|
+|Intervals.MinDelay|Minimum delay the user can choose|
+|Intervals.MaxDelay|Maximum delay the user can choose|
+|AuthFailureDeleteDays|Number of days after which a user account is deleted once an auth-error on Mastodo or Twitter occured|
+|MaxImageSize|Maximum Filesize for images in MB|
+|MaxMaxGifSize|Maximum Filesize for GIFs in MB|
+|MaxVideoSize|Maximum Filesize for videos in MB|
+|MinSplitLength|Number of characters after which a tweet is split into a thread even if no space is found|
+
+#### Usersettings (defaults)
+|Setting|Description|
+|-|-|
+|VisiblitiesToPost|Array of visibilities can be `Public`, `Private`,`NotListed`|
+|Delay|Delay before tweeting|
+|Appsuffix.Content|Content to add after each tweet|
+|Appsuffix.HideIfBreaks|Don't add Suffix if this would add another post in thread|
+|LongContent|What to do if toot is longer than allowed Tweetlength. Can be `Thread`, ``, ``|
+|LongContentThreadOptions.Prefix|Prefix to add in first entry of thread|
+|LongContentThreadOptions.Suffix|Suffix to add on all entries except the last of thread|
+|Replacements|List of automatic replacements|
+|UseGlobalMentions|Select `@*`- Replacements from others, top|
 
 
