@@ -42,7 +42,7 @@ namespace Toot2Toulouse
             var userCredentials = await GetAppClient().Auth.RequestCredentialsAsync(requestParameters);
             var queryContents=HttpUtility.ParseQueryString(query);
             var tmpGuid = queryContents["tweetinvi_auth_request_id"];
-            var t2tUser = _database.GetUserByTwitterTmpGuid(tmpGuid);
+            var t2tUser = await _database.GetUserByTwitterTmpGuid(tmpGuid);
             if (t2tUser == null) throw new Exception("Guid invalid");
 
             var userClient = new TwitterClient(userCredentials);
@@ -64,10 +64,10 @@ namespace Toot2Toulouse
                 t2tUser.BlockDate = null;
                 t2tUser.BlockReason = null;
             }
-            _database.UpsertUser(t2tUser);
+            await _database.UpsertUser(t2tUser);
             _toulouse.CalculateServerStats();
 
-            _notification.Info(t2tUser.Id, TootConfigurationApp.MessageCodes.RegistrationFinished);
+            _notification.Info(t2tUser, TootConfigurationApp.MessageCodes.RegistrationFinished);
 
             //   InitUserAsync(t2tUser);
             return true;
@@ -77,21 +77,20 @@ namespace Toot2Toulouse
         {
             try
             {
-                var hash = _cookies.UserHashGetCookie();
-                var id = _cookies.UserIdGetCookie();
+                var userCookie=_cookies.GetUserCookie();
 
-                if (id == Guid.Empty || hash == null) throw new Exception("No cookie. You shouldn't even be here");
+                if (userCookie.Userid == Guid.Empty || userCookie.Hash == null) throw new Exception("No cookie. You shouldn't even be here");
 
-                var t2tUser = _database.GetUserByIdAndHash(id, hash);
+                var t2tUser =await _database.GetUserByIdAndHash(userCookie.Userid, userCookie.Hash);
                 if (t2tUser == null) throw new Exception("invalid cookie data");
 
                 t2tUser.Twitter.TmpAuthGuid= Guid.NewGuid().ToString();
-                _database.UpsertUser(t2tUser);
+                await _database.UpsertUser(t2tUser);
                 var targetUrl = baseUrl + "/twitter/code";
                 var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, t2tUser.Twitter.TmpAuthGuid);
                 var authTokenRequest = await GetAppClient().Auth.RequestAuthenticationUrlAsync(redirectUrl);
                 await _twitterRequestStore.AddAuthenticationTokenAsync(t2tUser.Twitter.TmpAuthGuid, authTokenRequest);
-                _database.UpsertUser(t2tUser);
+                await _database.UpsertUser(t2tUser);
                 return authTokenRequest.AuthorizationURL;
             }
             catch (Exception ex)

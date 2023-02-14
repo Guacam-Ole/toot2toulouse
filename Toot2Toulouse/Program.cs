@@ -5,12 +5,12 @@ using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Interfaces;
 
+using Toot2ToulouseWeb;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddEnvironmentVariables();
 
 // Add services to the container.
-
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -21,7 +21,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllers();
+
 builder.Services.AddScoped(cr => new ConfigReader(builder.Environment.ContentRootPath));
 builder.Services.AddScoped<ITwitter, Twitter>();
 builder.Services.AddScoped<IMastodon, Mastodon>();
@@ -41,6 +41,12 @@ builder.Host.ConfigureLogging(logging =>
     logging.AddConsole();
     logging.AddFile("data/app.log", append: true);
 });
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ApiExceptionFilter>();
+});
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();

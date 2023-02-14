@@ -1,13 +1,16 @@
-﻿/*const { Callbacks } = require("jquery");*/
-
-var userSettings;
+﻿var userSettings;
 
 function fillServerdata() {
     $.getJSON("server", function (data) {
+        if (!data.success) {
+            errorHandling(data);
+            return;
+        }
+
         var lastCategory = undefined;
 
         var table = "<table><tbody>";
-        $.each(data, function (key, val) {
+        $.each(data.result, function (key, val) {
             if (lastCategory != val.category) {
                 table += "<tr><td><strong>" + val.category + "</strong></td><td></td></tr>";
             }
@@ -31,8 +34,12 @@ function fillServerdata() {
 
 function readDisclaimer() {
     $.getJSON("disclaimer", function (data) {
-        $("#disclaimer").text(data);
-    }, function (error, whatever) {
+        if (!data.success) {
+            errorHandling(data, $("#error"));
+            return;
+        }
+        $("#disclaimer").text(data.result);
+    }, function (error) {
         var e = error;
     });
     return false;
@@ -44,13 +51,17 @@ function switchAgreement() {
 }
 
 function authMastodonStart() {
+    hideError();
     var instance = $("#instance").val();
     $.getJSON("mastodon/auth?instance=" + instance, function (data) {
-        window.open(data);
+        if (!data.success) {
+            errorHandling(data, $("#error"));
+            return;
+        }
+        window.open(data.result);
+        $("#mastodoncode").show();
+        $("#register").hide();
     });
-
-    $("#mastodoncode").show();
-    $("#register").hide();
 }
 
 function codeEntered() {
@@ -59,32 +70,41 @@ function codeEntered() {
 }
 
 function authMastodonFinish() {
+    hideError();
     var instance = $("#instance").val();
     var code = $("#code").val();
 
     $.getJSON("mastodon/code?instance=" + instance + "&code=" + code, function (data) {
-        var success = data.key;
-
-        if (success) {
+        if (data.success) {
+            hideError();
             $("#mastodoncode").hide();
             $("#twitter").show();
         } else {
-            $($("#error").find("p")).text(data.value);
-            $("#error").show();
+            errorHandling(data, $("#error"));
+            return;
         }
     });
 }
 
 function loadUserSettings() {
     $.getJSON("/user/export", function (data) {
-        if (data.error == "auth") {
-            window.location = "/autherror";
-            return;
+        if (data.error != undefined) {
+            errorHandling(data);
+        } else {
+            displayUserSettings(data);
         }
-        displayUserSettings(data);
     });
 }
 
+function loadListSettings() {
+    $.getJSON("/user/export", function (data) {
+        if (data.error != undefined) {
+            errorHandling(data);
+        } else {
+            displayListSettings(data);
+        }
+    });
+}
 
 function styleButtonByValue(chkBox) {
     var button = chkBox.prev();
@@ -96,7 +116,18 @@ function styleButtonByValue(chkBox) {
     }
 }
 
+function displayListSettings(user) {
+    badwords = user.config.dontTweet;
+    replacements = user.config.replacements;
 
+    Object.entries(replacements).forEach(([key, value]) => {
+        addTranslation(key, value);
+    });
+
+    Object.entries(badwords).forEach(([, value]) => {
+        addBadword(value);
+    })
+}
 
 function displayUserSettings(user) {
     userSettings = user.config;
@@ -110,8 +141,6 @@ function displayUserSettings(user) {
     $("#AppSuffixHideIfBreaks").prop("checked", userSettings.appSuffix.hideIfBreaks);
     $("#LongContentThreadOptionsPrefix").val(userSettings.longContentThreadOptions.prefix);
     $("#LongContentThreadOptionsSuffix").val(userSettings.longContentThreadOptions.suffix);
-
-
 
     styleButtonByValue($("#VisibilitiesTootPublic"));
     styleButtonByValue($("#VisibilitiesTootUnlisted"));
@@ -127,18 +156,21 @@ function saveVisibility() {
         notListedToots: ($("#VisibilitiesTootUnlisted").prop("checked")),
         privateToots: ($("#VisibilitiesTootPrivate").prop("checked"))
     }, function (data) {
-        if (!data.success) saveError();
+        if (!data.success) saveError(data);
         else saveDelay();
+    }, function (error) {
+        saveError(error);
     });
 }
 
 function saveDelay() {
-
     $.getJSON("/user/delay", {
         delay: $("#Delay").val()
     }, function (data) {
-        if (!data.success) saveError();
+        if (!data.success) saveError(data);
         else saveSuffix();
+    }, function (error) {
+        saveError(error);
     });
 }
 
@@ -147,19 +179,22 @@ function saveSuffix() {
         content: $("#AppSuffixContent").val(),
         hideIfBreaks: $("#AppSuffixHideIfBreaks").prop("checked")
     }, function (data) {
-        if (!data.success) saveError();
+        if (!data.success) saveError(data);
         else saveThread();
+    }, function (error) {
+        saveError(error);
     });
 }
 
 function saveThread() {
-
     $.getJSON("/user/thread", {
         prefix: $("#LongContentThreadOptionsPrefix").val(),
         suffix: $("#LongContentThreadOptionsSuffix").val()
     }, function (data) {
-        if (!data.success) saveError();
+        if (!data.success) saveError(data);
         else finishSave();
+    }, function (error) {
+        saveError(error);
     });
 }
 
@@ -168,8 +203,8 @@ function finishSave() {
     $("#savestatus").show();
 }
 
-function saveError() {
-    $("#savestatuscontent").text("Error on saving");
+function saveError(data) {
+    errorHandling(data, $("#savestatuscontent"));
     $("#savestatus").show();
 }
 
@@ -178,5 +213,97 @@ function saveSettings() {
     saveVisibility();
 }
 
+/* Lists: */
 
+function GetTranslationRow(from = "", to = "") {
+    return "<tr class='translation'>" + $("#addTranslation").html().replace("[FROM]", from).replace("[TO]", to) + "</tr>";
+}
 
+function GetBadwordRow(value = "") {
+    return "<tr class='badword'>" + $("#addBadword").html().replace("[VALUE]", value) + "</tr>";
+}
+
+function addTranslation(from = "", to = "") {
+    $('#tblTrans tr:first').after(GetTranslationRow(from, to));
+}
+
+function addBadword(value = "") {
+    $('#tblBadword tr:first').after(GetBadwordRow(value));
+}
+
+function delRow(element) {
+    $(element).closest("tr").remove();
+}
+
+function saveTranslations() {
+    var trans = [];
+    $(".translation").each(function () {
+        var inputs = $(this).find("input");
+        trans.push({ "Key": inputs[0].value, "Value": inputs[1].value });
+    });
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: "/user/translations",
+        data: JSON.stringify(trans),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: function (response) {
+            if (!response.success) saveError(data);
+            else finishSave();
+        }
+    });
+}
+
+function saveBadwords() {
+    var badwords = [];
+    $(".badword").each(function () {
+        var inputs = $(this).find("input");
+        badwords.push(inputs[0].value);
+    });
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: "/user/donttweet",
+        data: JSON.stringify(badwords),
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        success: function (response) {
+            if (!response.success) saveError(data);
+            else finishSave();
+        }
+    });
+}
+/* Global ErrorHandling: */
+
+function hideError() {
+    $($("#error").find("p")).text("");
+    $("#error").hide();
+}
+
+function displayError(code, message, errordiv) {
+    if (code == undefined && message == undefined) message = "unexpected error. Something went wrong, sorry";
+    $(errordiv.find("p")).text(code + ":" + message);
+    errordiv.show();
+}
+
+function errorHandling(data, errordiv) {
+    var error = data.error.toLowerCase();
+    if (errordiv != undefined) {
+        displayError(data.error, data.errorMessage, errordiv);
+        //$(errordiv.find("p")).text(data.value);
+        //errordiv.show();
+        return;
+    }
+
+    switch (error) {
+        case "auth":
+            window.location = "/autherror";
+            break;
+        default:
+            window.location = "/error?code=" + error + "&msg=" + data.errorMessage;
+            break;
+    }
+}

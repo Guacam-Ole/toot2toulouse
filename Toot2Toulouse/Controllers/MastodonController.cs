@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Interfaces;
+
+using Toot2ToulouseWeb;
 
 namespace Toot2Toulouse.Controllers
 {
@@ -33,20 +34,21 @@ namespace Toot2Toulouse.Controllers
             }
             catch (HttpRequestException hex)
             {
-                return Content($"Sorry. Something went wrong. Most likely your instance wasn't correct: {hex.Message}");
+                throw new ApiException(ApiException.ErrorTypes.Mastodon, $"Sorry. Something went wrong. Most likely your instance wasn't correct: {hex.Message}");
             }
             catch (Exception ex)
             {
-                return Content($"Sorry. Something went terribly wrong: {ex.Message}");
+                throw new ApiException(ApiException.ErrorTypes.Exception, $"Sorry. Something went terribly wrong: {ex.Message}");
             }
-            return new JsonResult(redirectUrl);
+            return JsonResults.Success(redirectUrl);
         }
 
         [Route("code")]
         [HttpGet]
         public async Task<ActionResult> AuthFinishAsync(string instance, string code)
         {
-            return new JsonResult(await _mastodon.UserIsAllowedToRegisterAsync(instance, code));
+            await _mastodon.UserIsAllowedToRegisterAsync(instance, code);
+            return JsonResults.Success();
         }
     }
 }

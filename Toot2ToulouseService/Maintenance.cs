@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using System.Runtime.CompilerServices;
+
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
@@ -35,16 +37,16 @@ namespace Toot2ToulouseService
             }
         }
 
-        private void DoUpgradeFor(string version)
+        private async Task DoUpgradeFor(string version)
         {
             switch (version)
             {
                 case "0.9":
-                    var allUsers = _database.GetActiveUsers();
+                    var allUsers =  await _database.GetActiveUsers();
                     foreach (var user in allUsers)
                     {
                         user.Config.VisibilitiesToPost = _config.Defaults.VisibilitiesToPost;
-                        _database.UpsertUser(user);
+                        await _database.UpsertUser(user);
                     }
                     break;
             }
@@ -55,9 +57,9 @@ namespace Toot2ToulouseService
             await _toulouse.InviteAsync(mastodonHandle);
         }
 
-        public void Upgrade(Version? fromVersion)
+        public async Task    Upgrade(Version? fromVersion)
         {
-            var serverstats = _database.GetServerStats();
+            var serverstats = await _database.GetServerStats();
             fromVersion ??= new Version(serverstats.CurrentVersion ?? "0.0");
             if (fromVersion.ToString() == serverstats.CurrentVersion) return;
             GetUpgradePath(fromVersion, _config.CurrentVersion);
@@ -70,25 +72,26 @@ namespace Toot2ToulouseService
             return _config.CurrentVersion.ToString();
         }
 
-        public void ListIds()
+        public async Task ListIds()
         {
             Console.WriteLine("id\tblockreason\tblockdate\tmastodon\ttwitter");
-            _database.GetAllUsers().ForEach(user =>
+            var allUsers=await _database.GetAllUsers();
+            allUsers.ForEach(user =>
             {
                 Console.WriteLine($"{user.Id}\t{user.BlockReason}\t{user.BlockDate}\t{user.Mastodon?.Handle}@{user.Mastodon?.Instance}\t{user.Twitter?.Handle}");
             });
             _logger.LogInformation("Retrieved all userIds");
         }
 
-        public void BlockUser(Guid userId)
+        public async Task  BlockUser(Guid userId)
         {
-            _user.Block(userId, Toot2Toulouse.Backend.Models.UserData.BlockReasons.Manual);
+            await _user.Block(userId, Toot2Toulouse.Backend.Models.UserData.BlockReasons.Manual);
             Console.WriteLine("User blocked");
         }
 
-        public void UnblockUser(Guid userId)
+        public async Task UnblockUser(Guid userId)
         {
-            _user.Unblock(userId);
+          await  _user.Unblock(userId);
             Console.WriteLine("User unblocked");
         }
     }

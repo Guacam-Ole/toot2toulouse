@@ -1,12 +1,14 @@
 ﻿using Mastonet.Entities;
 
+using Toot2Toulouse.Backend.Models;
+
 namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IToulouse
     {
         List<DisplaySettingsItem> GetServerSettingsForDisplay();
 
-        Configuration.TootConfigurationAppModes.ValidModes GetServerMode();
+        Task<Configuration.TootConfigurationAppModes.ValidModes> GetServerMode();
 
         Task SendTootsForAllUsersAsync();
 
@@ -14,8 +16,8 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task InviteAsync(string mastodonHandle);
 
-        void CalculateServerStats();
+        Task CalculateServerStats();
 
-        Task SendSingleTootAsync(Guid userId, string tootId);
+        Task SendSingleTootAsync(UserData user, string tootId);
     }
 }
