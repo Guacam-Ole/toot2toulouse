@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.15" />
+    <PackageReference Include="LiteDB.Async" Version="0.1.5" />
     <PackageReference Include="Mastonet" Version="2.2.1" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.5" />
     <PackageReference Include="TweetinviAPI" Version="5.0.4" />

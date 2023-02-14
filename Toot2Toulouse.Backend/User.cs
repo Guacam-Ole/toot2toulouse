@@ -19,9 +19,9 @@ namespace Toot2Toulouse.Backend
             _notification = notification;
         }
 
-        public UserData? GetUser(Guid id, string hash)
+        public async Task<UserData?> GetUser(Guid id, string hash)
         {
-            return _database.GetUserByIdAndHash(id, hash);
+            return await _database.GetUserByIdAndHash(id, hash);
         }
 
         public UserData? ExportUserData(UserData userData)
@@ -33,25 +33,25 @@ namespace Toot2Toulouse.Backend
             return expoortUserData;
         }
 
-        public void UpdateUser(UserData user)
+        public async Task UpdateUser(UserData user)
         {
-            _database.UpsertUser(user);
+           await _database.UpsertUser(user);
         }
 
-        public void Block(Guid userId, UserData.BlockReasons reason)
+        public async Task Block(Guid userId, UserData.BlockReasons reason)
         {
-            var user=_database.GetUserById(userId);
+            var user=await _database.GetUserById(userId);
             user.BlockDate = DateTime.UtcNow;
             user.BlockReason=reason;
-            _database.UpsertUser(user);
+            await _database.UpsertUser(user);
             _logger.LogInformation("Blocked {userid}: {reason}", userId, reason);
         }
 
-        public void Unblock(Guid userId) {
-            var user = _database.GetUserById(userId);
+        public async Task Unblock(Guid userId) {
+            var user = await _database.GetUserById(userId);
             user.BlockDate = null;
             user.BlockReason = null;
-            _database.UpsertUser(user);
+            await _database.UpsertUser(user);
             _logger.LogInformation("Unlocked {userid}", userId);
         }
     }

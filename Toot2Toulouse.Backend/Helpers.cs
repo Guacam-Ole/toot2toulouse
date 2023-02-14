@@ -1,10 +1,10 @@
-﻿
+﻿using Mastonet.Entities;
+
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 using Toot2Toulouse.Backend.Configuration;
-using Toot2Toulouse.Backend.Models;
 
 using static Toot2Toulouse.Backend.Configuration.UserConfiguration;
 
@@ -19,10 +19,19 @@ namespace Toot2Toulouse.Backend
 
         public static string StripComments(this string json)
         {
-
-            json = Regex.Replace(json, @"//(.*?)\r?\n", "\n", RegexOptions.Multiline);  // removes comments like this
+            json = Regex.Replace(json, @"//(.*?)\r?\n", " \n", RegexOptions.Multiline);  // removes comments like this
             return json;
         }
+
+        public static string StripHtml(this string content)
+        {
+            content = content.Replace("</p>", " \n\n");
+            content = content.Replace("<br />", " \n");
+            content = Regex.Replace(content, "<[a-zA-Z/].*?>", String.Empty);
+            content = System.Net.WebUtility.HtmlDecode(content);
+            return content;
+        }
+
 
         public static void RemoveSecrets<T>(this T item)
         {
@@ -42,7 +51,27 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public static Mastonet.Visibility ToMastonet(this Visibilities visibility )
+        public static string? ReplacementForUser(this IEnumerable<KeyValuePair<string, string>> replacements, Mention mention)
+        {
+            if (replacements == null) return null;
+            var replacement = replacements.FirstOrDefault(q => q.Key.ToLower() == "@" + mention.AccountName.ToLower());
+            return replacement.Value;
+        }
+
+        public static string Replace(this string content, Mention mention, string replacement)
+        {
+            return Replace(content, new KeyValuePair<string,string>("@"+mention.UserName, replacement));
+        }
+
+        public static string Replace(this string content, KeyValuePair<string,string> pair)
+        {
+            return
+                content.Replace($" {pair.Key} ", $" {pair.Value} ", StringComparison.CurrentCultureIgnoreCase)
+                .Replace($"\n{pair.Key} ", $"\n{pair.Value} ", StringComparison.CurrentCultureIgnoreCase);
+        }
+
+
+        public static Mastonet.Visibility ToMastonet(this Visibilities visibility)
         {
             return Enum.Parse<Mastonet.Visibility>(visibility.ToString());
         }
@@ -52,19 +81,18 @@ namespace Toot2Toulouse.Backend
             return Enum.Parse<Visibilities>(visibility.ToString());
         }
 
-
-        public static T? SetLimits<T>(this T? value, T min, T max) where T: IComparable
+        public static T? SetLimits<T>(this T? value, T min, T max) where T : IComparable
         {
-            if (value == null) return value;  
+            if (value == null) return value;
             if (value.CompareTo(min) < 0) value = min;
-            if (value.CompareTo(max)>0) value = max;   
-            return value;   
+            if (value.CompareTo(max) > 0) value = max;
+            return value;
         }
 
-        public static string  Shorten(this string? value, int maxLength)
+        public static string Shorten(this string? value, int maxLength)
         {
             if (value == null) return string.Empty;
-            if (value.Length>maxLength) return value[..maxLength];
+            if (value.Length > maxLength) return value[..maxLength];
             return value;
         }
     }

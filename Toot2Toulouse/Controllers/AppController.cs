@@ -4,6 +4,8 @@ using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 
+using Toot2ToulouseWeb;
+
 namespace Toot2Toulouse.Controllers
 {
     [ApiController]
@@ -26,7 +28,6 @@ namespace Toot2Toulouse.Controllers
             _app = app;
             _user = user;
             _cookies = cookies;
-            
         }
 
         [Route("/")]
@@ -35,18 +36,16 @@ namespace Toot2Toulouse.Controllers
             return new RedirectResult($"index.{_config.App.DefaultLanguage}.html");
         }
 
-     
-
         [Route("server")]
         public ActionResult GetServerSettings()
         {
-            return new JsonResult(_app.GetServerSettingsForDisplay());
+            return JsonResults.Success(_app.GetServerSettingsForDisplay());
         }
 
         [Route("disclaimer")]
         public ActionResult GetDisclaimer()
         {
-            return new JsonResult(_config.App.Disclaimer);
+            return JsonResults.Success(_config.App.Disclaimer);
         }
 
         [Route("stats")]
@@ -55,17 +54,16 @@ namespace Toot2Toulouse.Controllers
             return null;
         }
 
-
-   
-
-     
-
         [Route("autherror")]
         public ActionResult Autherror()
         {
-            return new RedirectResult($"unknown.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"auth.{_config.App.DefaultLanguage}.html");
         }
 
-       
+        [Route("error")]
+        public ActionResult Error(string code)
+        {
+            return new RedirectResult($"error.{_config.App.DefaultLanguage}.html?error={code}");
+        }
     }
 }

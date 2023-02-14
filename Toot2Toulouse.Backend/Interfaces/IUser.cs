@@ -4,11 +4,11 @@ namespace Toot2Toulouse.Backend.Interfaces
 {
     public interface IUser
     {
-        UserData? GetUser(Guid id, string hash);
-        UserData? ExportUserData(UserData userData);
+        Task<UserData?> GetUser(Guid id, string hash);
+        UserData ExportUserData(UserData userData);
 
-        void UpdateUser(UserData user);
-        void Block(Guid userId, UserData.BlockReasons reason);
-        void Unblock(Guid userId);
+        Task UpdateUser(UserData user);
+        Task Block(Guid userId, UserData.BlockReasons reason);
+        Task Unblock(Guid userId);
     }
 }

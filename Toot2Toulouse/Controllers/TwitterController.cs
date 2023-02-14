@@ -8,6 +8,8 @@ using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Interfaces;
 
+using Toot2ToulouseWeb;
+
 namespace Toot2Toulouse.Controllers
 {
     [ApiController]
@@ -42,9 +44,9 @@ namespace Toot2Toulouse.Controllers
         [HttpGet]
         public async Task<ActionResult> AuthFinishAsync()
         {
-            if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) return Content("query missing");
+            if (string.IsNullOrWhiteSpace(Request.QueryString.Value)) throw new ApiException(ApiException.ErrorTypes.Twitter, "query missing");
             var success=await _twitterClientAuthentication.FinishAuthenticationAsync(Request.QueryString.Value);
-            if (!success) return Content("twitter auth failed");
+            if (!success) throw new ApiException(ApiException.ErrorTypes.Twitter, "auth error");
             return new RedirectResult($"/regfinished.{_config.App.DefaultLanguage}.html");
         }
     }

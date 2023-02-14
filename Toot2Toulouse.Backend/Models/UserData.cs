@@ -19,6 +19,7 @@ namespace Toot2Toulouse.Backend.Models
         public DateTime? BlockDate { get; set; }
         public BlockReasons? BlockReason { get; set; }
 
+        public bool Update { get; set; } = false;
 
         public override string ToString()
         {

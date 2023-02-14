@@ -20,16 +20,12 @@ namespace Toot2Toulouse.Backend
 
         private readonly ILogger<Twitter> _logger;
         private readonly Interfaces.IMessage _toot;
-        private readonly INotification _notification;
-        private readonly IDatabase _database;
 
-        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot, INotification notification, IDatabase database)
+        public Twitter(ILogger<Twitter> logger, ConfigReader configReader, Interfaces.IMessage toot)
         {
             _config = configReader.Configuration;
             _logger = logger;
             _toot = toot;
-            _notification = notification;
-            _database = database;
         }
 
         private TwitterClient GetUserClient(UserData userData)
@@ -46,7 +42,7 @@ namespace Toot2Toulouse.Backend
         {
             if (string.IsNullOrWhiteSpace(toot.Content)) return false;
             if (!user.Config.VisibilitiesToPost.Contains(toot.Visibility.ToT2t())) return false;
-            if (user.Config.DontTweet.Any(q=>toot.Content.Contains(q))) return false;   
+            if (user.Config.DontTweet.Any(q => toot.Content.Contains(q))) return false;
             return true;
         }
 
@@ -54,20 +50,45 @@ namespace Toot2Toulouse.Backend
         {
             if (!ShouldITweetThis(userData, toot))
             {
-                _logger.LogDebug("Didn't tweet toot {id} ", toot.Id);
+                _logger.LogTrace("Didn't tweet toot {id} ", toot.Id);
                 return new List<long>();
             }
             return await PublishFromTootAsync(userData, toot, replyTo);
         }
 
-        private void ReplaceRecipients(IEnumerable<Mention> mentions, ref string content)
+     
+        private static void ReplaceContent(IEnumerable<Mention> mentions, UserData userdata, ref string content)
         {
+            content = $" {content} ";
             if (mentions == null) return;
+            var personalUserReplacements = userdata.Config.Replacements.Where(q => q.Key.StartsWith("@"));
+            var personalNonUserReplacements = userdata.Config.Replacements.Where(q => !q.Key.StartsWith("@"));
 
             foreach (var mention in mentions)
             {
-                content = content.Replace($"@{mention.UserName}", $"🐘{mention.UserName}");
+                if (!mention.AccountName.Contains('@')) mention.AccountName += "@" + userdata.Mastodon.Instance;   
+                var userReplacement = personalUserReplacements.ReplacementForUser(mention);
+                var globalUserReplacement = GlobalStorage.UserReplacements.ReplacementForUser(mention);
+
+                if (userReplacement != null)
+                {
+                    content = content.Replace(mention, userReplacement);
+                    continue;
+                }
+                else if (globalUserReplacement != null)
+                {
+                    content = content.Replace(mention, globalUserReplacement);
+                    continue;
+                }
+
+                content = content.Replace(mention, $"🐘{mention.AccountName}");
             }
+
+            foreach (var nonUserReplacement in personalNonUserReplacements)
+            {
+                content = content.Replace(nonUserReplacement);
+            }
+            content = content.Trim();
         }
 
         private async Task<List<long>> PublishFromTootAsync(UserData userData, Status toot, long? replyTo)
@@ -82,8 +103,8 @@ namespace Toot2Toulouse.Backend
                 }
                 bool isSensitive = toot.Sensitive ?? false;
 
-                string content = _toot.StripHtml(toot.Content);
-                ReplaceRecipients(toot.Mentions, ref content);
+                string content = toot.Content.StripHtml();
+                ReplaceContent(toot.Mentions, userData, ref content);
 
                 var twitterUser = await GetTwitterUserAsync(userData);
 
@@ -93,14 +114,14 @@ namespace Toot2Toulouse.Backend
                     switch (userData.Config.LongContent)
                     {
                         case ITwitter.LongContent.DontPublish:
-                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser.Name, content.Length);
+                            _logger.LogDebug("didnt tweet for {twitterUser} because {contentLength} was more than the allowed twitter limit", twitterUser.ScreenName, content.Length);
                             break;
 
                         case ITwitter.LongContent.Cut:
                             var cuttweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
                             tweetIds.Add(cuttweet.Id);
 
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser.Name, content.Length, mainTweet.Length);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser.ScreenName, content.Length, mainTweet.Length);
                             break;
 
                         case ITwitter.LongContent.Thread:
@@ -112,11 +133,11 @@ namespace Toot2Toulouse.Backend
                                 foreach (var replyContent in replies)
                                 {
                                     tweet = await TweetAsync(userData, replyContent, isSensitive, tweet.Id, null);
-                                    if (tweet == null) ;
+                                    if (tweet == null) continue;
                                     tweetIds.Add(tweet.Id);
                                 }
                             }
-                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser.Name, content.Length, replies.Count);
+                            _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars resulting in thread with {replyCount} replies", twitterUser.ScreenName, content.Length, replies.Count);
                             break;
 
                         default:
@@ -127,7 +148,7 @@ namespace Toot2Toulouse.Backend
                 {
                     var singletweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
                     tweetIds.Add(singletweet.Id);
-                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser.Name, content.Length);
+                    _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser.ScreenName, content.Length);
                 }
                 return tweetIds;
             }
@@ -157,7 +178,6 @@ namespace Toot2Toulouse.Backend
                         mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
 
                         break;
-                    //return mediafile;
 
                     case ".gif":
                         fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
@@ -168,7 +188,6 @@ namespace Toot2Toulouse.Backend
                         fileContents = await DownloadFileAsync(attachment.Url, null, _config.App.MaxVideoSize);
                         mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
                         break;
-                    //return mediafile;
 
                     default:
                         throw new NotImplementedException(); // TODO: Own exceptiontype
@@ -184,7 +203,7 @@ namespace Toot2Toulouse.Backend
             }
             catch (Exception ex)
             {
-                _logger.LogError("oops", ex);
+                _logger.LogError("Downloading attachment failed. Will tweet without attachment", ex);
                 return null;
             }
         }
@@ -195,8 +214,8 @@ namespace Toot2Toulouse.Backend
             {
                 Text = content,
                 PossiblySensitive = isSensitive,
-                InReplyToTweetId = replyTo, 
-                AutoPopulateReplyMetadata= true
+                InReplyToTweetId = replyTo,
+                AutoPopulateReplyMetadata = true
             };
 
             if (attachments?.Count() > 0)
