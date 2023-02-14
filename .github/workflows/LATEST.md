@@ -1,12 +1,19 @@
-# Release notes
+# Release notes 
+Version 1.1 adds additional Configuration options for the user
 
-first stable release
 
 ## New Features
-Replies to your own toots are now tweeted
-You can now mark your toots with an "🐘" to disable tweeting
+- User can now configure specific "badwords" to disable tweeting for that toots
+- Users can now add translations (e.g. "toot"->"tweet")
+- Users can also use those translations to hint which person on Mastodon is who on Twitter (e.g. @jeanluc@enterprise.social -> @uss_captain)
+- As Fallback search for usertranslations on other users (personal translations always override global translations)
+- Switched to Async methods on Database
+- Allow to define the Loglevel from service
+- More generic response and errorhandling on webapi
 
-## Fixes
-Fixed an issue where replies to toots that should not be tweeted (e.g. private toots) threw an error
-Fixed delay
+## Fixes 
+- On logs display accountname instead of displayname
+- Fixed an issue where replying to your own non-tweeted (e.g. "private") toot could cause an error 
+- Better log-entries on exceptions
+- Database optimizations on service
 
