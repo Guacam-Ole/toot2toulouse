@@ -33,7 +33,7 @@ namespace Toot2Toulouse.Controllers
         [Route("/")]
         public ActionResult Index()
         {
-            return new RedirectResult($"index.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"index.{_config.App.Languages.Default}.html");
         }
 
         [Route("server")]
@@ -57,13 +57,13 @@ namespace Toot2Toulouse.Controllers
         [Route("autherror")]
         public ActionResult Autherror()
         {
-            return new RedirectResult($"auth.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"auth.{_config.App.Languages.Default}.html");
         }
 
         [Route("error")]
         public ActionResult Error(string code)
         {
-            return new RedirectResult($"error.{_config.App.DefaultLanguage}.html?error={code}");
+            return new RedirectResult($"error.{_config.App.Languages.Default}.html?error={code}");
         }
     }
 }

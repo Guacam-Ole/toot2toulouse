@@ -115,7 +115,7 @@ namespace Toot2Toulouse
             var authClient = new AuthenticationClient(userInstance);
             if (createApp)
             {
-                var appRegistration = await authClient.CreateApp(_configuration.App.ClientName, Scope.Read);
+                var appRegistration = await authClient.CreateApp(_configuration.App.AppInfo.ClientName, Scope.Read);
                 _cookies.AppRegistrationSetSession(appRegistration);
             }
             else
