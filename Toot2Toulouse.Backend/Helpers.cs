@@ -1,10 +1,13 @@
 ﻿using Mastonet.Entities;
 
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 using Toot2Toulouse.Backend.Configuration;
+
+using Tweetinvi.Streams.Helpers;
 
 using static Toot2Toulouse.Backend.Configuration.UserConfiguration;
 
@@ -12,6 +15,8 @@ namespace Toot2Toulouse.Backend
 {
     public static class Helpers
     {
+        private static readonly string _urlReplacementString = $"[URL-NUM-{new string('*', 20)}]";
+
         public static T Clone<T>(this T source)
         {
             return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(source, ConfigReader.JsonOptions));
@@ -94,6 +99,30 @@ namespace Toot2Toulouse.Backend
             if (value == null) return string.Empty;
             if (value.Length > maxLength) return value[..maxLength];
             return value;
+        }
+
+        public static string GetUrlsInText(this string content,out IEnumerable<string> urls)
+        {
+            var words = content.Replace('\n',' ').Split(' ');
+            urls = words.Where(q => q.StartsWith("http://") || q.StartsWith("https://"));
+            if (!urls.Any()) return content;
+            int count = 0;
+            foreach (var url in urls)
+            {
+                content = content.Replace(url, _urlReplacementString.Replace("NUM", $"{count++:000}"));
+            }
+            return content;
+        }
+
+        public static string ReInsertUrls(this string content, IEnumerable<string>? urls)
+        {
+            if (urls== null) return content;
+            int count = 0;
+            foreach (var url in urls)
+            {
+                content = content.Replace(_urlReplacementString.Replace("NUM", $"{count++:000}"), url);
+            }
+            return content;
         }
     }
 }

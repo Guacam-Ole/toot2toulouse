@@ -56,9 +56,9 @@ namespace Toot2Toulouse.Backend
             return await PublishFromTootAsync(userData, toot, replyTo);
         }
 
-     
-        private static void ReplaceContent(IEnumerable<Mention> mentions, UserData userdata, ref string content)
+        private static void ReplaceContent(IEnumerable<Mention> mentions, UserData userdata, ref string content, out IEnumerable<string>? urls)
         {
+            urls = null;
             content = $" {content} ";
             if (mentions == null) return;
             var personalUserReplacements = userdata.Config.Replacements.Where(q => q.Key.StartsWith("@"));
@@ -66,7 +66,7 @@ namespace Toot2Toulouse.Backend
 
             foreach (var mention in mentions)
             {
-                if (!mention.AccountName.Contains('@')) mention.AccountName += "@" + userdata.Mastodon.Instance;   
+                if (!mention.AccountName.Contains('@')) mention.AccountName += "@" + userdata.Mastodon.Instance;
                 var userReplacement = personalUserReplacements.ReplacementForUser(mention);
                 var globalUserReplacement = GlobalStorage.UserReplacements.ReplacementForUser(mention);
 
@@ -88,6 +88,7 @@ namespace Toot2Toulouse.Backend
             {
                 content = content.Replace(nonUserReplacement);
             }
+            content = content.GetUrlsInText(out urls);
             content = content.Trim();
         }
 
@@ -104,7 +105,7 @@ namespace Toot2Toulouse.Backend
                 bool isSensitive = toot.Sensitive ?? false;
 
                 string content = toot.Content.StripHtml();
-                ReplaceContent(toot.Mentions, userData, ref content);
+                ReplaceContent(toot.Mentions, userData, ref content, out IEnumerable<string>? urls);
 
                 var twitterUser = await GetTwitterUserAsync(userData);
 
@@ -118,21 +119,21 @@ namespace Toot2Toulouse.Backend
                             break;
 
                         case ITwitter.LongContent.Cut:
-                            var cuttweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
+                            var cuttweet = await TweetAsync(userData, mainTweet.ReInsertUrls(urls), isSensitive, replyTo, toot.MediaAttachments);
                             tweetIds.Add(cuttweet.Id);
 
                             _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars cutting after {tweetLength} chars", twitterUser.ScreenName, content.Length, mainTweet.Length);
                             break;
 
                         case ITwitter.LongContent.Thread:
-                            var tweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
+                            var tweet = await TweetAsync(userData, mainTweet.ReInsertUrls(urls), isSensitive, replyTo, toot.MediaAttachments);
 
                             if (tweet.Id != 0)
                             {
                                 tweetIds.Add(tweet.Id);
                                 foreach (var replyContent in replies)
                                 {
-                                    tweet = await TweetAsync(userData, replyContent, isSensitive, tweet.Id, null);
+                                    tweet = await TweetAsync(userData, replyContent.ReInsertUrls(urls), isSensitive, tweet?.Id, null);
                                     if (tweet == null) continue;
                                     tweetIds.Add(tweet.Id);
                                 }
@@ -208,7 +209,7 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        private async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long? replyTo, IEnumerable<Attachment> attachments = null)
+        private async Task<ITweet> TweetAsync(UserData userData, string content, bool isSensitive, long? replyTo, IEnumerable<Attachment>? attachments = null)
         {
             var tweetParameters = new PublishTweetParameters
             {
