@@ -9,9 +9,11 @@ using Tweetinvi;
 using Tweetinvi.Auth;
 using Tweetinvi.Parameters;
 
+using static Toot2Toulouse.Backend.Configuration.Messages;
+
 namespace Toot2Toulouse
 {
-    public class TwitterClientAuthentication:ITwitterClientAuthentication
+    public class TwitterClientAuthentication : ITwitterClientAuthentication
     {
         private readonly ILogger<TwitterClientAuthentication> _logger;
         private readonly IDatabase _database;
@@ -40,7 +42,7 @@ namespace Toot2Toulouse
         {
             var requestParameters = await RequestCredentialsParameters.FromCallbackUrlAsync(query, _twitterRequestStore);
             var userCredentials = await GetAppClient().Auth.RequestCredentialsAsync(requestParameters);
-            var queryContents=HttpUtility.ParseQueryString(query);
+            var queryContents = HttpUtility.ParseQueryString(query);
             var tmpGuid = queryContents["tweetinvi_auth_request_id"];
             var t2tUser = await _database.GetUserByTwitterTmpGuid(tmpGuid);
             if (t2tUser == null) throw new Exception("Guid invalid");
@@ -57,9 +59,9 @@ namespace Toot2Toulouse
                 Id = user.Id.ToString(),
                 DisplayName = user.Name,
                 Handle = user.ScreenName,
-                TmpAuthGuid=null
+                TmpAuthGuid = null
             };
-            if (t2tUser.BlockReason==  Backend.Models.UserData.BlockReasons.AuthTwitter)
+            if (t2tUser.BlockReason == Backend.Models.UserData.BlockReasons.AuthTwitter)
             {
                 t2tUser.BlockDate = null;
                 t2tUser.BlockReason = null;
@@ -67,7 +69,7 @@ namespace Toot2Toulouse
             await _database.UpsertUser(t2tUser);
             _toulouse.CalculateServerStats();
 
-            _notification.Info(t2tUser, TootConfigurationApp.MessageCodes.RegistrationFinished);
+            _notification.Info(t2tUser, MessageCodes.RegistrationFinished);
 
             //   InitUserAsync(t2tUser);
             return true;
@@ -77,14 +79,14 @@ namespace Toot2Toulouse
         {
             try
             {
-                var userCookie=_cookies.GetUserCookie();
+                var userCookie = _cookies.GetUserCookie();
 
                 if (userCookie.Userid == Guid.Empty || userCookie.Hash == null) throw new Exception("No cookie. You shouldn't even be here");
 
-                var t2tUser =await _database.GetUserByIdAndHash(userCookie.Userid, userCookie.Hash);
+                var t2tUser = await _database.GetUserByIdAndHash(userCookie.Userid, userCookie.Hash);
                 if (t2tUser == null) throw new Exception("invalid cookie data");
 
-                t2tUser.Twitter.TmpAuthGuid= Guid.NewGuid().ToString();
+                t2tUser.Twitter.TmpAuthGuid = Guid.NewGuid().ToString();
                 await _database.UpsertUser(t2tUser);
                 var targetUrl = baseUrl + "/twitter/code";
                 var redirectUrl = _twitterRequestStore.AppendAuthenticationRequestIdToCallbackUrl(targetUrl, t2tUser.Twitter.TmpAuthGuid);

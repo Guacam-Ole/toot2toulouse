@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 
-using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
+
+using static Toot2Toulouse.Backend.Configuration.Messages;
 
 namespace Toot2Toulouse.Backend
 {
@@ -17,17 +18,17 @@ namespace Toot2Toulouse.Backend
             _mastodon = mastodon;
         }
 
-        public  void Error(UserData user, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
+        public void Error(UserData user, MessageCodes messageCode, string? additionalInfo = null)
         {
             _mastodon.SendStatusMessageToAsync(user, "💣 ERROR 💣\n", messageCode, additionalInfo).Wait();
         }
 
-        public void Info(UserData user, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
+        public void Info(UserData user, MessageCodes messageCode, string? additionalInfo = null)
         {
             _mastodon.SendStatusMessageToAsync(user, null, messageCode, additionalInfo).Wait();
         }
 
-        public void Warning(UserData user, TootConfigurationApp.MessageCodes messageCode, string? additionalInfo = null)
+        public void Warning(UserData user, MessageCodes messageCode, string? additionalInfo = null)
         {
             _mastodon.SendStatusMessageToAsync(user, "⚠️ WARNING ⚠️\n", messageCode, additionalInfo).Wait();
         }

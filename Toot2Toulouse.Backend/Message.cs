@@ -23,7 +23,7 @@ namespace Toot2Toulouse.Backend
         public List<string>? GetReplies(UserConfiguration userConfiguration, string originalToot, out string mainTweet)
         {
             DoReplacements(userConfiguration, ref originalToot);
-            int maxLength = _config.App.TwitterCharacterLimit;
+            int maxLength = _config.App.TwitterLimits.CharacterLimit;
             bool addSuffix = true;
 
             string suffix = userConfiguration.AppSuffix.Content ?? string.Empty;
@@ -70,7 +70,7 @@ namespace Toot2Toulouse.Backend
             if (!isLast) maxLength -= userConfiguration.LongContentThreadOptions.Suffix.Length;
 
             int lastSpace;
-            for (lastSpace = maxLength; lastSpace >= _config.App.MinSplitLength; lastSpace--)
+            for (lastSpace = maxLength; lastSpace >= _config.App.TwitterLimits.MinSplitLength; lastSpace--)
             {
                 if (completeText[lastSpace] == ' ')
 

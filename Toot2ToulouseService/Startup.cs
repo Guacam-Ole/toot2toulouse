@@ -32,11 +32,12 @@ namespace Toot2ToulouseService
 
             services.AddLogging(logging =>
             {
-                //logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"))
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.SetMinimumLevel(Enum.Parse<LogLevel>( config.LogLevel));
-                logging.AddFile(Path.Combine(config.Paths.Log, "t2t.service.log"), append: true);
+                var logFile = config.Paths.Log;
+                if (!logFile.EndsWith(".log") && !logFile.EndsWith(".txt")) logFile = Path.Combine(logFile, "t2t.service.log");
+                logging.AddFile(logFile, append: true);
             });
         }
 

@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Toot2Toulouse.Backend.Configuration;
 
+using static Toot2Toulouse.Backend.Configuration.Messages;
 using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
 
 namespace Toot2Toulouse.Backend

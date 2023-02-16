@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 using Toot2Toulouse.Backend.Models;
 
-using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
+using static Toot2Toulouse.Backend.Configuration.Messages;
 
 namespace Toot2Toulouse.Backend.Interfaces
 {

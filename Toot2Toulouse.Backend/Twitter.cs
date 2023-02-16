@@ -175,18 +175,18 @@ namespace Toot2Toulouse.Backend
                     case ".jpg":
                     case ".jpeg":
                     case ".webp":
-                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxImageSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.TwitterLimits.MaxImageSize);
                         mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
 
                         break;
 
                     case ".gif":
-                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.MaxGifSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, attachment.PreviewUrl, _config.App.TwitterLimits.MaxGifSize);
                         mediafile = await userClient.Upload.UploadTweetImageAsync(fileContents);
                         break;
 
                     case ".mp4":
-                        fileContents = await DownloadFileAsync(attachment.Url, null, _config.App.MaxVideoSize);
+                        fileContents = await DownloadFileAsync(attachment.Url, null, _config.App.TwitterLimits.MaxVideoSize);
                         mediafile = await userClient.Upload.UploadTweetVideoAsync(fileContents);
                         break;
 
