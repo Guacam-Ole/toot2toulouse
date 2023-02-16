@@ -33,7 +33,7 @@ namespace Toot2Toulouse.Controllers
         [Route("/")]
         public ActionResult Index()
         {
-            return new RedirectResult($"index.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"index.{_config.App.Languages.Default}.html");
         }
 
         [Route("server")]
@@ -42,10 +42,12 @@ namespace Toot2Toulouse.Controllers
             return JsonResults.Success(_app.GetServerSettingsForDisplay());
         }
 
-        [Route("disclaimer")]
-        public ActionResult GetDisclaimer()
+
+
+        [Route("config")]
+        public ActionResult GetServerSettingsStructured()
         {
-            return JsonResults.Success(_config.App.Disclaimer);
+            return JsonResults.Success(_config.App);
         }
 
         [Route("stats")]
@@ -57,13 +59,13 @@ namespace Toot2Toulouse.Controllers
         [Route("autherror")]
         public ActionResult Autherror()
         {
-            return new RedirectResult($"auth.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"auth.{_config.App.Languages.Default}.html");
         }
 
         [Route("error")]
         public ActionResult Error(string code)
         {
-            return new RedirectResult($"error.{_config.App.DefaultLanguage}.html?error={code}");
+            return new RedirectResult($"error.{_config.App.Languages.Default}.html?error={code}");
         }
     }
 }

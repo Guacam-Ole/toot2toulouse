@@ -33,8 +33,8 @@ namespace Toot2ToulouseWeb.Controllers
         public async Task<ActionResult> Register()
         {
             var serverMode = await _app.GetServerMode();
-            if (serverMode == TootConfigurationAppModes.ValidModes.Closed) return new RedirectResult($"closed.{_config.App.DefaultLanguage}.html");
-            return new RedirectResult($"/register.{_config.App.DefaultLanguage}.html");
+            if (serverMode == TootConfigurationAppModes.ValidModes.Closed) return new RedirectResult($"closed.{_config.App.Languages.Default}.html");
+            return new RedirectResult($"/register.{_config.App.Languages.Default}.html");
         }
 
         [Route("export")]
@@ -127,13 +127,13 @@ namespace Toot2ToulouseWeb.Controllers
         [Route("config")]
         public ActionResult Config()
         {
-            return new RedirectResult($"/config.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"/config.{_config.App.Languages.Default}.html");
         }
 
         [Route("lists")]
         public ActionResult Lists()
         {
-            return new RedirectResult($"/lists.{_config.App.DefaultLanguage}.html");
+            return new RedirectResult($"/lists.{_config.App.Languages.Default}.html");
         }
     }
 }

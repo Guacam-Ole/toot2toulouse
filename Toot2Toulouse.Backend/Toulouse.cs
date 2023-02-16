@@ -12,6 +12,8 @@ using Toot2Toulouse.Backend.Models;
 
 using Tweetinvi.Exceptions;
 
+using static Toot2Toulouse.Backend.Configuration.Messages;
+
 namespace Toot2Toulouse.Backend
 {
     public class Toulouse : IToulouse
@@ -179,13 +181,13 @@ namespace Toot2Toulouse.Backend
                         switch (firstTwitterException.Code)
                         {
                             case 88:
-                                _notification.Error(user, TootConfigurationApp.MessageCodes.RateLimit);
+                                _notification.Error(user, MessageCodes.RateLimit);
                                 sentToots.Add(new Crosspost { Result = "RateLimit", TootId = toot.Id });
                                 _logger.LogCritical("Rate Limit reached");
                                 break;
 
                             case 89:
-                                _notification.Error(user, TootConfigurationApp.MessageCodes.TwitterAuthError);
+                                _notification.Error(user, MessageCodes.TwitterAuthError);
                                 user.BlockDate = DateTime.UtcNow;
                                 user.BlockReason = UserData.BlockReasons.AuthTwitter;
                                 sentToots.Add(new Crosspost { Result = "TwitterAuth", TootId = toot.Id });
@@ -219,7 +221,7 @@ namespace Toot2Toulouse.Backend
 
         public async Task InviteAsync(string mastodonHandle)
         {
-            await _mastodon.SendStatusMessageToAsync(null, $"{mastodonHandle} [INVITE] ", TootConfigurationApp.MessageCodes.Invite, null);
+            await _mastodon.SendStatusMessageToAsync(null, $"{mastodonHandle} [INVITE] ", MessageCodes.Invite, null);
         }
 
         public async Task SendSingleTootAsync(UserData user, string tootId)
@@ -238,7 +240,7 @@ namespace Toot2Toulouse.Backend
             }
             catch (Mastonet.ServerErrorException mastodonException)
             {
-                _notification.Error(user, TootConfigurationApp.MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
+                _notification.Error(user, MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
             }
             catch (Exception ex)
             {
@@ -263,7 +265,7 @@ namespace Toot2Toulouse.Backend
                 }
                 catch (Mastonet.ServerErrorException mastodonException)
                 {
-                    _notification.Error(user, TootConfigurationApp.MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
+                    _notification.Error(user, MessageCodes.MastodonAuthError, $"Error Message: {mastodonException.Message}");
                     blockUser = true;
                     userToots = new List<Status>();
                 }

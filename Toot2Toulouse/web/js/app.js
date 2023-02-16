@@ -1,4 +1,5 @@
 ﻿var userSettings;
+var config;
 
 function fillServerdata() {
     $.getJSON("server", function (data) {
@@ -10,7 +11,7 @@ function fillServerdata() {
         var lastCategory = undefined;
 
         var table = "<table><tbody>";
-        $.each(data.result, function (key, val) {
+        $.each(data.result, function (_, val) {
             if (lastCategory != val.category) {
                 table += "<tr><td><strong>" + val.category + "</strong></td><td></td></tr>";
             }
@@ -26,6 +27,7 @@ function fillServerdata() {
         table += "</tbody></table>";
 
         $(table).appendTo("#serverlimitstable");
+        readDonations();
     }, function (error, whatever) {
         var e = error;
     });
@@ -33,17 +35,41 @@ function fillServerdata() {
 }
 
 function readDisclaimer() {
-    $.getJSON("disclaimer", function (data) {
+    readConfig(function (data) {
+        $("#disclaimer").text(data.disclaimer);
+    });
+    return false;
+}
+
+function readDonations() {
+    readConfig(function (data) {
+        if (!data.donations.enabled) return;
+        var donationhtml = "<p>" + data.donations.caption + "</p><ul>";
+
+        $.each(data.donations.targets, function (_, val) {
+            donationhtml += "<li><a href=\""+val.url+"\" target=\"_blank\"><img src=\""+val.icon+"\" />"+val.name+"</a></li>";
+        });
+        donationhtml += "</ul>";
+        $("#donate .container").append(donationhtml);
+        $("#donate").show();
+    });
+    return false;
+}
+
+function readConfig(followup) {
+    $.getJSON("config", function (data) {
         if (!data.success) {
             errorHandling(data, $("#error"));
             return;
         }
-        $("#disclaimer").text(data.result);
+        followup(data.result);
     }, function (error) {
         var e = error;
     });
     return false;
 }
+
+
 
 function switchAgreement() {
     var accepted = $("#agreement").prop('checked');

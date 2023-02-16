@@ -1,4 +1,4 @@
-﻿// Copy this to secrets.json and replace the contents
+﻿// Copy this to config.json and replace the contents
 
 {
   "Secrets": {
@@ -20,52 +20,69 @@
     }
   },
   "App": {
-    // Html is allowd on disclaimer
     "Disclaimer": "We store your data in our local database and also as a cookie on your browser. We store any setting you enter, store your credentials for Mastodon and Twitter and keep a history of your posted content\n\nYou agree that you will not use this App to post illegal, sexist or discriminating contents. You agree that we do not guarantee any service and also cannot guarantee that the wrong contents are posted. You also agree that we can delete your data and block your account without providing a reason. This service may be shutdown on any time",
-    "Ping": [ "https://p2p/maintenance/ping" ], // Ping these Servers to inform others searching for an instance (enter "null" if you don't want to periodiacly send your stats to any search server) [NOTYETIMPLEMENTED]
-    "GenerateStats": "weekly", // How often to generate stats (like users active, etc.) and send them to the ping [NOTYETIMPLEMENTED]
-    "AvailableLanguages": [ "en" ], // available languages [NOTYETIMPLEMENTED]
-    "DefaultLanguage": "en", // the language files to use
+    "Donations": {
+      "Enabled": false,
+      "Caption": "If you want to help support this instance you can use one of the following options. Thanks a lot",
+      "Targets": [
+        {
+          "Name": "Sponsor me on GitHub ",
+          "Url": "https:\/\/github.com\/sponsors\/<name>",
+          "Icon": "img\/github.png"
+        },
+        {
+          "Name": "Buy me a coffee at Ko-Fi ",
+          "Url": "https:\/\/ko-fi.com\/<name>",
+          "Icon": "img\/kofi.png"
+        },
+        {
+          "Name": "Support me on Patreon",
+          "Url": "https:\/\/www.patreon.com\/<name>",
+          "Icon": "img\/patreon.png"
+        }
+      ]
+    },
+    "Stats": {
+      "Ping": [ "https:\/\/t2t.social\/maintenance\/ping" ]
+    },
+    "Languages": {
+      "Available": [ "en" ],
+      "Default": "en"
+    },
     "Modes": {
-      "Active": "Open", // can be Open|Closed|Invite
-      "AutoInvite": 100, // Switch to "invite" automatically if x users are on this server
-      "AutoClose": 1000, // Switch to "closed" automaticylly if x users are on this server
-      "AllowedInstances": null, // Limit new registrations to the following instances. Seperate by ","
-      "BlockedInstances": null, // Block anyone from registration if the following instance is used. Seperate by ","
-      "AllowBots": false, // Allow bot accounts to use this.
-      "MaxTootsPerDay": 960 // Max. toots per day per user
+      "Active": "Invite",
+      "AutoInvite": 100,
+      "AutoClose": 1000,
+      "AllowedInstances": null,
+      "BlockedInstances": "evil.social",
+      "AllowBots": false,
+      "MaxTootsPerDay": 100
     },
-    "ServiceAppSuffix": " -- 🐘🦆", // When sending a service message to mastodon user this will added at the end
-    "Instance": "mastodon.social", // Instance your service app is installed
-    "ClientName": "toot2toulouse on [mydomain]",
-    "Accountname": "handle@instance", // Account which sends status update to user
-    "Url": "https://example.com", // your URL
+    "AppInfo": {
+      "Instance": "mastodon.social",
+      "Accountname": "serviceaccount@mastodon.social",
+      "ClientName": "Toot2toulouse on mydomain",
+      "Url": "https:\/\/url",
+      "Suffix": " -- 🐘🦆"
+    },
     "Intervals": {
-      "Sending": "00:05:00", // How often will this app look for new toots
-      "FollowerCheckApp": "01:00:00", // [NOTYETIMPLEMENTED]
-      "FollowerCheckUser": "7.0:00:00", // [NOTYETIMPLEMENTED]
-      "MinDelay": "00:01:00", // Minimum delay for each toot before it is sent to twitter
-      "MaxDelay": "01:00:00", // maximum delay for each toot before it is sent to twitter
-      "AuthFailureDeleteDays": 14, // Days after which a user is delete if authentication revoced from Twitter or Mastodon
+      "MinDelay": "00:01:00",
+      "MaxDelay": "01:00:00",
+      "AuthFailureDeleteDays": 14
     },
-    "MaxImageSize": 5, // max size in MB never go ABOVE the default values as Twitter will not allow it
-    "MaxGifSize": 15, // max size in MB never go ABOVE the default values as Twitter will not allow it
-    "MaxVideoSize": 512, // max size in MB never go ABOVE the default values as Twitter will not allow it
-    "TwitterCharacterLimit": 280,
-    "MinSplitLength": 260, // After how many characters should the algoritm give up to find a space to split the contents ans just split inside a word,
-    "DonateTarget": "App", // Changes what the donations are for (and displayed for). Can be "App" = Donations for the app, or "Server" = For the server (aka you). Change the urls accordingly if you switch to server (which is absolutely fine BTW) [NOTYETIMPLEMENTED]
-    "Donations": [ //  [NOTYETIMPLEMENTED]
-      {
-        "Name": "GitHub",
-        "Target": "https://github.com/sponsors/Guacam-Ole"
-      }
-    ]
+    "TwitterLimits": {
+      "MaxImageSize": 5,
+      "MaxGifSize": 15,
+      "MaxVideoSize": 512,
+      "CharacterLimit": 280,
+      "MinSplitLength": 200
+    }
   },
   "Defaults": { // Default user settings that are applied after registration. (User can change those)
     "VisibilitiesToPost": [ "Public" ],
     "Delay": "00:05:00",
     "AppSuffix": {
-      "Content": " 🐘🦆",
+      "Content": "🐘🦆",
       "HideIfBreaks": true
     },
     "LongContent": "Thread",
@@ -73,7 +90,6 @@
       "Prefix": "...",
       "Suffix": "..."
     },
-    "DontTweet": [ "🐘" ],
     "Replacements": {
       "Toot": "Tweet",
       "Boost": "Retweet",

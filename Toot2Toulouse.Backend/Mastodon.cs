@@ -7,7 +7,7 @@ using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
 using Toot2Toulouse.Backend.Models;
 
-using static Toot2Toulouse.Backend.Configuration.TootConfigurationApp;
+using static Toot2Toulouse.Backend.Configuration.Messages;
 
 namespace Toot2Toulouse.Backend
 {
@@ -21,14 +21,14 @@ namespace Toot2Toulouse.Backend
         {
             _logger = logger;
             _configuration = configuration.Configuration;
-            _messages = configuration.GetMessagesForLanguage(_configuration.App.DefaultLanguage);   // TODO: Allow per-user Language setting
+            _messages = configuration.GetMessagesForLanguage(_configuration.App.Languages.Default);   // TODO: Allow per-user Language setting
         }
 
         public async Task SendStatusMessageToAsync(UserData? user, string? prefix, MessageCodes messageCode, string? additionalInfo)
         {
             string? recipient = user == null ? null : "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
 
-            string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.ServiceAppSuffix}";
+            string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.AppInfo.Suffix}";
             ReplaceServiceTokens(ref message);
             await ServiceTootAsync(message, Visibility.Direct);
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
@@ -160,13 +160,13 @@ namespace Toot2Toulouse.Backend
         {
             try
             {
-                var serviceClient = new MastodonClient(_configuration.App.Instance, _configuration.Secrets.Mastodon.AccessToken);
-                _logger.LogDebug("Successfully retrieved Serviceclient for {Instance} using accesstoken", _configuration.App.Instance);
+                var serviceClient = new MastodonClient(_configuration.App.AppInfo.Instance, _configuration.Secrets.Mastodon.AccessToken);
+                _logger.LogDebug("Successfully retrieved Serviceclient for {Instance} using accesstoken", _configuration.App.AppInfo.Instance);
                 return serviceClient;
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex, "Cannot retrieve serviceclient for {Instance} using accesstoken", _configuration.App.Instance);
+                _logger.LogCritical(ex, "Cannot retrieve serviceclient for {Instance} using accesstoken", _configuration.App.AppInfo.Instance);
                 throw;
             }
         }

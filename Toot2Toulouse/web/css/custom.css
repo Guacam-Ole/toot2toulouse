@@ -1,9 +1,9 @@
 .fake {
-cursor:  not-allowed;
+    cursor: not-allowed;
 }
 
 #serverlimitstable table {
-    width:100%;
+    width: 100%;
 }
 
 th.right, td.right {
@@ -31,19 +31,47 @@ th.right, td.right {
 }
 
 .button-red {
-    border-color:red;
-    color:darkred;
+    border-color: red;
+    color: darkred;
 }
 
 .button-green {
     border-color: green;
-    color:darkgreen;
+    color: darkgreen;
 }
 
 .button-icon {
-    font-size:large;
+    font-size: large;
 }
 
 .noborder td {
     border-bottom: 0px;
 }
+
+#donate {
+    display: none;
+}
+
+#donate img {
+    width: 25px;
+    height: 25px;
+    border: 0;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+#donate li {
+    list-style-type: none;
+    font-size: larger;
+}
+
+#donate a {
+    color: black;
+    padding-left: 20px;
+    text-decoration: none;
+}
+
+    #donate a:hover {
+        text-decoration: underline;
+    }
+
