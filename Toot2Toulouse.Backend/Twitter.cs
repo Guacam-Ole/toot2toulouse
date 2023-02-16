@@ -147,7 +147,7 @@ namespace Toot2Toulouse.Backend
                 }
                 else
                 {
-                    var singletweet = await TweetAsync(userData, mainTweet, isSensitive, replyTo, toot.MediaAttachments);
+                    var singletweet = await TweetAsync(userData, mainTweet.ReInsertUrls(urls), isSensitive, replyTo, toot.MediaAttachments);
                     tweetIds.Add(singletweet.Id);
                     _logger.LogDebug("tweeted for {twitterUser} containing {contentLength} chars ", twitterUser.ScreenName, content.Length);
                 }
