@@ -1,4 +1,4 @@
-﻿// Copy this to secrets.json and replace the contents
+﻿// Copy this to config.json and replace the contents
 
 {
   "Secrets": {
@@ -23,12 +23,22 @@
     "Disclaimer": "We store your data in our local database and also as a cookie on your browser. We store any setting you enter, store your credentials for Mastodon and Twitter and keep a history of your posted content\n\nYou agree that you will not use this App to post illegal, sexist or discriminating contents. You agree that we do not guarantee any service and also cannot guarantee that the wrong contents are posted. You also agree that we can delete your data and block your account without providing a reason. This service may be shutdown on any time",
     "Donations": {
       "Enabled": false,
-      "Caption": "IF you want to help support the development of this tool you can use one of the following options. Thanks a lot",
+      "Caption": "If you want to help support this instance you can use one of the following options. Thanks a lot",
       "Targets": [
         {
-          "Name": "github ",
-          "Url": "",
-          "Icon": ""
+          "Name": "Sponsor me on GitHub ",
+          "Url": "https:\/\/github.com\/sponsors\/<name>",
+          "Icon": "img\/github.png"
+        },
+        {
+          "Name": "Buy me a coffee at Ko-Fi ",
+          "Url": "https:\/\/ko-fi.com\/<name>",
+          "Icon": "img\/kofi.png"
+        },
+        {
+          "Name": "Support me on Patreon",
+          "Url": "https:\/\/www.patreon.com\/<name>",
+          "Icon": "img\/patreon.png"
         }
       ]
     },
@@ -60,7 +70,7 @@
       "MaxDelay": "01:00:00",
       "AuthFailureDeleteDays": 14
     },
-    "TwitterLimits" {
+    "TwitterLimits": {
       "MaxImageSize": 5,
       "MaxGifSize": 15,
       "MaxVideoSize": 512,
@@ -88,9 +98,3 @@
     "UseGlobalMentions": true
   }
 }
-
-
-
-
-
-

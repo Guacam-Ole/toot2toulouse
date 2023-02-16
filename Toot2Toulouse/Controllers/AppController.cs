@@ -42,10 +42,12 @@ namespace Toot2Toulouse.Controllers
             return JsonResults.Success(_app.GetServerSettingsForDisplay());
         }
 
-        [Route("disclaimer")]
-        public ActionResult GetDisclaimer()
+
+
+        [Route("config")]
+        public ActionResult GetServerSettingsStructured()
         {
-            return JsonResults.Success(_config.App.Disclaimer);
+            return JsonResults.Success(_config.App);
         }
 
         [Route("stats")]
