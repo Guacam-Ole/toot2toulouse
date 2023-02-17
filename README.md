@@ -115,7 +115,8 @@ Both auth-errors will cause a message to be sent to the user. If the user reauth
 
 
 
-### (Todo): Config description
+## Detailled Configuration description
+More detailled descriptions can be found in the [Wiki](https://github.com/Guacam-Ole/toot2toulouse/wiki)
 
 
 
