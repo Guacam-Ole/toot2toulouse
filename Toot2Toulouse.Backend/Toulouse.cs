@@ -311,15 +311,17 @@ namespace Toot2Toulouse.Backend
             return serverMode;
         }
 
-        public async Task CalculateServerStats()
+        public async Task<Stats> CalculateServerStats()
         {
             var serverstats = await _database.GetServerStats();
+            serverstats.CurrentVersion = _config.CurrentVersion.ToString();    
             var allUsers = await _database.GetActiveUsers();
             var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.UtcNow.AddDays(-1)));
             serverstats.ActiveUsers = activeUsers.Count();
             serverstats.TotalUsers = allUsers.Count();
             await _database.UpSertServerStats(serverstats);
             _logger.LogDebug("Updated Serverstats.  {serverstats} ", serverstats);
+            return serverstats;
         }
     }
 }

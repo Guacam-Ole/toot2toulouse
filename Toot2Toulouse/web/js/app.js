@@ -270,7 +270,6 @@ function saveTranslations() {
 
     $.ajax({
         type: "POST",
-        dataType: "json",
         url: "/user/translations",
         data: JSON.stringify(trans),
         dataType: "json",
