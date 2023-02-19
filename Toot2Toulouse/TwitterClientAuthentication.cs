@@ -67,7 +67,7 @@ namespace Toot2Toulouse
                 t2tUser.BlockReason = null;
             }
             await _database.UpsertUser(t2tUser);
-            _toulouse.CalculateServerStats();
+            await _toulouse.CalculateServerStats();
 
             _notification.Info(t2tUser, MessageCodes.RegistrationFinished);
 

@@ -16,7 +16,7 @@ namespace Toot2Toulouse.Backend.Interfaces
 
         Task InviteAsync(string mastodonHandle);
 
-        Task CalculateServerStats();
+        Task<Stats> CalculateServerStats();
 
         Task SendSingleTootAsync(UserData user, string tootId);
     }
