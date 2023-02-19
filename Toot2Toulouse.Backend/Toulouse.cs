@@ -103,24 +103,34 @@ namespace Toot2Toulouse.Backend
             return toots;
         }
 
-        private async Task<long?> GetTwitterReplyToIdFromTootId(string tootId)
+        private long? GetTwitterReplyToFromTootIdForUser(UserData user, string tootId)
         {
-            var allUsers = await _database.GetAllUsers();
-            foreach (var user in allUsers)
+            if (user.Crossposts.Any(q => q.TootId == tootId))
             {
-                if (user.Crossposts.Any(q => q.TootId == tootId))
-                {
-                    var twitterIds = user.Crossposts.FirstOrDefault(q => q.TootId == tootId)?.TwitterIds;
-                    if (twitterIds != null && twitterIds.Count > 0) return twitterIds.Max();
-                }
+                var twitterIds = user.Crossposts.FirstOrDefault(q => q.TootId == tootId)?.TwitterIds;
+                if (twitterIds != null && twitterIds.Count > 0) return twitterIds.Max();
             }
             return null;
         }
 
-        private async Task<long?> GetTwitterReplyId(Status toot)
+        private async Task<long?> GetTwitterReplyToIdFromTootId(UserData currentUser, string tootId)
+        {
+            long? replyToId = GetTwitterReplyToFromTootIdForUser(currentUser, tootId);
+            if (replyToId != null) return replyToId;
+
+            var allUsers = await _database.GetAllUsers();
+            foreach (var user in allUsers)
+            {
+                replyToId = GetTwitterReplyToFromTootIdForUser(user, tootId);
+                if (replyToId != null) return replyToId;
+            }
+            return null;
+        }
+
+        private async Task<long?> GetTwitterReplyId(UserData currentUser, Status toot)
         {
             if (toot.InReplyToId == null) return null;
-            return await GetTwitterReplyToIdFromTootId(toot.InReplyToId);
+            return await GetTwitterReplyToIdFromTootId(currentUser, toot.InReplyToId);
         }
 
         private async Task<List<Crosspost>> SendTootsAsync(UserData user, List<Status> toots)
@@ -140,7 +150,7 @@ namespace Toot2Toulouse.Backend
                 user.Update = true;
                 try
                 {
-                    long? twitterReplyToId = await GetTwitterReplyId(toot);
+                    var twitterReplyToId = await GetTwitterReplyId(user, toot);
                     _logger.LogTrace("Toot: {id}|{url}", toot.Id, toot.Uri);
                     if (user.Crossposts.FirstOrDefault(q => q.TootId == toot.Id) != null)
                     {
