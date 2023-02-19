@@ -109,7 +109,7 @@ namespace Toot2Toulouse.Backend
 
                 var twitterUser = await GetTwitterUserAsync(userData);
 
-                var replies = _toot.GetReplies(userData.Config, content, out string mainTweet);
+                var replies = _toot.GetThreadReplies(userData.Config, content, out string mainTweet);
                 if (replies != null)
                 {
                     switch (userData.Config.LongContent)

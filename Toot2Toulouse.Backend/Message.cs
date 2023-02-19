@@ -20,7 +20,7 @@ namespace Toot2Toulouse.Backend
         }
 
     
-        public List<string>? GetReplies(UserConfiguration userConfiguration, string originalToot, out string mainTweet)
+        public List<string>? GetThreadReplies(UserConfiguration userConfiguration, string originalToot, out string mainTweet)
         {
             DoReplacements(userConfiguration, ref originalToot);
             int maxLength = _config.App.TwitterLimits.CharacterLimit;
