@@ -1,33 +1,36 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LiteDB;
+
+using Microsoft.AspNetCore.Mvc;
+
+using Newtonsoft.Json;
+
+using System.Dynamic;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
 using Toot2Toulouse.Backend.Interfaces;
+using Toot2Toulouse.Backend.Models;
 
 using Toot2ToulouseWeb;
 
 namespace Toot2Toulouse.Controllers
 {
     [ApiController]
-    [Route("/")]
+    //[Route("/")]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class AppController : ControllerBase
     {
         private readonly IToulouse _app;
-        private readonly IUser _user;
-        private readonly ICookies _cookies;
         private readonly ILogger<AppController> _logger;
         private TootConfiguration _config;
 
-        public AppController(ILogger<AppController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon, IUser user, ICookies cookies)
+        public AppController(ILogger<AppController> logger, ConfigReader configReader, IToulouse app, IMastodon mastodon)
         {
             _logger = logger;
             _logger.LogDebug("Reading config");
             _config = configReader.Configuration;
             _logger.LogDebug("Config read");
             _app = app;
-            _user = user;
-            _cookies = cookies;
         }
 
         [Route("/")]
@@ -42,8 +45,6 @@ namespace Toot2Toulouse.Controllers
             return JsonResults.Success(_app.GetServerSettingsForDisplay());
         }
 
-
-
         [Route("config")]
         public ActionResult GetServerSettingsStructured()
         {
@@ -53,7 +54,7 @@ namespace Toot2Toulouse.Controllers
         [Route("stats")]
         public ActionResult GetServerStats()
         {
-            return null;
+            return JsonResults.Success(_app.CalculateServerStats());
         }
 
         [Route("autherror")]
@@ -66,6 +67,21 @@ namespace Toot2Toulouse.Controllers
         public ActionResult Error(string code)
         {
             return new RedirectResult($"error.{_config.App.Languages.Default}.html?error={code}");
+        }
+
+        [Route("ping")]
+        [HttpPost]
+        public ActionResult Ping([FromBody] string pingdata) {
+            // ToDo: Store
+           var pingObject=JsonConvert.DeserializeObject<PingData>(pingdata);
+            return JsonResults.Success();
+        }
+
+        [Route("pingget")]
+        public ActionResult PingGet()
+        {
+            // ToDo: Store
+            return JsonResults.Success();
         }
     }
 }

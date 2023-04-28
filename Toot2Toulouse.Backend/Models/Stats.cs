@@ -9,5 +9,6 @@ namespace Toot2Toulouse.Backend.Models
         public string CurrentVersion { get; set; }
         public long ActiveUsers { get; set; }
         public long TotalUsers { get; set; }    
+        public string Url { get; set; } 
     }
 }

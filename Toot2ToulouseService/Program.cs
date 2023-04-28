@@ -74,6 +74,15 @@ namespace Toot2ToulouseService
                         ArgsCheck(args, 2, "userId required");
                         await _maintenance.UnblockUser(new Guid(args[1]));
                         break;
+                    case "cleanup":
+                        await _maintenance.CleanUp();
+                        break;
+                    case "stats":
+                        await _maintenance.CollectStats();
+                        break;
+                    case "ping":
+                        await _maintenance.Ping();
+                        break;
 
                     default:
                         Console.WriteLine("Parameter unknown");

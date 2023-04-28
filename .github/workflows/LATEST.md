@@ -1,12 +1,12 @@
 # Release notes 
-Version 1.2 fixes some minor issues and adds optional donations to allow admins to ask users for support
+Version 1.2.1 Optimizes Maintenance functions
 
 
 ## New Features
-- Administrators can now add a Donations - region that will be shown on the startpage
-- Logfilename can now be changed for Service
-- Configuration restructured for better readability
+- Application can now send pings to inform others about its existence
+- Statistics can be collected from service (e.g. cronjob)
+
 
 ## Fixes 
-- URLs are now detected as such and treated with the correct fixed length
+- Users are now correctly removed after a while when they have been blocked due to an auth issue
 

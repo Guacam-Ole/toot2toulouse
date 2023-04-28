@@ -1,5 +1,5 @@
 # Toot2Toulouse (t2t)
-Use this documentation **if you want to host** your own t2t-instance. If instead you are using this as a user and have questions asks the maintainer of your instance instead or read the [user.md] (will follow)
+Use this documentation **if you want to host** your own t2t-instance. If instead you are using this as a user and have questions asks the maintainer of your instance instead or read the user-documentation in the wiki
 
 ## Description
 Toot2Toulouse is a crossposter from Mastodon-Toots to Twitter-tweets. It automatically posts public contents from the user using two different apps:
@@ -115,7 +115,8 @@ Both auth-errors will cause a message to be sent to the user. If the user reauth
 
 
 
-### (Todo): Config description
+## Detailled Configuration description
+More detailled descriptions can be found in the [Wiki](https://github.com/Guacam-Ole/toot2toulouse/wiki)
 
 
 
