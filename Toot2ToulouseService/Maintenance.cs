@@ -39,7 +39,7 @@ namespace Toot2ToulouseService
             if (currentVersionInt <= databaseVersionInt) return;
             for (int i = databaseVersionInt + 1; i <= currentVersionInt; i++)
             {
-               await  DoUpgradeFor($"{i / 100}.{i % 100}");
+                await DoUpgradeFor($"{i / 100}.{i % 100}");
             }
         }
 
@@ -78,14 +78,59 @@ namespace Toot2ToulouseService
             return _config.CurrentVersion.ToString();
         }
 
+        private string MinLength(string value, int minLength)
+        {
+            while (value.Length < minLength) value += " ";
+            return value;
+        }
+
+        private string WriteLine(string seperator = "\t", params object[] elements)
+        {
+            var line = string.Empty;
+            bool isContent = true;
+            object currentElement = string.Empty;
+
+            foreach ( var element in elements)
+            {
+                if (isContent)
+                {
+                    currentElement = element;
+
+                }else
+                {
+                    if (currentElement==null)
+                    {
+                        line += MinLength(string.Empty, (int)element);
+                    } else
+                    {
+                        line += MinLength(currentElement.ToString(), (int)element);
+                    }
+                    line += seperator;
+                }
+                isContent = !isContent;
+            }
+
+            line = line[..^seperator.Length];
+                
+         //       line[^seperator.Length..]+"\n";
+            return line;
+        }
+
         public async Task ListIds()
         {
-            Console.WriteLine("id\tblockreason\tblockdate\tmastodon\ttwitter");
+            await Console.Out.WriteLineAsync(WriteLine("\t", "id",32,"mastodon",30,"twitter",30,"last",20,"count",5, "blockreason",12,"blockdate",20));
             var allUsers = await _database.GetAllUsers();
-            allUsers.ForEach(user =>
+            foreach (var user in allUsers)
             {
-                Console.WriteLine($"{user.Id}\t{user.BlockReason}\t{user.BlockDate}\t{user.Mastodon?.Handle}@{user.Mastodon?.Instance}\t{user.Twitter?.Handle}");
-            });
+                await Console.Out.WriteLineAsync(WriteLine("\t",
+                    user.Id, 32,
+                    user.Mastodon.CompleteName, 30,
+                    user.Twitter.Handle, 30,
+                    user.Crossposts?.Max(q => q.CreatedAt) , 20,
+                    user.Crossposts?.Count, 5,
+                    user.BlockReason, 12,
+                    user.BlockDate, 20));
+            }
             _logger.LogInformation("Retrieved all userIds");
         }
 
@@ -159,7 +204,7 @@ namespace Toot2ToulouseService
 
             foreach (var url in _config.App.Stats.Ping)
             {
-                var pingdata = new PingData { Stats = stats, Config = _config.App};
+                var pingdata = new PingData { Stats = stats, Config = _config.App };
                 var response = await client.PostAsJsonAsync(url, JsonConvert.SerializeObject(pingdata));
                 response.EnsureSuccessStatusCode();
 

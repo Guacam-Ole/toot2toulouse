@@ -4,10 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Toot2ToulouseService
 {
     public class Program
-
     {
-        private static Publish? _publish;
-        private static Maintenance? _maintenance;
+        private static Publish _publish;
+        private static Maintenance _maintenance;
+
+     
 
         private static void ArgsCheck(string[] args, int requiredLength, string message)
         {
@@ -74,12 +75,15 @@ namespace Toot2ToulouseService
                         ArgsCheck(args, 2, "userId required");
                         await _maintenance.UnblockUser(new Guid(args[1]));
                         break;
+
                     case "cleanup":
                         await _maintenance.CleanUp();
                         break;
+
                     case "stats":
                         await _maintenance.CollectStats();
                         break;
+
                     case "ping":
                         await _maintenance.Ping();
                         break;
@@ -98,12 +102,12 @@ namespace Toot2ToulouseService
             startup.Inject(collection);
 
             var serviceProvider = collection.BuildServiceProvider();
-            _publish = serviceProvider.GetService<Publish>();
-            _maintenance = serviceProvider.GetService<Maintenance>();
-
-            await CheckparametersAsync(args);
+            _publish = serviceProvider.GetRequiredService<Publish>();
+            _maintenance = serviceProvider.GetRequiredService<Maintenance>();
 
             serviceProvider.Dispose();
+
+            await CheckparametersAsync(args);
         }
     }
 }
