@@ -86,6 +86,13 @@ namespace Toot2Toulouse.Backend
         {
             var displaySettings = new List<DisplaySettingsItem>();
             GetSettingsForDisplayRecursive(_config.App, string.Empty, displaySettings);
+            displaySettings.Add(new DisplaySettingsItem
+            {
+                Category = "General Information",
+                DisplayAsButton = false,
+                DisplayName = "Server Version",
+                Value = _config.CurrentVersion
+            });
             return displaySettings.OrderBy(q => q.Category).ThenBy(q => q.DisplayName).ToList();
         }
 
@@ -318,7 +325,7 @@ namespace Toot2Toulouse.Backend
             var allUsers = await _database.GetActiveUsers();
             var activeUsers = allUsers.Where(q => q.Crossposts.Any(q => q.CreatedAt >= DateTime.UtcNow.AddDays(-1)));
             serverstats.ActiveUsers = activeUsers.Count();
-            serverstats.TotalUsers = allUsers.Count();
+            serverstats.TotalUsers = allUsers.Count;
             await _database.UpSertServerStats(serverstats);
             _logger.LogDebug("Updated Serverstats.  {serverstats} ", serverstats);
             return serverstats;

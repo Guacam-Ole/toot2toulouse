@@ -1,10 +1,6 @@
-﻿using LiteDB;
-
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 using Newtonsoft.Json;
-
-using System.Dynamic;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
@@ -52,9 +48,9 @@ namespace Toot2Toulouse.Controllers
         }
 
         [Route("stats")]
-        public ActionResult GetServerStats()
+        public async Task<ActionResult> GetServerStats()
         {
-            return JsonResults.Success(_app.CalculateServerStats());
+            return JsonResults.Success(await _app.CalculateServerStats());
         }
 
         [Route("autherror")]
@@ -71,9 +67,10 @@ namespace Toot2Toulouse.Controllers
 
         [Route("ping")]
         [HttpPost]
-        public ActionResult Ping([FromBody] string pingdata) {
+        public ActionResult Ping([FromBody] string pingdata)
+        {
             // ToDo: Store
-           var pingObject=JsonConvert.DeserializeObject<PingData>(pingdata);
+            var pingObject = JsonConvert.DeserializeObject<PingData>(pingdata);
             return JsonResults.Success();
         }
 
