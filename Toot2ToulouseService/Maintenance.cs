@@ -4,8 +4,6 @@ using Newtonsoft.Json;
 
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
 
 using Toot2Toulouse.Backend;
 using Toot2Toulouse.Backend.Configuration;
@@ -90,18 +88,19 @@ namespace Toot2ToulouseService
             bool isContent = true;
             object currentElement = string.Empty;
 
-            foreach ( var element in elements)
+            foreach (var element in elements)
             {
                 if (isContent)
                 {
                     currentElement = element;
-
-                }else
+                }
+                else
                 {
-                    if (currentElement==null)
+                    if (currentElement == null)
                     {
                         line += MinLength(string.Empty, (int)element);
-                    } else
+                    }
+                    else
                     {
                         line += MinLength(currentElement.ToString(), (int)element);
                     }
@@ -111,14 +110,14 @@ namespace Toot2ToulouseService
             }
 
             line = line[..^seperator.Length];
-                
-         //       line[^seperator.Length..]+"\n";
+
+            //       line[^seperator.Length..]+"\n";
             return line;
         }
 
         public async Task ListIds()
         {
-            await Console.Out.WriteLineAsync(WriteLine("\t", "id",32,"mastodon",30,"twitter",30,"last",20,"count",5, "blockreason",12,"blockdate",20));
+            await Console.Out.WriteLineAsync(WriteLine("\t", "id", 32, "mastodon", 30, "twitter", 30, "last", 20, "count", 5, "blockreason", 12, "blockdate", 20));
             var allUsers = await _database.GetAllUsers();
             foreach (var user in allUsers)
             {
@@ -126,7 +125,7 @@ namespace Toot2ToulouseService
                     user.Id, 32,
                     user.Mastodon.CompleteName, 30,
                     user.Twitter.Handle, 30,
-                    user.Crossposts?.Max(q => q.CreatedAt) , 20,
+                    user.Crossposts?.Max(q => q.CreatedAt), 20,
                     user.Crossposts?.Count, 5,
                     user.BlockReason, 12,
                     user.BlockDate, 20));
@@ -136,7 +135,7 @@ namespace Toot2ToulouseService
 
         public async Task BlockUser(Guid userId)
         {
-            await _user.Block(userId, Toot2Toulouse.Backend.Models.UserData.BlockReasons.Manual);
+            await _user.Block(userId, UserData.BlockReasons.Manual);
             Console.WriteLine("User blocked");
         }
 
@@ -157,7 +156,7 @@ namespace Toot2ToulouseService
                 {
                     case Toot2Toulouse.Backend.Models.UserData.BlockReasons.Manual:
                         _logger.LogDebug("Won't remove {user}  {mastodon} because is blocked manually. Will remove all other data, though", user.Id, user.Mastodon?.CompleteName);
-                        user.Crossposts = new List<Toot2Toulouse.Backend.Models.Crosspost>();
+                        user.Crossposts = new List<Crosspost>();
                         user.Mastodon.Secret = null;
                         user.Twitter.AccessSecret = null;
                         user.Twitter.AccessToken = null;
@@ -168,10 +167,11 @@ namespace Toot2ToulouseService
                         await _database.UpsertUser(user);
                         break;
 
-                    case Toot2Toulouse.Backend.Models.UserData.BlockReasons.AuthMastodon:
-                    case Toot2Toulouse.Backend.Models.UserData.BlockReasons.AuthTwitter:
+                    case UserData.BlockReasons.AuthMastodon:
+                    case UserData.BlockReasons.AuthTwitter:
                         _logger.LogInformation("Remove {user} ({mastodon}-{twitter})", user.Id, user.Mastodon?.CompleteName, user.Twitter?.Handle);
-                        await _database.RemoveUser(user.Id);
+                        await _database.
+                            RemoveUser(user.Id);
                         break;
 
                     default:
@@ -187,7 +187,6 @@ namespace Toot2ToulouseService
             await _toulouse.CalculateServerStats();
             _logger.LogInformation("collected and stored stats");
         }
-
 
         public async Task Ping()
         {
