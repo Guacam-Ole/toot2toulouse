@@ -88,7 +88,7 @@ You're done. Toot something and wait for it to appear on Twitter.
 
 
 ## Updating
-Just replace the files (except data - folder and configs) with the contents form the zip. Before replacing the web you should stop it with `supervisorctl stop t2tweb` and start it with `supervisorctl start t2tweb` afterwards (your commands may differ slightly depending on you OS)
+Just replace the files (except data - folder and configs) with the contents form the zip. Before replacing the web you should stop it with `supervisorctl stop t2tweb` and start it with `supervisorctl start t2tweb` afterwards (your commands may differ slightly depending on your OS)
 
 ## Service Commands
 The service can not only crosspost to Twitter but also allows additional maintenance tasks:
