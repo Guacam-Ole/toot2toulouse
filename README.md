@@ -87,8 +87,10 @@ Call this if you don't want to use a cronjob. The application will loop infinite
 You're done. Toot something and wait for it to appear on Twitter.
 
 
+## Updating
+Just replace the files (except data - folder and configs) with the contents form the zip. Before replacing the web you should stop it with `supervisorctl stop t2tweb` and start it with `supervisorctl start t2tweb` afterwards (your commands may differ slightly depending on your OS)
 
-#### Service Commands
+## Service Commands
 The service can not only crosspost to Twitter but also allows additional maintenance tasks:
 
 `upgrade [version?]` - Upgrades the database to the mentioned version. If version is missing to the most current version. Call this if you install a new version but have a database running at a previous version.
