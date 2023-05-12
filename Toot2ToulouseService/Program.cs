@@ -8,8 +8,6 @@ namespace Toot2ToulouseService
         private static Publish _publish;
         private static Maintenance _maintenance;
 
-     
-
         private static void ArgsCheck(string[] args, int requiredLength, string message)
         {
             if (args.Length < requiredLength)
@@ -105,9 +103,9 @@ namespace Toot2ToulouseService
             _publish = serviceProvider.GetRequiredService<Publish>();
             _maintenance = serviceProvider.GetRequiredService<Maintenance>();
 
-            serviceProvider.Dispose();
-
             await CheckparametersAsync(args);
+
+            serviceProvider.Dispose();
         }
     }
 }

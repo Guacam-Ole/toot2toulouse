@@ -1,15 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
-
-using Toot2Toulouse.Backend.Interfaces;
 
 using Toot2Toulouse.Backend;
+using Toot2Toulouse.Backend.Interfaces;
 
 namespace Toot2ToulouseService
 {
@@ -17,8 +12,8 @@ namespace Toot2ToulouseService
     {
         public void Inject(ServiceCollection services)
         {
-            var config=ReadServiceConfig();
-            
+            var config = ReadServiceConfig();
+
             services.AddScoped(cr => new ConfigReader(config.Paths.Config));
             services.AddScoped<ITwitter, Twitter>();
             services.AddScoped<IMastodon, Mastodon>();
@@ -34,7 +29,7 @@ namespace Toot2ToulouseService
             {
                 logging.ClearProviders();
                 logging.AddConsole();
-                logging.SetMinimumLevel(Enum.Parse<LogLevel>( config.LogLevel));
+                logging.SetMinimumLevel(Enum.Parse<LogLevel>(config.LogLevel));
                 var logFile = config.Paths.Log;
                 if (!logFile.EndsWith(".log") && !logFile.EndsWith(".txt")) logFile = Path.Combine(logFile, "t2t.service.log");
                 logging.AddFile(logFile, append: true);
