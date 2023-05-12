@@ -2,7 +2,7 @@
   "profiles": {
     "Toot2ToulouseService": {
       "commandName": "Project",
-      "commandLineArgs": "ping",
+      "commandLineArgs": "listids",
       "Logging": {
         "LogLevel": {
           "Default": "Debug",

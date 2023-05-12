@@ -28,7 +28,7 @@ namespace Toot2Toulouse.Backend
             _toot = toot;
         }
 
-        private TwitterClient GetUserClient(UserData userData)
+        private static TwitterClient GetUserClient(UserData userData)
         {
             return new TwitterClient(userData.Twitter.ConsumerKey, userData.Twitter.ConsumerSecret, userData.Twitter.AccessToken, userData.Twitter.AccessSecret);
         }
@@ -38,7 +38,7 @@ namespace Toot2Toulouse.Backend
             return await GetUserClient(userData).Users.GetAuthenticatedUserAsync();
         }
 
-        private bool ShouldITweetThis(UserData user, Status toot)
+        private static bool ShouldITweetThis(UserData user, Status toot)
         {
             if (string.IsNullOrWhiteSpace(toot.Content)) return false;
             if (!user.Config.VisibilitiesToPost.Contains(toot.Visibility.ToT2t())) return false;
@@ -160,7 +160,7 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        private async Task<IMedia> ValidateAndDownloadAttachmentAsync(UserData userData, Attachment attachment)
+        private async Task<IMedia?> ValidateAndDownloadAttachmentAsync(UserData userData, Attachment attachment)
         {
             try
             {
@@ -216,7 +216,8 @@ namespace Toot2Toulouse.Backend
                 Text = content,
                 PossiblySensitive = isSensitive,
                 InReplyToTweetId = replyTo,
-                AutoPopulateReplyMetadata = true
+                AutoPopulateReplyMetadata = true, 
+                 
             };
 
             if (attachments?.Count() > 0)

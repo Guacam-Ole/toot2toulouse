@@ -25,10 +25,8 @@ jobs:
 
     - name: Publish
       run: 
-        echo publishing as ${{  github.ref_name }}
-        
-        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/bin/t2tservice"
-        
+        echo publishing as ${{  github.ref_name }}       
+        dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2ToulouseService/Toot2ToulouseService.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/bin/t2tservice"        
         dotnet publish /home/runner/work/toot2toulouse/toot2toulouse/Toot2Toulouse/Toot2ToulouseWeb.csproj -p:Version=${{  github.ref_name }} -c Release -o "/home/runner/work/out/bin/t2tweb"
     - name: Zip
       run:
