@@ -210,7 +210,10 @@ namespace Toot2Toulouse.Backend
                                 sentToots.Add(new Crosspost { Result = "TwitterAuth", TootId = toot.Id });
                                 _logger.LogWarning("User {id} has been blocked because twitter auth was revoked", user.Id);
                                 break;
-
+                            case 187:
+                                _logger.LogWarning("duplicate detected");
+                                sentToots.Add(new Crosspost { Result = "TwitterDuplicate", TootId = toot.Id });
+                                break;
                             default:
                                 _logger.LogError("Unknown Twitter Errorcode {code}: {message}", firstTwitterException.Code, firstTwitterException.Message);
                                 sentToots.Add(new Crosspost { Result = "TwitterExceptionDef", TootId = toot.Id });

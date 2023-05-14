@@ -99,17 +99,25 @@ namespace Toot2Toulouse.Backend
             var client = GetUserClient(user);
 
             var lastStatuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1 }, false, true, false, true);
-            var lastTweeted = lastStatuses.OrderBy(q => q.CreatedAt).FirstOrDefault();
+            var lastTweeted = lastStatuses.OrderBy(q => q.CreatedAt).First();
             user.Mastodon.LastToot = lastTweeted.Id;
             user.Update = true;
         }
 
         public async Task<List<Status>> GetNonPostedTootsAsync(UserData user)
         {
-            await AssignLastTweetedIfMissingAsync(user);
-            var client = GetUserClient(user);
-            var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
-            return statuses.OrderBy(q => q.CreatedAt).ToList();
+            try
+            {
+                await AssignLastTweetedIfMissingAsync(user);
+                var client = GetUserClient(user);
+                var statuses = await client.GetAccountStatuses(user.Mastodon.Id, new ArrayOptions { Limit = 1000, SinceId = user.Mastodon.LastToot }, false, true, false, true);
+                return statuses.OrderBy(q => q.CreatedAt).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in library receiving statuses for {user} since {date}. Cannot fix this. Will retry later", user.Mastodon.Id, user.Mastodon.LastToot);
+                return new List<Status>();
+            }
         }
 
         public async Task<List<Status>> GetServiceTootsContainingAsync(string content, int limit = 100, string? recipient = null)
