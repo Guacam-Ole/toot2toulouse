@@ -153,9 +153,19 @@ namespace Toot2Toulouse.Backend
                 }
                 return tweetIds;
             }
+            catch (TwitterException duplicateException) when (duplicateException.StatusCode == 403 && duplicateException.TwitterExceptionInfos?.FirstOrDefault(q => q.Code == 187) != null)
+            {
+                _logger.LogWarning("Duplicate when trying to tweet for @{user}. Url: {url} ", userData.Twitter.Handle, toot.Url);
+                throw;
+            }
+            catch (TwitterException twitterException)
+            {
+                _logger.LogWarning(twitterException, "Tweet-error on toot for @{user}. Url: {url} ", userData.Twitter.Handle, toot.Url);
+                throw;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "error tweeting");
+                _logger.LogError(ex, "Error tweeting for @{user}. Url: {url}", userData.Twitter.Handle, toot.Url);
                 throw;
             }
         }
@@ -216,8 +226,7 @@ namespace Toot2Toulouse.Backend
                 Text = content,
                 PossiblySensitive = isSensitive,
                 InReplyToTweetId = replyTo,
-                AutoPopulateReplyMetadata = true, 
-                 
+                AutoPopulateReplyMetadata = true,
             };
 
             if (attachments?.Count() > 0)
@@ -265,20 +274,7 @@ namespace Toot2Toulouse.Backend
 
         private async Task<ITweet> TweetAsync(UserData userData, PublishTweetParameters tweetParameters)
         {
-            try
-            {
-                return await GetUserClient(userData).Tweets.PublishTweetAsync(tweetParameters);
-            }
-            catch (TwitterException tex) // when (tex.StatusCode==403)
-            {
-                _logger.LogWarning(tex, "Tweet-error {text} to {reply} ", tweetParameters.Text, tweetParameters.InReplyToTweet);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error tweeting for {userData.Twitter.DisplayName}", ex);
-                throw;
-            }
+            return await GetUserClient(userData).Tweets.PublishTweetAsync(tweetParameters);
         }
     }
 }
