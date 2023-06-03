@@ -133,9 +133,9 @@ namespace Toot2ToulouseService
             _logger.LogInformation("Retrieved all userIds");
         }
 
-        public async Task BlockUser(Guid userId)
+        public async Task BlockUser(Guid userId, UserData.BlockReasons blockreason)
         {
-            await _user.Block(userId, UserData.BlockReasons.Manual);
+            await _user.Block(userId, blockreason);
             Console.WriteLine("User blocked");
         }
 

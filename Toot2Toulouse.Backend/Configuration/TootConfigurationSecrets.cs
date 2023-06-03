@@ -17,7 +17,7 @@
     public class SecretsTwitter
     {
         public SecretsTwitterConsumer Consumer { get; set; }
-        public SecretsTwitterPersonal Personal { get; set; }
+        //public SecretsTwitterPersonal Personal { get; set; }
     }
 
     public class SecretsTwitterConsumer
