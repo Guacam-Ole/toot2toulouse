@@ -17,15 +17,17 @@ namespace Toot2ToulouseService
         private readonly ILogger<Maintenance> _logger;
         private readonly IDatabase _database;
         private readonly IToulouse _toulouse;
+        private readonly IMastodon _mastodon;
         private readonly IUser _user;
         private readonly TootConfiguration _config;
 
-        public Maintenance(ILogger<Maintenance> logger, ConfigReader configReader, IDatabase database, IToulouse toulouse, IUser user)
+        public Maintenance(ILogger<Maintenance> logger, ConfigReader configReader, IDatabase database, IToulouse toulouse, IUser user, IMastodon mastodon)
         {
             _logger = logger;
             _database = database;
             _toulouse = toulouse;
             _user = user;
+            _mastodon = mastodon;
             _config = configReader.Configuration;
         }
 
@@ -133,10 +135,30 @@ namespace Toot2ToulouseService
             _logger.LogInformation("Retrieved all userIds");
         }
 
+
+        public async Task BlockAllUsers( UserData.BlockReasons blockreason)
+        {
+            var allUsers = await _database.GetAllUsers();
+            foreach (var user in allUsers)
+            {
+                await BlockUser(user.Id, blockreason);
+            }
+        }
+
+        public async Task MessageToAll(string message)
+        {
+            var allUsers = await _database.GetAllUsers();
+            foreach (var user in allUsers)
+            {
+                await _mastodon.SendStatusMessageToAsync(user, null, null, message);
+            }
+        }
+
+
         public async Task BlockUser(Guid userId, UserData.BlockReasons blockreason)
         {
             await _user.Block(userId, blockreason);
-            Console.WriteLine("User blocked");
+            Console.WriteLine($"User {userId} blocked");
         }
 
         public async Task UnblockUser(Guid userId)

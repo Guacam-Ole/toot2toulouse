@@ -2,7 +2,7 @@
   "profiles": {
     "Toot2ToulouseService": {
       "commandName": "Project",
-      "commandLineArgs": "single 3a066853-6f82-4193-93f2-0434810f92e2 110356801454084848",
+      "commandLineArgs": "blockall authTwitter",
       "Logging": {
         "LogLevel": {
           "Default": "Debug",
