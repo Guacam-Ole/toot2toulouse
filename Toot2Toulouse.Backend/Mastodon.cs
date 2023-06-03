@@ -24,11 +24,14 @@ namespace Toot2Toulouse.Backend
             _messages = configuration.GetMessagesForLanguage(_configuration.App.Languages.Default);   // TODO: Allow per-user Language setting
         }
 
-        public async Task SendStatusMessageToAsync(UserData? user, string? prefix, MessageCodes messageCode, string? additionalInfo)
+        public async Task SendStatusMessageToAsync(UserData? user, string? prefix, MessageCodes? messageCode, string? additionalInfo)
         {
             string? recipient = user == null ? null : "@" + user.Mastodon.Handle + "@" + user.Mastodon.Instance;
+            string? messageFromCode = null;
+            if (messageCode != null) messageFromCode = _messages[messageCode.Value];
 
-            string message = $"{recipient}\n{prefix}{_messages[messageCode]}\n{additionalInfo}\n{_configuration.App.AppInfo.Suffix}";
+
+            string message = $"{recipient}\n{prefix}{messageFromCode}\n{additionalInfo}\n{_configuration.App.AppInfo.Suffix}";
             ReplaceServiceTokens(ref message);
             await ServiceTootAsync(message, Visibility.Direct);
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);

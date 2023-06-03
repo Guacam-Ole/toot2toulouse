@@ -71,6 +71,17 @@ namespace Toot2ToulouseService
                         await _maintenance.BlockUser(new Guid(args[1]), Enum.Parse<Toot2Toulouse.Backend.Models.UserData.BlockReasons>(args[2], true));
                         break;
 
+                    case "blockall":
+                        ArgsCheck(args, 2, "reason [manual,authtwitter,authmastodon] required");
+                        await _maintenance.BlockAllUsers(Enum.Parse<Toot2Toulouse.Backend.Models.UserData.BlockReasons>(args[1], true));
+                        break;
+
+                    case "messageall":
+                        ArgsCheck(args, 2, "message required");
+                        var messageArgs = args[1..].ToArray();
+                        await _maintenance.MessageToAll(string.Join(' ', messageArgs));
+                        break;
+
                     case "unblock":
                         ArgsCheck(args, 2, "userId required");
                         await _maintenance.UnblockUser(new Guid(args[1]));

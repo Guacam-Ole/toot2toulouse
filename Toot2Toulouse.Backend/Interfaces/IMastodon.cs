@@ -20,7 +20,7 @@ namespace Toot2Toulouse.Backend.Interfaces
             OnlyMentioned
         }
 
-        Task SendStatusMessageToAsync(UserData user, string? prefix, MessageCodes messageCode, string? additionalInfo);
+        Task SendStatusMessageToAsync(UserData user, string? prefix, MessageCodes? messageCode, string? additionalInfo);
 
         Task<Account?> GetUserAccountAsync(UserData userData);
 
