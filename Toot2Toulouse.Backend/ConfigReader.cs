@@ -56,7 +56,7 @@ namespace Toot2Toulouse.Backend
 
         private bool SecretsAreMissing()
         {
-            bool twitterSecretsMissing = SecretsAreMissing(Configuration.Secrets.Twitter.Consumer.ApiKey, Configuration.Secrets.Twitter.Consumer.ApiKeySecret, Configuration.Secrets.Twitter.Personal.AccessToken, Configuration.Secrets.Twitter.Personal.AccessTokenSecret);
+            bool twitterSecretsMissing = SecretsAreMissing(Configuration.Secrets.Twitter.Consumer.ApiKey, Configuration.Secrets.Twitter.Consumer.ApiKeySecret);
             bool mastodonSecretsMissing = SecretsAreMissing(Configuration.Secrets.Mastodon.AccessToken, Configuration.Secrets.Mastodon.ClientId, Configuration.Secrets.Mastodon.ClientSecret);
             return twitterSecretsMissing || mastodonSecretsMissing;
         }
