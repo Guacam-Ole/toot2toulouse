@@ -15,7 +15,8 @@ namespace Toot2Toulouse.Backend.Configuration
             BackAgain,
             RegistrationFinished,
             Invite,
-            RateLimit
+            RateLimit,
+
         }
     }
 }
