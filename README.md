@@ -1,3 +1,10 @@
+
+# DEPRECATED
+T2T does not work anymore with the newest Twitter-API (and the free tier does not make any sense anyway).
+**So feel free to use this project for your own experiments but don't expect this to be working anymore**
+----------------------------------------------------------------------------------------------------------
+
+
 # Toot2Toulouse (t2t)
 Use this documentation **if you want to host** your own t2t-instance. If instead you are using this as a user and have questions asks the maintainer of your instance instead or read the user-documentation in the wiki
 
