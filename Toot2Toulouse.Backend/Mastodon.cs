@@ -16,12 +16,15 @@ namespace Toot2Toulouse.Backend
         private readonly ILogger<Mastodon> _logger;
         private readonly TootConfiguration _configuration;
         private readonly Dictionary<MessageCodes, string> _messages;
+        private readonly IMessage _message;
+        private const int _maxLength = 499;
 
-        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration)
+        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration, IMessage message)
         {
             _logger = logger;
             _configuration = configuration.Configuration;
             _messages = configuration.GetMessagesForLanguage(_configuration.App.Languages.Default);   // TODO: Allow per-user Language setting
+            _message = message;
         }
 
         public async Task SendStatusMessageToAsync(UserData? user, string? prefix, MessageCodes? messageCode, string? additionalInfo)
@@ -30,10 +33,46 @@ namespace Toot2Toulouse.Backend
             string? messageFromCode = null;
             if (messageCode != null) messageFromCode = _messages[messageCode.Value];
 
-
             string message = $"{recipient}\n{prefix}{messageFromCode}\n{additionalInfo}\n{_configuration.App.AppInfo.Suffix}";
             ReplaceServiceTokens(ref message);
-            await ServiceTootAsync(message, Visibility.Direct);
+
+            var appUserConfig = new UserConfiguration
+            {
+                AppSuffix = new UserConfigurationAppSuffix
+                {
+                    Content = string.Empty,
+                    HideIfBreaks = false
+                },
+                LongContent = ITwitter.LongContent.Thread,
+                LongContentThreadOptions = new TootConfigurationAppThreadOptions
+                {
+                    Prefix = "...",
+                    Suffix = "..."
+                },
+                Delay = TimeSpan.FromSeconds(0),
+                Replacements = new Dictionary<string, string>(),
+                DontTweet = new List<string>(),
+                UseGlobalMentions = false,
+            };
+
+            message = message.Replace("\\n", "\n");
+            var replies = _message.GetThreadReplies(appUserConfig, message, out string mainMessage);
+            if (replies == null)
+            {
+                await ServiceTootAsync(message, Visibility.Direct, null);
+            }
+            else
+            {
+                var toot = await ServiceTootAsync(mainMessage, Visibility.Direct, null);
+                if (!string.IsNullOrEmpty(toot.Id))
+                {
+                    foreach (var replyContent in replies)
+                    {
+                        toot = await ServiceTootAsync(replyContent, Visibility.Direct, toot.Id);
+                        if (toot == null) continue;
+                    }
+                }
+            }
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
         }
 
@@ -182,28 +221,18 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public async Task ServiceTootAsync(string content, Visibility visibility)
+        public async Task<Status> ServiceTootAsync(string content, Visibility visibility, string? replyTo)
         {
             try
             {
                 var mastodonClient = GetServiceClient();
-                await mastodonClient.PublishStatus(content, visibility);
+                return await mastodonClient.PublishStatus(content, visibility, replyTo);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed sending Status Message: '{content}'", content);
+                return null;
             }
         }
-
-        //public async Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100)
-        //{
-        //    var mastodonClient = GetServiceClient();
-        //    var serviceUser = await mastodonClient.GetCurrentUser();
-        //    var userName = serviceUser.UserName;
-        //    var statuses = await mastodonClient.GetAccountStatuses(serviceUser.Id, new ArrayOptions { Limit = limit });
-        //    var matches = statuses.Where(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
-        //    _logger.LogDebug("Found {matchtes} matches when searching for '{searchString}' in service User", matches.Count(), searchString);
-        //    return matches;
-        //}
     }
 }
