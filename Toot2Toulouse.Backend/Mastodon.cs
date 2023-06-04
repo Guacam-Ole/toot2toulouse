@@ -16,6 +16,7 @@ namespace Toot2Toulouse.Backend
         private readonly ILogger<Mastodon> _logger;
         private readonly TootConfiguration _configuration;
         private readonly Dictionary<MessageCodes, string> _messages;
+        private const int _maxLength = 499;
 
         public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration)
         {
@@ -30,10 +31,18 @@ namespace Toot2Toulouse.Backend
             string? messageFromCode = null;
             if (messageCode != null) messageFromCode = _messages[messageCode.Value];
 
-
             string message = $"{recipient}\n{prefix}{messageFromCode}\n{additionalInfo}\n{_configuration.App.AppInfo.Suffix}";
             ReplaceServiceTokens(ref message);
-            await ServiceTootAsync(message, Visibility.Direct);
+            string? replyTo = null;
+
+            while (message.Length > _maxLength)
+            {
+                string messagePart = message[.._maxLength];
+                var status = await ServiceTootAsync(messagePart, Visibility.Direct, replyTo);
+                replyTo = status.Id;
+                message = message[_maxLength..];
+            }
+            await ServiceTootAsync(message, Visibility.Direct, replyTo);
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
         }
 
@@ -182,28 +191,18 @@ namespace Toot2Toulouse.Backend
             }
         }
 
-        public async Task ServiceTootAsync(string content, Visibility visibility)
+        public async Task<Status> ServiceTootAsync(string content, Visibility visibility, string? replyTo)
         {
             try
             {
                 var mastodonClient = GetServiceClient();
-                await mastodonClient.PublishStatus(content, visibility);
+                return await mastodonClient.PublishStatus(content, visibility, replyTo);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed sending Status Message: '{content}'", content);
+                return null;
             }
         }
-
-        //public async Task<IEnumerable<Status>> GetServicePostsContainingAsync(string searchString, int limit = 100)
-        //{
-        //    var mastodonClient = GetServiceClient();
-        //    var serviceUser = await mastodonClient.GetCurrentUser();
-        //    var userName = serviceUser.UserName;
-        //    var statuses = await mastodonClient.GetAccountStatuses(serviceUser.Id, new ArrayOptions { Limit = limit });
-        //    var matches = statuses.Where(q => q.Content.Contains(searchString, StringComparison.InvariantCultureIgnoreCase));
-        //    _logger.LogDebug("Found {matchtes} matches when searching for '{searchString}' in service User", matches.Count(), searchString);
-        //    return matches;
-        //}
     }
 }
