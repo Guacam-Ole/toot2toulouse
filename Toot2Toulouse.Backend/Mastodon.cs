@@ -16,13 +16,15 @@ namespace Toot2Toulouse.Backend
         private readonly ILogger<Mastodon> _logger;
         private readonly TootConfiguration _configuration;
         private readonly Dictionary<MessageCodes, string> _messages;
+        private readonly IMessage _message;
         private const int _maxLength = 499;
 
-        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration)
+        public Mastodon(ILogger<Mastodon> logger, ConfigReader configuration, IMessage message)
         {
             _logger = logger;
             _configuration = configuration.Configuration;
             _messages = configuration.GetMessagesForLanguage(_configuration.App.Languages.Default);   // TODO: Allow per-user Language setting
+            _message = message;
         }
 
         public async Task SendStatusMessageToAsync(UserData? user, string? prefix, MessageCodes? messageCode, string? additionalInfo)
@@ -33,16 +35,44 @@ namespace Toot2Toulouse.Backend
 
             string message = $"{recipient}\n{prefix}{messageFromCode}\n{additionalInfo}\n{_configuration.App.AppInfo.Suffix}";
             ReplaceServiceTokens(ref message);
-            string? replyTo = null;
 
-            while (message.Length > _maxLength)
+            var appUserConfig = new UserConfiguration
             {
-                string messagePart = message[.._maxLength];
-                var status = await ServiceTootAsync(messagePart, Visibility.Direct, replyTo);
-                replyTo = status.Id;
-                message = message[_maxLength..];
+                AppSuffix = new UserConfigurationAppSuffix
+                {
+                    Content = string.Empty,
+                    HideIfBreaks = false
+                },
+                LongContent = ITwitter.LongContent.Thread,
+                LongContentThreadOptions = new TootConfigurationAppThreadOptions
+                {
+                    Prefix = "...",
+                    Suffix = "..."
+                },
+                Delay = TimeSpan.FromSeconds(0),
+                Replacements = new Dictionary<string, string>(),
+                DontTweet = new List<string>(),
+                UseGlobalMentions = false,
+            };
+
+            message = message.Replace("\\n", "\n");
+            var replies = _message.GetThreadReplies(appUserConfig, message, out string mainMessage);
+            if (replies == null)
+            {
+                await ServiceTootAsync(message, Visibility.Direct, null);
             }
-            await ServiceTootAsync(message, Visibility.Direct, replyTo);
+            else
+            {
+                var toot = await ServiceTootAsync(mainMessage, Visibility.Direct, null);
+                if (!string.IsNullOrEmpty(toot.Id))
+                {
+                    foreach (var replyContent in replies)
+                    {
+                        toot = await ServiceTootAsync(replyContent, Visibility.Direct, toot.Id);
+                        if (toot == null) continue;
+                    }
+                }
+            }
             _logger.LogInformation("Sent Statusmessage {messageCode} to {recipient}", messageCode, recipient);
         }
 

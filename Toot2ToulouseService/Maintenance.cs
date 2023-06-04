@@ -18,16 +18,18 @@ namespace Toot2ToulouseService
         private readonly IDatabase _database;
         private readonly IToulouse _toulouse;
         private readonly IMastodon _mastodon;
+        private readonly IMessage _message;
         private readonly IUser _user;
         private readonly TootConfiguration _config;
 
-        public Maintenance(ILogger<Maintenance> logger, ConfigReader configReader, IDatabase database, IToulouse toulouse, IUser user, IMastodon mastodon)
+        public Maintenance(ILogger<Maintenance> logger, ConfigReader configReader, IDatabase database, IToulouse toulouse, IUser user, IMastodon mastodon, IMessage message)
         {
             _logger = logger;
             _database = database;
             _toulouse = toulouse;
             _user = user;
             _mastodon = mastodon;
+            _message = message;
             _config = configReader.Configuration;
         }
 

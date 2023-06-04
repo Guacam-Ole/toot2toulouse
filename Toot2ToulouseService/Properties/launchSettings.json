@@ -2,7 +2,7 @@
   "profiles": {
     "Toot2ToulouseService": {
       "commandName": "Project",
-      "commandLineArgs": "blockall authTwitter",
+      "commandLineArgs": "messageall Letztes, (unschönes) Update: Es ist nicht nur ein technisches Problem, sondern auch ein Berechtigungsproblem. Der Free Tier erlaubt max. 50 Tweets pro Tag PRO APP. Das macht natürlich für einen Crossposter keinen echten Sinn mehr. <br><br>Die nächste Stufe könnte gerade reichen (100 Tweets pro User, 1700 pro App), kostet aber 100 USD pro Monat und so viel kann und will ich Elon nicht in den Hals werfen...<br><br> Also: Machts gut und danke für den 🐟, T2T wird hiermit offiziell eingestellt. (Der Source verbleibt bei Github, wird aber nicht mehr weiter entwickelt)\n\nOle\n\n(Eure Daten werden in t2t genauso gelöscht wie dieser Account, so dass ich Euch zukünftig nicht mehr anschreiben kann. Wenn ich noch Fragen habt (Mistforken und brennende Fackeln bitte nicht an mich sondern Twitter schicken!) findet ihr mich bei @guacamole@chaos.social",
       "Logging": {
         "LogLevel": {
           "Default": "Debug",
